@@ -4,7 +4,7 @@
 
 export const environment = {
     production: false,
-    apiUrl: 'https://apiboilerplate-production.up.railway.app'
+    apiUrl: 'https://apiboilerplate.onrender.com'
 };
 
 /*
