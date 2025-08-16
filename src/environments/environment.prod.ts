@@ -1,4 +1,4 @@
 export const environment = {
     production: true,
-    apiUrl: 'https://apiboilerplate.onrender.com'
+    apiUrl: 'https://IMP.com'
 };
