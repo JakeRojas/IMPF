@@ -1,0 +1,325 @@
+<div class="p-1 container">
+  <h2>Room: {{ room?.roomName || room?.name || ('#' + roomId) }}</h2>
+
+  <p *ngIf="room?.roomType === 'stockroom' || room?.roomType === 'subStockroom'" class="mb-3">
+    Floor:      {{ room?.roomFloor }} •
+    Type:       {{ room?.roomType }} •
+    Stock:      {{ room?.stockroomType }} •
+    In charge:  {{ room?.roomInCharge || room?.inCharge || '-' }}
+  </p>
+  <p *ngIf="room?.roomType !== 'stockroom' || room?.roomType !== 'subStockroom'" class="mb-3">
+    Floor:      {{ room?.roomFloor }} •
+    Type:       {{ room?.roomType }} •
+    In charge:  {{ room?.roomInCharge || room?.inCharge || '-' }}
+  </p>
+
+  <!--------------------------- Dynamic Buttons ---------------------------->
+  <div *ngIf="room?.roomType === 'stockroom' || room?.roomType === 'subStockroom'" class="mb-3">
+    <!-- Buttons that open modals -->
+    <button type="button" class="btn btn-primary me-2" (click)="openReceiveModal()">Receive</button>
+    <button type="button" class="btn btn-danger me-2" (click)="openReleaseModal()">Release</button>
+    <button type="button" class="btn btn-success me-2" [routerLink]="['/room', room.roomId || room.roomId, 'apparels']">Unit Lists</button>
+  </div>
+
+  <!--------------------------- Received & Released Lists (separated by stock type) ------------------------->
+  <div *ngIf="room?.roomType === 'stockroom' || room?.roomType === 'subStockroom'">
+    <div class="row">
+      <div class="col-md-6">
+
+        <!--------------------------- Received Item Lists Area ------------------------->
+        <h5 *ngIf="(room?.stockroomType || 'apparel') === 'apparel'">Received (Apparel)</h5>
+        <h5 *ngIf="room?.stockroomType === 'supply'">Received (Admin Supply)</h5>
+        <h5 *ngIf="room?.stockroomType && room?.stockroomType !== 'apparel' && room?.stockroomType !== 'supply'">Received (Items)</h5>
+
+        <table class="table table-sm">
+          <thead *ngIf="(room?.stockroomType || 'apparel') === 'apparel'">
+            <tr>
+              <th>Name</th><th>Grade Level</th><th>Type</th><th>For</th><th>Size</th><th>Quantity</th><th></th>
+            </tr>
+          </thead>
+          <thead *ngIf="room?.stockroomType === 'supply'">
+            <tr>
+              <th>Name</th><th>Quantity</th><th>Received From</th><th>Received By</th><th>Date</th><th></th>
+            </tr>
+          </thead>
+          <thead *ngIf="room?.stockroomType && room?.stockroomType !== 'apparel' && room?.stockroomType !== 'supply'">
+            <tr>
+              <th>Name</th><th>Quantity</th><th>Notes</th><th>Date</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of receivedItems">
+              <!-- apparel row -->
+              <ng-container *ngIf="(room?.stockroomType || 'apparel') === 'apparel'">
+                <td>{{ r.apparelName }}</td>
+                <td>{{ r.apparelLevel }}</td>
+                <td>{{ r.apparelType }}</td>
+                <td>{{ r.apparelFor }}</td>
+                <td>{{ r.apparelSize }}</td>
+                <td>{{ r.apparelQuantity }}</td>
+                <td>
+                  <button class="btn btn-sm btn-secondary" (click)="onDownloadBatchQr(r)">QR</button>
+                </td>
+              </ng-container>
+
+              <!-- supply row -->
+              <ng-container *ngIf="room?.stockroomType === 'supply'">
+                <td>{{ r.supplyName || r.adminName || r.name }}</td>
+                <td>{{ r.adminQuantity || r.quantity }}</td>
+                <td>{{ r.receivedFrom }}</td>
+                <td>{{ r.receivedBy }}</td>
+                <td>{{ r.createdAt | date:'short' }}</td>
+                <td><button class="btn btn-sm btn-secondary" (click)="onDownloadBatchQr(r)">QR</button></td>
+              </ng-container>
+
+              <!-- general items row -->
+              <ng-container *ngIf="room?.stockroomType && room?.stockroomType !== 'apparel' && room?.stockroomType !== 'supply'">
+                <td>{{ r.itemName || r.name }}</td>
+                <td>{{ r.itemQuantity || r.quantity }}</td>
+                <td>{{ r.notes }}</td>
+                <td>{{ r.createdAt | date:'short' }}</td>
+                <td><button class="btn btn-sm btn-secondary" (click)="onDownloadBatchQr(r)">QR</button></td>
+              </ng-container>
+            </tr>
+          </tbody>
+        </table>
+
+        <div *ngIf="(receivedItems?.length === 0)" class="text-muted">No received records</div>
+
+      </div>
+
+      <!--------------------------- Released Item Lists Area ------------------------->
+      <div class="col-md-6">
+        <h5>Released</h5>
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>ID</th><th>Quantity</th><th>Released By</th><th>Claimed By</th><th>Date</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let b of releasedBatches">
+              <td>{{ b.apparelInventoryId || b.inventoryId || b.id }}</td>
+              <td>{{ b.releaseQuantity || b.releaseApparelQuantity }}</td>
+              <td>{{ b.releasedBy }}</td>
+              <td>{{ b.claimedBy }}</td>
+              <td>{{ b.releasedAt || b.createdAt | date:'short' }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div *ngIf="releasedBatches?.length === 0" class="text-muted">No release records</div>
+      </div>
+    </div>
+  </div>
+
+  <!--------------------------- Inventory Item List (generic) ------------------------->
+  <h4>Inventory</h4>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th *ngIf="(room?.stockroomType || 'apparel') === 'apparel'">Grade Level</th>
+        <th *ngIf="(room?.stockroomType || 'apparel') === 'apparel'">Type</th>
+        <th *ngIf="(room?.stockroomType || 'apparel') === 'apparel'">For</th>
+        <th *ngIf="(room?.stockroomType || 'apparel') === 'apparel'">Size</th>
+        <th>Quantity</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let inv of inventory">
+        <td>{{ inv.apparelInventoryId || inv.inventoryId || inv.id }}</td>
+        <td>
+          {{ inv.apparelName || inv.name || inv.supplyName || inv.itemName }}
+        </td>
+        <td *ngIf="(room?.stockroomType || 'apparel') === 'apparel'">{{ inv.apparelLevel }}</td>
+        <td *ngIf="(room?.stockroomType || 'apparel') === 'apparel'">{{ inv.apparelType }}</td>
+        <td *ngIf="(room?.stockroomType || 'apparel') === 'apparel'">{{ inv.apparelFor }}</td>
+        <td *ngIf="(room?.stockroomType || 'apparel') === 'apparel'">{{ inv.apparelSize }}</td>
+        <td>{{ inv.totalQuantity || inv.quantity || inv.adminQuantity || 0 }}</td>
+        <td>
+          <button type="button" class="btn btn-sm btn-outline-danger" (click)="openReleaseModal(inv.apparelInventoryId || inv.inventoryId || inv.id)">Release</button>
+          <button type="button" class="btn btn-sm btn-secondary ms-1" (click)="onDownloadBatchQr(inv)">Generate QR</button>
+        </td>
+      </tr>
+      <tr *ngIf="inventory?.length === 0">
+        <td colspan="8" class="text-center p-3">No inventory found</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ---------- Receive Modal ---------- -->
+  <div *ngIf="showReceiveModal" class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+    <div class="modal-backdrop show" (click)="closeReceiveModal()" style="opacity:.5"></div>
+    <div class="modal-dialog modal-lg" role="document" style="z-index:1050;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Receive Items</h5>
+          <button type="button" class="btn-close" aria-label="Close" (click)="closeReceiveModal()"></button>
+        </div>
+        <form [formGroup]="receiveForm" (ngSubmit)="onReceive()">
+          <div class="modal-body">
+            <!-- Apparel receive -->
+            <div *ngIf="(room?.stockroomType || 'apparel') === 'apparel'">
+              <div class="mb-3">
+                <label class="form-label">Received from *</label>
+                <input class="form-control" formControlName="receivedFrom" required />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Received by *</label>
+                <select formControlName="receivedBy" class="form-select" required>
+                  <option [ngValue]="null">-- Select --</option>
+                  <option *ngFor="let opt of inChargeOptions" [ngValue]="opt?.id || opt?.AccountId">{{ opt?.name || opt?.fullname || opt?.username }}</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Apparel name</label>
+                <input class="form-control" formControlName="apparelName" placeholder="Apparel name" />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Grade level</label>
+                <input class="form-control" formControlName="apparelLevel" placeholder="Grade level" />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Apparel type</label>
+                <input class="form-control" formControlName="apparelType" placeholder="Apparel type" />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Apparel for</label>
+                <input class="form-control" formControlName="apparelFor" placeholder="Apparel for" />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Size</label>
+                <input class="form-control" formControlName="apparelSize" placeholder="Apparel size" />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Apparel quantity</label>
+                <input type="number" class="form-control" formControlName="apparelQuantity" placeholder="Apparel quantity" />
+              </div>
+            </div>
+
+            <!-- Supply receive -->
+            <div *ngIf="room?.stockroomType === 'supply'">
+              <div class="mb-3">
+                <label class="form-label">Received from *</label>
+                <input class="form-control" formControlName="receivedFrom" required />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Received by *</label>
+                <select formControlName="receivedBy" class="form-select" required>
+                  <option [ngValue]="null">-- Select --</option>
+                  <option *ngFor="let opt of inChargeOptions" [ngValue]="opt?.id || opt?.AccountId">{{ opt?.name || opt?.fullname || opt?.username }}</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Supply name</label>
+                <input class="form-control" formControlName="supplyName" placeholder="Supply name" />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Quantity</label>
+                <input type="number" class="form-control" formControlName="adminQuantity" placeholder="Quantity" />
+              </div>
+            </div>
+
+            <!-- General / items receive -->
+            <div *ngIf="room?.stockroomType && room?.stockroomType !== 'apparel' && room?.stockroomType !== 'supply'">
+              <div class="mb-3">
+                <label class="form-label">Received from *</label>
+                <input class="form-control" formControlName="receivedFrom" required />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Received by *</label>
+                <select formControlName="receivedBy" class="form-select" required>
+                  <option [ngValue]="null">-- Select --</option>
+                  <option *ngFor="let opt of inChargeOptions" [ngValue]="opt?.id || opt?.AccountId">{{ opt?.name || opt?.fullname || opt?.username }}</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Item name</label>
+                <input class="form-control" formControlName="supplyName" placeholder="Item name" />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Quantity</label>
+                <input type="number" class="form-control" formControlName="adminQuantity" placeholder="Quantity" />
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Notes</label>
+              <textarea class="form-control" formControlName="notes" rows="3"></textarea>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeReceiveModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="submitting">{{ submitting ? 'Saving...' : 'Receive' }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- Release Modal ---------- -->
+  <div *ngIf="showReleaseModal" class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+    <div class="modal-backdrop show" (click)="closeReleaseModal()" style="opacity:.5"></div>
+    <div class="modal-dialog modal-lg" role="document" style="z-index:1050;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Release Items (Batch)</h5>
+          <button type="button" class="btn-close" aria-label="Close" (click)="closeReleaseModal()"></button>
+        </div>
+
+        <form [formGroup]="releaseForm" (ngSubmit)="onRelease()">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Inventory ID *</label>
+              <input class="form-control" formControlName="apparelInventoryId" placeholder="Inventory id" />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Release quantity *</label>
+              <input type="number" min="1" class="form-control" formControlName="releaseQuantity" />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Released by *</label>
+              <select formControlName="releasedBy" class="form-select" required>
+                <option [ngValue]="null">-- Select --</option>
+                <option *ngFor="let opt of inChargeOptions" [ngValue]="opt?.id || opt?.AccountId">{{ opt?.name || opt?.fullname || opt?.username }}</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Claimed by *</label>
+              <input class="form-control" formControlName="claimedBy" />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Remarks</label>
+              <textarea class="form-control" formControlName="remarks" rows="3"></textarea>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeReleaseModal()">Cancel</button>
+            <button type="submit" class="btn btn-danger" [disabled]="submitting">{{ submitting ? 'Releasing...' : 'Release' }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scanned panel (simple) -->
+  <div *ngIf="showScannedPanel" class="scanned-panel card p-2 mt-3">
+    <h6>Scanned</h6>
+    <pre>{{scanned | json}}</pre>
+    <div class="d-flex gap-2">
+      <button class="btn btn-sm btn-danger" (click)="releaseScannedUnit()">Release</button>
+      <button class="btn btn-sm btn-outline-warning" (click)="toggleScannedStatus()">
+        {{scanned?.status === 'damage' ? 'Mark as Goods' : 'Mark as Damage'}}
+      </button>
+      <button class="btn btn-sm btn-link" (click)="showScannedPanel=false">Close</button>
+    </div>
+  </div>
+</div>

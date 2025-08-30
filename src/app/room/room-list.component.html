@@ -1,0 +1,20 @@
+<div class="card p-3">
+  <h3>Rooms</h3>
+  <table class="table table-striped">
+    <thead>
+      <tr><th>Name</th><th>Floor</th><th>Type</th><th>In Charge</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let r of rooms">
+        <td>{{r.roomName}}</td>
+        <td>{{r.roomFloor}}</td>
+        <td>{{r.roomType}} <span *ngIf="r.stockroomType">/ {{r.stockroomType}}</span></td>
+        <td>{{ r.roomInChargeName || r.roomInCharge }}</td>
+        <td>
+          <button class="btn btn-sm btn-primary" [routerLink]="['/room', r.roomId]">View</button>
+          <button class="btn btn-sm btn-secondary" (click)="updateRoom(r)">Edit</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

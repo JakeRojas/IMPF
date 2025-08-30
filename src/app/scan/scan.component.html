@@ -1,0 +1,65 @@
+<div class="scan-modal container-fluid p-0">
+  <div class="scan-header p-2 bg-dark text-white d-flex justify-content-between align-items-center">
+    <div><strong>Scan QR</strong></div>
+    <div>
+      <button class="btn btn-sm btn-light me-2" (click)="stopScanner()" [disabled]="!scanning">Stop</button>
+      <button class="btn btn-sm btn-primary" (click)="startScanner()" [disabled]="scanning">Start</button>
+    </div>
+  </div>
+
+  <div class="scan-body d-flex justify-content-center align-items-center">
+    <div class="scanner-wrapper">
+      <!-- video element (camera preview) -->
+      <video #video muted playsinline></video>
+
+      <!-- square overlay to indicate scanning area -->
+      <div #overlay class="scan-square">
+        <div class="corner top-left"></div>
+        <div class="corner top-right"></div>
+        <div class="corner bottom-left"></div>
+        <div class="corner bottom-right"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scan-footer p-3">
+  <div *ngIf="errorMsg" class="alert alert-danger">{{ errorMsg }}</div>
+
+  <div *ngIf="lastResult && !showBatchQtyInput" class="card">
+    <div class="card-body">
+      <h5 class="card-title">Scanned result</h5>
+      <pre style="max-height:140px;overflow:auto">{{ lastResult }}</pre>
+
+      <div *ngIf="lastParsed">
+        <h6>Parsed JSON</h6>
+        <pre style="max-height:140px;overflow:auto">{{ lastParsed | json }}</pre>
+      </div>
+
+      <button type="button" class="btn btn-danger me-2" (click)="onReleaseClicked()">Release</button>
+      <button type="button" class="btn btn-outline-secondary" (click)="startScanner()" [disabled]="scanning">Scan again</button>
+    </div>
+  </div>
+
+  <div *ngIf="showBatchQtyInput" class="card">
+    <div class="card-body">
+      <h5 class="card-title">Batch release</h5>
+      <p *ngIf="lastParsed?.name"><strong>{{ lastParsed?.name }}</strong></p>
+
+      <div class="mb-2">
+        <label>Quantity to release</label>
+        <input type="number" class="form-control" [(ngModel)]="batchQty" min="1" />
+      </div>
+
+      <div class="mb-2" *ngIf="!lastParsed?.roomId">
+        <label>Room ID (required)</label>
+        <input type="number" class="form-control" [(ngModel)]="batchRoomIdInput" />
+      </div>
+
+      <div class="d-flex">
+        <!-- IMPORTANT: type="button" so it doesn't submit any form -->
+        <button type="button" class="btn btn-danger me-2" (click)="confirmBatchRelease()">Confirm release</button>
+        <button type="button" class="btn btn-secondary" (click)="cancelBatchRelease()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,4 +1,5 @@
-﻿import { Component, OnInit } from '@angular/core';
+﻿// main
+import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
@@ -9,7 +10,7 @@ import { MustMatch } from '@app/_helpers';
 @Component({ templateUrl: 'add-edit.component.html' })
 export class AddEditComponent implements OnInit {
     form!: FormGroup;
-    AccountId?: string;
+    AccountId?: number;
     title!: string;
     loading = false;
     submitting = false;
@@ -27,14 +28,14 @@ export class AddEditComponent implements OnInit {
         this.AccountId = this.route.snapshot.params['AccountId'];
 
         this.form = this.formBuilder.group({
-            title: ['', Validators.required],
-            firstName: ['', Validators.required],
-            lastName: ['', Validators.required],
-            email: ['', [Validators.required, Validators.email]],
-            role: ['', Validators.required],
+            title:              ['', Validators.required],
+            firstName:          ['', Validators.required],
+            lastName:           ['', Validators.required],
+            email:              ['', [Validators.required, Validators.email]],
+            role:               ['', Validators.required],
             // password only required in add mode
-            password: ['', [Validators.minLength(6), ...(!this.AccountId ? [Validators.required] : [])]],
-            confirmPassword: ['']
+            password:           ['', [Validators.minLength(6), ...(!this.AccountId ? [Validators.required] : [])]],
+            confirmPassword:    ['']
         }, {
             validator: MustMatch('password', 'confirmPassword')
         });
@@ -88,6 +89,7 @@ export class AddEditComponent implements OnInit {
                     this.router.navigateByUrl('/admin/accounts');
                 },
                 error: error => {
+                    console.error('Create account error:', error);
                     this.alertService.error(error);
                     this.submitting = false;
                 }

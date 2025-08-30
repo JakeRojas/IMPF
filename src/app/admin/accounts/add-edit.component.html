@@ -1,4 +1,4 @@
-﻿<h1>{{title}}</h1>
+﻿<!-- <h1>{{title}}</h1> -->
 <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="row">
         <div class="mb-3 col-2">
@@ -42,8 +42,9 @@
             <label class="form-label">Role</label>
             <select formControlName="role" class="form-select" [ngClass]="{ 'is-invalid': submitted && f.role.errors }">
                 <option value=""></option>
-                <option value="User">User</option>
-                <option value="Admin">Admin</option>
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+                <option value="superAdmin">SuperAdmin</option>
             </select>
             <div *ngIf="submitted && f.role.errors" class="invalid-feedback">
                 <div *ngIf="f.role.errors.required">Role is required</div>
@@ -73,7 +74,7 @@
         </div>
     </div>
     <div class="mb-3">
-        <button [disabled]="submitting" class="btn btn-primary">
+        <button type="submit" [disabled]="submitting" class="btn btn-primary">
             <span *ngIf="submitting" class="spinner-border spinner-border-sm me-1"></span>
             Save
         </button>

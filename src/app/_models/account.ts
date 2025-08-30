@@ -1,7 +1,7 @@
 ﻿import { Role } from './role';
 
 export class Account {
-    AccountId?: string;
+    AccountId?: number;
     title?: string;
     firstName?: string;
     lastName?: string;
