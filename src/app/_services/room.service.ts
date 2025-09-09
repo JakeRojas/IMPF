@@ -23,65 +23,51 @@ export class RoomService {
     return this.http.put(`${this.baseUrl}/${roomId}`, room); 
   }
 
-  // ------------- APPAREL (existing) -------------
-  // Inventory: apparel inventory aggregate for a room
-  getInventory(roomId: number): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/${roomId}/apparel-inventory`);
-  }
-  // Get received batches (apparel receive rows)
-  getReceivedItems(roomId: number): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/${roomId}/receive-apparels`);
-  }
-  // Get release batches
-  getReleasedBatches(roomId: number): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/${roomId}/release-apparels`);
-  }
-  // Get unit items inside a room (Apparel units)
-  getRoomItems(roomId: number): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/${roomId}/apparels`);
-  }
-
-  // Receive item in a room (apparel or supply or gen item)
-  // backend handler will route depending on payload content.
+  // ------------- Receive Any types of item -------------
   receiveItem(roomId: number, payload: any): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/${roomId}/receive`, payload);
   }
-  // helper: get specific apparel inventory row
-  getInventoryById(roomId: number, inventoryId: number): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/${roomId}/apparel-inventory/${inventoryId}`);
+
+  // ------------- APPAREL -------------
+  getApparelInventory(roomId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/${roomId}/apparel-inventory`);
+  }
+  getReceivedBatchApparels(roomId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/${roomId}/receive-apparels`);
+  }
+  getReleasedBatchAppparel(roomId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/${roomId}/release-apparels`);
+  }
+  getApparelUnits(roomId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/${roomId}/apparels`);
   }
 
-  // Update an item's status (goods / damage) by QR or unitId
-  updateItemStatus(roomId: number, itemQrCodeOrId: string | number, newStatus: string): Observable<any> {
-    return this.http.put<any>(`${this.baseUrl}/${roomId}/item/status`, { id: itemQrCodeOrId, status: newStatus });
-  }
-
-  // ------------- ADMIN/SUPPLY endpoints (NEW) -------------
-  // supply inventory aggregate for a room
+  // ------------- ADMIN/SUPPLY -------------
   getAdminSupplyInventory(roomId: number): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/${roomId}/supply-inventory`);
   }
-  // supply units in room
+  getReceivedBatchAdminSupply(roomId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/${roomId}/receive-supply`);
+  }
+  getReleasedBatchAdminSupply(roomId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/${roomId}/release-supply`);
+  }
   getAdminSupplyUnits(roomId: number): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/${roomId}/supply`);
   }
-  // received admin supply batches
-  getReceiveAdminSupply(roomId: number): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/${roomId}/receive-supply`);
-  }
 
   // ------------- GENERAL / IT / MAINTENANCE (NEW) -------------
-  // gen item inventory aggregate for a room
   getGenItemInventory(roomId: number): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/${roomId}/items-inventory`);
   }
-  // gen item units in room
+  getReceivedBatchGenItem(roomId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/${roomId}/receive-items`);
+  }
   getGenItemUnits(roomId: number): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/${roomId}/items`);
   }
-  // received general item batches
-  getReceiveGenItem(roomId: number): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/${roomId}/receive-items`);
+  getReleasedBatchGenItem(roomId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/${roomId}/release-gen-item`);
   }
 
   // ------------- Room-scoped QR endpoints (return PNG blobs) -------------
@@ -124,5 +110,17 @@ export class RoomService {
   
     // backend route is /rooms/:roomId/release/apparel
     return this.http.post<any>(`${this.baseUrl}/${roomId}/release`, body);
+  }
+
+  updateApparelStatus(roomId: number, apparelId: number, newStatus: string) {
+    return this.http.put(`${this.baseUrl}/${roomId}/apparels/${apparelId}/status`, { status: newStatus });
+  }
+  
+  updateAdminSupplyStatus(roomId: number, supplyId: number, newStatus: string) {
+    return this.http.put(`${this.baseUrl}/${roomId}/admin-supplies/${supplyId}/status`, { status: newStatus });
+  }
+  
+  updateGenItemStatus(roomId: number, genItemId: number, newStatus: string) {
+    return this.http.put(`${this.baseUrl}/${roomId}/gen-items/${genItemId}/status`, { status: newStatus });
   }
 }

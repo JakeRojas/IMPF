@@ -1,0 +1,40 @@
+<div class="container py-3">
+    <h3>Units in Room #{{ roomId }}</h3>
+  
+    <div *ngIf="loading">Loading units...</div>
+  
+    <table *ngIf="!loading && units?.length" class="table table-striped">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>SKU / Code</th>
+          <th>Item</th>
+          <th>Size / Variant</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of units">
+          <td>{{ u.id || u.unitId || u.apparelId }}</td>
+          <td>{{ u.sku || u.code || '-' }}</td>
+          <td>{{ u.name || u.itemName || u.title }}</td>
+          <td>{{ u.size || u.variant || '-' }}</td>
+          <td>{{ u.status || '-' }}</td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary me-2" (click)="generateQr(u)">
+              Generate QR
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" (click)="openQrInNewTab(u)">
+              Open QR
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  
+    <div *ngIf="!loading && (!units || units.length === 0)">
+      No units in this room.
+    </div>
+  </div>
+  

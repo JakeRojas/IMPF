@@ -15,16 +15,18 @@ export class QrService {
       responseType: 'blob'
     });
   }
-  getUnitQr(stockroomType: string, apparelId: number): Observable<HttpResponse<Blob>> {
-    return this.http.get(`${this.base}/${stockroomType}/unit/${apparelId}/qrcode`, {
-      observe: 'response',
-      responseType: 'blob'
-    });
-  }
   releaseUnit(stockroomType: string, apparelId: number, body: { actorId?: number } = {}): Observable<any> {
     return this.http.post<any>(`${this.base}/${stockroomType}/unit/${apparelId}/release`, body);
   }
   verifyQr(payload: any): Observable<any> {
     return this.http.post<any>(`${this.base}/scan`, payload);
+  }
+  updateUnitStatus(stockroomType: string, unitId: number, body: { status: string }) {
+    return this.http.put<any>(`${this.base}/${stockroomType}/unit/${unitId}/status`, body, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+  getUnitQr(stockroomType: string, unitId: number) {
+    return this.http.get(`${this.base}/${stockroomType}/unit/${unitId}/qrcode`, { responseType: 'blob' });
   }
 }

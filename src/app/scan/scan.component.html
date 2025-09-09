@@ -10,7 +10,7 @@
   <div class="scan-body d-flex justify-content-center align-items-center">
     <div class="scanner-wrapper">
       <!-- video element (camera preview) -->
-      <video #video muted playsinline></video>
+      <video #video autoplay muted playsinline></video>
 
       <!-- square overlay to indicate scanning area -->
       <div #overlay class="scan-square">
@@ -36,6 +36,27 @@
       </div>
 
       <button type="button" class="btn btn-danger me-2" (click)="onReleaseClicked()">Release</button>
+
+      <!-- REPLACED: previously a single prompt-based updateScannedStatus() button.
+           Now an Angular-driven Update status dropdown (no bootstrap JS required). -->
+      <div *ngIf="lastParsed?.unitId" class="d-inline-block me-2 position-relative">
+        <button type="button"
+                class="btn btn-outline-warning"
+                (click)="toggleUpdateMenu($event)"
+                [disabled]="scanning || updating">
+          Update status
+        </button>
+
+        <ul *ngIf="openUpdateMenu" class="dropdown-menu show" style="display:block; position:absolute; z-index:2000; min-width:160px;">
+          <li *ngFor="let s of statuses">
+            <a href="#" class="dropdown-item"
+               (click)="updateScannedStatusTo(s); $event.preventDefault(); $event.stopPropagation()">
+              {{ s }}
+            </a>
+          </li>
+        </ul>
+      </div>
+
       <button type="button" class="btn btn-outline-secondary" (click)="startScanner()" [disabled]="scanning">Scan again</button>
     </div>
   </div>

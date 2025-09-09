@@ -145,7 +145,7 @@ SOFTWARE.
 
 ================================================================================
 File: package.json
-Size: 1.36 kB
+Size: 1.39 kB
 ================================================================================
 
 {
@@ -157,7 +157,7 @@ Size: 1.36 kB
         "build": "ng build",
         "watch": "ng build --watch --configuration development",
         "test": "ng test",
-        "export:all": "folder2txt --include-all --output frontend.txt C:/Users/Administrator/Desktop/IMPF"
+        "export:all": "folder2txt --output frontend.txt C:/Users/Administrator/My Desktop/IMPF --exclude .angular --exclude node_modules"
     },
     "private": true,
     "dependencies": {
@@ -1707,6 +1707,248 @@ export class UpdateComponent implements OnInit {
 }
 
 ================================================================================
+File: src\app\room\add-edit\add-edit-routing.module.ts
+Size: 446 B
+================================================================================
+
+import { NgModule } from '@angular/core';
+import { Routes, RouterModule } from '@angular/router';
+
+import { RoomAddEditComponent } from './room.add-edit.component';
+
+const routes: Routes = [
+  { path: 'add', component: RoomAddEditComponent },
+  { path: 'edit/:id', component: RoomAddEditComponent },
+];
+
+@NgModule({
+    imports: [RouterModule.forChild(routes)],
+    exports: [RouterModule]
+})
+export class AddEditRoutingModule { }
+
+
+================================================================================
+File: src\app\room\add-edit\list.module.ts
+Size: 607 B
+================================================================================
+
+import { NgModule } from '@angular/core';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+
+import { AddEditRoutingModule } from './add-edit-routing.module';
+import { RoomAddEditComponent } from './room.add-edit.component';
+
+@NgModule({
+    imports: [
+        CommonModule,
+        AddEditRoutingModule,
+        ReactiveFormsModule,
+        FormsModule,
+        RouterModule
+    ],
+    declarations: [
+        RoomAddEditComponent,
+    ]
+})
+export class AddEditModule { }
+
+
+================================================================================
+File: src\app\room\add-edit\room.add-edit.component.html
+Size: 4.54 kB
+================================================================================
+
+<h1>{{title}}</h1>
+<form *ngIf="!loading" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="row">
+        <div class="mb-3 col-2">
+            <label class="form-label">Title</label>
+            <select formControlName="title" class="form-select" [ngClass]="{ 'is-invalid': submitted && f.title.errors }">
+                <option value=""></option>
+                <option value="Mr">Mr</option>
+                <option value="Mrs">Mrs</option>
+                <option value="Miss">Miss</option>
+                <option value="Ms">Ms</option>
+            </select>
+            <div *ngIf="submitted && f.title.errors" class="invalid-feedback">
+                <div *ngIf="f.title.errors.required">Title is required</div>
+            </div>
+        </div>
+        <div class="mb-3 col-5">
+            <label class="form-label">First Name</label>
+            <input type="text" formControlName="firstName" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.firstName.errors }" />
+            <div *ngIf="submitted && f.firstName.errors" class="invalid-feedback">
+                <div *ngIf="f.firstName.errors.required">First Name is required</div>
+            </div>
+        </div>
+        <div class="mb-3 col-5">
+            <label class="form-label">Last Name</label>
+            <input type="text" formControlName="lastName" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.lastName.errors }" />
+            <div *ngIf="submitted && f.lastName.errors" class="invalid-feedback">
+                <div *ngIf="f.lastName.errors.required">Last Name is required</div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="mb-3 col-7">
+            <label class="form-label">Email</label>
+            <input type="text" formControlName="email" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.email.errors }" />
+            <div *ngIf="submitted && f.email.errors" class="invalid-feedback">
+                <div *ngIf="f.email.errors.required">Email is required</div>
+                <div *ngIf="f.email.errors.email">Email must be a valid email address</div>
+            </div>
+        </div>
+        <div class="mb-3 col-5">
+            <label class="form-label">Role</label>
+            <select formControlName="role" class="form-select" [ngClass]="{ 'is-invalid': submitted && f.role.errors }">
+                <option value=""></option>
+                <option value="User">User</option>
+                <option value="Admin">Admin</option>
+            </select>
+            <div *ngIf="submitted && f.role.errors" class="invalid-feedback">
+                <div *ngIf="f.role.errors.required">Role is required</div>
+            </div>
+        </div>
+    </div>
+    <!-- <div *ngIf="AccountId">
+        <h3 class="pt-3">Change Password</h3>
+        <p>Leave blank to keep the same password</p>
+    </div> -->
+    <div class="row">
+        <div class="mb-3 col">
+            <label class="form-label">Password</label>
+            <input type="password" formControlName="password" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.password.errors }" />
+            <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
+                <div *ngIf="f.password.errors.required">Password is required</div>
+                <div *ngIf="f.password.errors.minlength">Password must be at least 6 characters</div>
+            </div>
+        </div>
+        <div class="mb-3 col">
+            <label class="form-label">Confirm Password</label>
+            <input type="password" formControlName="confirmPassword" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.confirmPassword.errors }" />
+            <div *ngIf="submitted && f.confirmPassword.errors" class="invalid-feedback">
+                <div *ngIf="f.confirmPassword.errors.required">Confirm Password is required</div>
+                <div *ngIf="f.confirmPassword.errors.mustMatch">Passwords must match</div>
+            </div>
+        </div>
+    </div>
+    <div class="mb-3">
+        <button [disabled]="submitting" class="btn btn-primary">
+            <span *ngIf="submitting" class="spinner-border spinner-border-sm me-1"></span>
+            Save
+        </button>
+        <a routerLink="/admin/accounts" class="btn btn-link">Cancel</a>
+    </div>
+</form>
+<div *ngIf="loading" class="text-center m-5">
+    <span class="spinner-border spinner-border-lg align-center"></span>
+</div>
+
+================================================================================
+File: src\app\room\add-edit\room.add-edit.component.ts
+Size: 3.44 kB
+================================================================================
+
+import { Component, OnInit }                    from '@angular/core';
+import { Router, ActivatedRoute }               from '@angular/router';
+import { FormBuilder, FormGroup, Validators }   from '@angular/forms';
+import { first }                                from 'rxjs/operators';
+
+import { RoomService, AlertService }            from '@app/_services';
+
+@Component({ templateUrl: 'room.add-edit.component.html' })
+export class RoomAddEditComponent implements OnInit {
+    form!:      FormGroup;
+    roomId?:    number;
+    title!:     string;
+    loading     = false;
+    submitting  = false;
+    submitted   = false;
+
+    constructor(
+        private formBuilder:    FormBuilder,
+        private route:          ActivatedRoute,
+        private router:         Router,
+        private RoomService:    RoomService,
+        private alertService:   AlertService
+    ) { }
+
+    ngOnInit() {
+        this.roomId = this.route.snapshot.params['roomId'];
+
+        // Define form with necessary fields
+        this.form = this.formBuilder.group({
+            roomName:       ['',            [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
+            roomFloor:      ['',            [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
+            roomType:       ['unknownroom', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
+            stockroomType:  ['unknownType', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
+            roomInCharge:   [,              [Validators.required]],
+        });
+
+        this.title = 'Create Room';
+        if (this.roomId) {
+            // Edit mode
+            this.title = 'Edit Room';
+            this.loading = true;
+            this.RoomService.getRoomById(this.roomId)
+                .pipe(first())
+                .subscribe({
+                    next: (room) => {
+                        this.form.patchValue(room);
+                        this.loading = false;
+                    },
+                    error: () => this.loading = false
+                });
+        }
+    }
+
+    // Convenience getter for easy access to form fields
+    get f() { return this.form.controls; }
+
+    onSubmit() {
+        this.submitted = true;
+
+        // Clear alerts on submit
+        this.alertService.clear();
+
+        // Stop here if form is invalid
+        if (this.form.invalid) {
+            return;
+        }
+
+        this.submitting = true;
+
+        // Create or update Room based on id param
+        let saveRoom;
+        let message: string;
+        if (this.roomId) {
+            saveRoom = () => this.RoomService.updateRoom(this.roomId!, this.form.value);
+            message = 'Room updated successfully';
+        } else {
+            saveRoom = () => this.RoomService.createRoom(this.form.value);
+            message = 'Room created successfully';
+        }
+
+        saveRoom()
+            .pipe(first())
+            .subscribe({
+                next: () => {
+                    this.alertService.success(message, { keepAfterRouteChange: true });
+                    this.router.navigateByUrl('/rooms');
+                },
+                error: error => {
+                    this.alertService.error(error);
+                    this.submitting = false;
+                }
+            });
+    }
+}
+
+
+================================================================================
 File: src\app\room\layout.component.html
 Size: 106 B
 ================================================================================
@@ -1806,36 +2048,33 @@ export class RoomListComponent implements OnInit {
 
 ================================================================================
 File: src\app\room\room-routing.module.ts
-Size: 1.17 kB
+Size: 949 B
 ================================================================================
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
 import { LayoutComponent } from './layout.component';
-import { RoomAddEditComponent } from './room.add-edit.component';
 import { RoomListComponent } from './room-list.component';
 import { RoomViewComponent } from './room-view.component';
 
-// const routes: Routes = [
-//     {
-//         path: '', component: LayoutComponent,
-//         children: [
-//             { path: 'add', component: RoomAddEditComponent },
-//             { path: 'edit/:id', component: RoomAddEditComponent }
-//         ]
-//     }
-// ];
+const unitModule = () => import('./units/unit.module').then(x => x.UnitModule);
+const addEditModule = () => import('./add-edit/list.module').then(x => x.AddEditModule);
+
 const routes: Routes = [
-    { path: '', component: LayoutComponent,
-      children: [
-        { path: '', component: RoomListComponent },        // list ( /room )
-        { path: 'add', component: RoomAddEditComponent },  // add
-        { path: 'edit/:id', component: RoomAddEditComponent }, // edit
-        { path: ':id', component: RoomViewComponent }      // view detail ( /room/:id )
-      ]
-    }
-  ];
+  { path: '', component: LayoutComponent,
+    children: [
+      { path: '', component: RoomListComponent},
+      { path: '', loadChildren: addEditModule },
+      {
+        path: ':id', component: RoomViewComponent,
+          children: [
+            { path: ':id', loadChildren: unitModule },
+          ]
+      },
+    ]
+  },
+];
 
 @NgModule({
     imports: [RouterModule.forChild(routes)],
@@ -1843,24 +2082,25 @@ const routes: Routes = [
 })
 export class RoomRoutingModule { }
 
+
 ================================================================================
 File: src\app\room\room-view.component.html
-Size: 16.24 kB
+Size: 18.1 kB
 ================================================================================
 
 <div class="p-1 container">
-  <h2>Room: {{ room?.roomName || room?.name || ('#' + roomId) }}</h2>
+  <h2>Room: {{ room?.roomName }}</h2>
 
   <p *ngIf="room?.roomType === 'stockroom' || room?.roomType === 'subStockroom'" class="mb-3">
     Floor:      {{ room?.roomFloor }} •
     Type:       {{ room?.roomType }} •
     Stock:      {{ room?.stockroomType }} •
-    In charge:  {{ room?.roomInCharge || room?.inCharge || '-' }}
+    In charge:  {{ room?.roomInCharge }}
   </p>
-  <p *ngIf="room?.roomType !== 'stockroom' || room?.roomType !== 'subStockroom'" class="mb-3">
+  <p *ngIf="room?.roomType !== 'stockroom' && room?.roomType !== 'subStockroom'" class="mb-3">
     Floor:      {{ room?.roomFloor }} •
     Type:       {{ room?.roomType }} •
-    In charge:  {{ room?.roomInCharge || room?.inCharge || '-' }}
+    In charge:  {{ room?.roomInCharge }}
   </p>
 
   <!--------------------------- Dynamic Buttons ---------------------------->
@@ -1868,7 +2108,12 @@ Size: 16.24 kB
     <!-- Buttons that open modals -->
     <button type="button" class="btn btn-primary me-2" (click)="openReceiveModal()">Receive</button>
     <button type="button" class="btn btn-danger me-2" (click)="openReleaseModal()">Release</button>
-    <button type="button" class="btn btn-success me-2" [routerLink]="['/room', room.roomId || room.roomId, 'apparels']">Unit Lists</button>
+    <button
+      class="btn btn-sm btn-outline-primary ms-3"
+      *ngIf="room?.roomType === 'stockroom' || room?.roomType === 'subStockroom'"
+      [routerLink]="['/room', roomId, 'units', (room?.stockroomType === 'supply' ? 'supply' : (room?.stockroomType === 'apparel' ? 'apparel' : 'general'))]">
+      Unit List
+    </button>
   </div>
 
   <!--------------------------- Received & Released Lists (separated by stock type) ------------------------->
@@ -1877,58 +2122,69 @@ Size: 16.24 kB
       <div class="col-md-6">
 
         <!--------------------------- Received Item Lists Area ------------------------->
-        <h5 *ngIf="(room?.stockroomType || 'apparel') === 'apparel'">Received (Apparel)</h5>
+        <h5 *ngIf="room?.stockroomType === 'apparel'">Received (Apparel)</h5>
         <h5 *ngIf="room?.stockroomType === 'supply'">Received (Admin Supply)</h5>
-        <h5 *ngIf="room?.stockroomType && room?.stockroomType !== 'apparel' && room?.stockroomType !== 'supply'">Received (Items)</h5>
+        <h5 *ngIf="room?.stockroomType !== 'apparel' && room?.stockroomType !== 'supply'">Received (Items)</h5>
 
         <table class="table table-sm">
-          <thead *ngIf="(room?.stockroomType || 'apparel') === 'apparel'">
+          <thead *ngIf="room?.stockroomType === 'apparel'">
             <tr>
-              <th>Name</th><th>Grade Level</th><th>Type</th><th>For</th><th>Size</th><th>Quantity</th><th></th>
+              <th>Name</th>
+              <th>Grade Level</th>
+              <th>Type</th>
+              <th>For</th>
+              <th>Size</th>
+              <th>Quantity</th>
+              <th>Date</th>
             </tr>
           </thead>
           <thead *ngIf="room?.stockroomType === 'supply'">
             <tr>
-              <th>Name</th><th>Quantity</th><th>Received From</th><th>Received By</th><th>Date</th><th></th>
+              <th>Name</th>
+              <th>Quantity</th>
+              <th>Received From</th>
+              <th>Received By</th>
+              <th>Date</th>
             </tr>
           </thead>
-          <thead *ngIf="room?.stockroomType && room?.stockroomType !== 'apparel' && room?.stockroomType !== 'supply'">
+          <thead *ngIf="room?.stockroomType !== 'apparel' && room?.stockroomType !== 'supply'">
             <tr>
-              <th>Name</th><th>Quantity</th><th>Notes</th><th>Date</th><th></th>
+              <th>Name</th>
+              <th>Size</th>
+              <th>Quantity</th>
+              <th>Type</th>
+              <th>Date</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let r of receivedItems">
               <!-- apparel row -->
-              <ng-container *ngIf="(room?.stockroomType || 'apparel') === 'apparel'">
+              <ng-container *ngIf="room?.stockroomType === 'apparel'">
                 <td>{{ r.apparelName }}</td>
                 <td>{{ r.apparelLevel }}</td>
                 <td>{{ r.apparelType }}</td>
                 <td>{{ r.apparelFor }}</td>
                 <td>{{ r.apparelSize }}</td>
                 <td>{{ r.apparelQuantity }}</td>
-                <td>
-                  <button class="btn btn-sm btn-secondary" (click)="onDownloadBatchQr(r)">QR</button>
-                </td>
+                <td>{{ r.receivedAt | date:'short' }}</td>
               </ng-container>
 
               <!-- supply row -->
               <ng-container *ngIf="room?.stockroomType === 'supply'">
-                <td>{{ r.supplyName || r.adminName || r.name }}</td>
-                <td>{{ r.adminQuantity || r.quantity }}</td>
+                <td>{{ r.supplyName }}</td>
+                <td>{{ r.adminQuantity }}</td>
                 <td>{{ r.receivedFrom }}</td>
                 <td>{{ r.receivedBy }}</td>
                 <td>{{ r.createdAt | date:'short' }}</td>
-                <td><button class="btn btn-sm btn-secondary" (click)="onDownloadBatchQr(r)">QR</button></td>
               </ng-container>
 
               <!-- general items row -->
-              <ng-container *ngIf="room?.stockroomType && room?.stockroomType !== 'apparel' && room?.stockroomType !== 'supply'">
-                <td>{{ r.itemName || r.name }}</td>
-                <td>{{ r.itemQuantity || r.quantity }}</td>
-                <td>{{ r.notes }}</td>
-                <td>{{ r.createdAt | date:'short' }}</td>
-                <td><button class="btn btn-sm btn-secondary" (click)="onDownloadBatchQr(r)">QR</button></td>
+              <ng-container *ngIf="room?.stockroomType !== 'apparel' && room?.stockroomType !== 'supply'">
+                <td>{{ r.genItemName }}</td>
+                <td>{{ r.genItemSize }}</td>
+                <td>{{ r.genItemQuantity }}</td>
+                <td>{{ r.genItemType }}</td>
+                <td>{{ r.receivedAt | date:'short' }}</td>
               </ng-container>
             </tr>
           </tbody>
@@ -1962,34 +2218,79 @@ Size: 16.24 kB
     </div>
   </div>
 
-  <!--------------------------- Inventory Item List (generic) ------------------------->
+  <!--------------------------- Inventory Item List (separated) ------------------------->
   <h4>Inventory</h4>
   <table class="table table-striped">
-    <thead>
+    <thead *ngIf="room?.stockroomType === 'apparel'">
       <tr>
         <th>ID</th>
         <th>Name</th>
-        <th *ngIf="(room?.stockroomType || 'apparel') === 'apparel'">Grade Level</th>
-        <th *ngIf="(room?.stockroomType || 'apparel') === 'apparel'">Type</th>
-        <th *ngIf="(room?.stockroomType || 'apparel') === 'apparel'">For</th>
-        <th *ngIf="(room?.stockroomType || 'apparel') === 'apparel'">Size</th>
+        <th>Grade Level</th>
+        <th>Type</th>
+        <th>For</th>
+        <th>Size</th>
         <th>Quantity</th>
-        <th></th>
       </tr>
     </thead>
-    <tbody>
+    <thead *ngIf="room?.stockroomType === 'supply'">
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Measure</th>
+        <th>Quantity</th>
+      </tr>
+    </thead>
+    <thead *ngIf="room?.stockroomType !== 'apparel' && room?.stockroomType !== 'supply'">
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Size</th>
+        <th>Type</th>
+        <th>Quantity</th>
+      </tr>
+    </thead>
+    <tbody *ngIf="room?.stockroomType === 'apparel'">
       <tr *ngFor="let inv of inventory">
-        <td>{{ inv.apparelInventoryId || inv.inventoryId || inv.id }}</td>
+        <td>{{ inv.apparelInventoryId }}</td>
+        <td>{{ inv.apparelName }}</td>
+        <td>{{ inv.apparelLevel }}</td>
+        <td>{{ inv.apparelType }}</td>
+        <td>{{ inv.apparelFor }}</td>
+        <td>{{ inv.apparelSize }}</td>
+        <td>{{ inv.totalQuantity }}</td>
         <td>
-          {{ inv.apparelName || inv.name || inv.supplyName || inv.itemName }}
+          <button type="button" class="btn btn-sm btn-outline-danger" (click)="openReleaseModal(inv.apparelInventoryId)">Release</button>
+          <button type="button" class="btn btn-sm btn-secondary ms-1" (click)="onDownloadBatchQr(inv)">Generate QR</button>
         </td>
-        <td *ngIf="(room?.stockroomType || 'apparel') === 'apparel'">{{ inv.apparelLevel }}</td>
-        <td *ngIf="(room?.stockroomType || 'apparel') === 'apparel'">{{ inv.apparelType }}</td>
-        <td *ngIf="(room?.stockroomType || 'apparel') === 'apparel'">{{ inv.apparelFor }}</td>
-        <td *ngIf="(room?.stockroomType || 'apparel') === 'apparel'">{{ inv.apparelSize }}</td>
-        <td>{{ inv.totalQuantity || inv.quantity || inv.adminQuantity || 0 }}</td>
+      </tr>
+      <tr *ngIf="inventory?.length === 0">
+        <td colspan="8" class="text-center p-3">No inventory found</td>
+      </tr>
+    </tbody>
+    <tbody *ngIf="room?.stockroomType === 'supply'">
+      <tr *ngFor="let inv of inventory">
+        <td>{{ inv.adminSupplyInventoryId }}</td>
+        <td>{{ inv.supplyName }}</td>
+        <td>{{ inv.supplyMeasure }}</td>
+        <td>{{ inv.totalQuantity }}</td>
         <td>
-          <button type="button" class="btn btn-sm btn-outline-danger" (click)="openReleaseModal(inv.apparelInventoryId || inv.inventoryId || inv.id)">Release</button>
+          <button type="button" class="btn btn-sm btn-outline-danger" (click)="openReleaseModal(inv.adminSupplyInventoryId)">Release</button>
+          <button type="button" class="btn btn-sm btn-secondary ms-1" (click)="onDownloadBatchQr(inv)">Generate QR</button>
+        </td>
+      </tr>
+      <tr *ngIf="inventory?.length === 0">
+        <td colspan="8" class="text-center p-3">No inventory found</td>
+      </tr>
+    </tbody>
+    <tbody *ngIf="room?.stockroomType !== 'apparel' || room?.stockroomType !== 'supply'">
+      <tr *ngFor="let inv of inventory">
+        <td>{{ inv.genItemInventoryId }}</td>
+        <td>{{ inv.genItemName }}</td>
+        <td>{{ inv.genItemSize }}</td>
+        <td>{{ inv.genItemType }}</td>
+        <td>{{ inv.totalQuantity }}</td>
+        <td>
+          <button type="button" class="btn btn-sm btn-outline-danger" (click)="openReleaseModal(inv.genItemInventoryId)">Release</button>
           <button type="button" class="btn btn-sm btn-secondary ms-1" (click)="onDownloadBatchQr(inv)">Generate QR</button>
         </td>
       </tr>
@@ -2011,17 +2312,14 @@ Size: 16.24 kB
         <form [formGroup]="receiveForm" (ngSubmit)="onReceive()">
           <div class="modal-body">
             <!-- Apparel receive -->
-            <div *ngIf="(room?.stockroomType || 'apparel') === 'apparel'">
+            <div *ngIf="room?.stockroomType === 'apparel'">
               <div class="mb-3">
                 <label class="form-label">Received from *</label>
-                <input class="form-control" formControlName="receivedFrom" required />
+                <input class="form-control" formControlName="receivedFrom" placeholder="Received from" required />
               </div>
               <div class="mb-3">
                 <label class="form-label">Received by *</label>
-                <select formControlName="receivedBy" class="form-select" required>
-                  <option [ngValue]="null">-- Select --</option>
-                  <option *ngFor="let opt of inChargeOptions" [ngValue]="opt?.id || opt?.AccountId">{{ opt?.name || opt?.fullname || opt?.username }}</option>
-                </select>
+                <input class="form-control" formControlName="receivedBy" placeholder="Received By" required />
               </div>
               <div class="mb-3">
                 <label class="form-label">Apparel name</label>
@@ -2036,7 +2334,7 @@ Size: 16.24 kB
                 <input class="form-control" formControlName="apparelType" placeholder="Apparel type" />
               </div>
               <div class="mb-3">
-                <label class="form-label">Apparel for</label>
+                <label class="form-label">Gender</label>
                 <input class="form-control" formControlName="apparelFor" placeholder="Apparel for" />
               </div>
               <div class="mb-3">
@@ -2053,7 +2351,7 @@ Size: 16.24 kB
             <div *ngIf="room?.stockroomType === 'supply'">
               <div class="mb-3">
                 <label class="form-label">Received from *</label>
-                <input class="form-control" formControlName="receivedFrom" required />
+                <input class="form-control" formControlName="receivedFrom" placeholder="Received from" required />
               </div>
               <div class="mb-3">
                 <label class="form-label">Received by *</label>
@@ -2067,16 +2365,20 @@ Size: 16.24 kB
                 <input class="form-control" formControlName="supplyName" placeholder="Supply name" />
               </div>
               <div class="mb-3">
+                <label class="form-label">Measure</label>
+                <input class="form-control" formControlName="supplyMeasure" placeholder="Supply measure" />
+              </div>
+              <div class="mb-3">
                 <label class="form-label">Quantity</label>
                 <input type="number" class="form-control" formControlName="adminQuantity" placeholder="Quantity" />
               </div>
             </div>
 
             <!-- General / items receive -->
-            <div *ngIf="room?.stockroomType && room?.stockroomType !== 'apparel' && room?.stockroomType !== 'supply'">
+            <div *ngIf="room?.stockroomType !== 'apparel' && room?.stockroomType !== 'supply'">
               <div class="mb-3">
                 <label class="form-label">Received from *</label>
-                <input class="form-control" formControlName="receivedFrom" required />
+                <input class="form-control" formControlName="receivedFrom" placeholder="Received from" required />
               </div>
               <div class="mb-3">
                 <label class="form-label">Received by *</label>
@@ -2087,11 +2389,19 @@ Size: 16.24 kB
               </div>
               <div class="mb-3">
                 <label class="form-label">Item name</label>
-                <input class="form-control" formControlName="supplyName" placeholder="Item name" />
+                <input class="form-control" formControlName="genItemName" placeholder="Item name" />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Size</label>
+                <input class="form-control" formControlName="genItemSize" placeholder="Item size" />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Item type</label>
+                <input class="form-control" formControlName="genItemType" placeholder="Item type" />
               </div>
               <div class="mb-3">
                 <label class="form-label">Quantity</label>
-                <input type="number" class="form-control" formControlName="adminQuantity" placeholder="Quantity" />
+                <input type="number" class="form-control" formControlName="genItemQuantity" placeholder="Quantity" />
               </div>
             </div>
 
@@ -2166,375 +2476,23 @@ Size: 16.24 kB
     <pre>{{scanned | json}}</pre>
     <div class="d-flex gap-2">
       <button class="btn btn-sm btn-danger" (click)="releaseScannedUnit()">Release</button>
-      <button class="btn btn-sm btn-outline-warning" (click)="toggleScannedStatus()">
+      <!-- <button class="btn btn-sm btn-outline-warning" (click)="toggleScannedStatus()">
         {{scanned?.status === 'damage' ? 'Mark as Goods' : 'Mark as Damage'}}
-      </button>
+      </button> -->
       <button class="btn btn-sm btn-link" (click)="showScannedPanel=false">Close</button>
     </div>
   </div>
 </div>
 
+<div class="mt-3">
+  <router-outlet></router-outlet>
+</div>
+
 
 ================================================================================
 File: src\app\room\room-view.component.ts
-Size: 28.43 kB
+Size: 15.65 kB
 ================================================================================
-
-// import { Component, OnInit }                  from '@angular/core';
-// import { ActivatedRoute }                     from '@angular/router';
-// import { first }                              from 'rxjs/operators';
-// import { HttpResponse }                       from '@angular/common/http';
-// import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-
-// import { 
-//   RoomService, 
-//   QrService, 
-//   AlertService, 
-// } from '@app/_services';
-
-// @Component({
-//   templateUrl: './room-view.component.html'
-// })
-// export class RoomViewComponent implements OnInit {
-//   roomId!:          number;
-//   room:             any;
-//   inventory:        any[] = [];
-//   receivedItems:    any[] = [];
-//   releasedBatches:  any[] = [];
-//   roomItems:        any[] = [];
-//   inChargeOptions:  any[] = [];
-
-//   // --- added props for QR scanning panel ---
-//   scanned: any = null;                     
-//   showScannedPanel = false;  
-//   account: any = null; // TODO: set this from your auth/account service in ngOnInit
-
-//   // modal visibility flags
-//   showReceiveModal = false;
-//   showReleaseModal = false;
-
-//   // forms
-//   receiveForm!:   FormGroup;
-//   releaseForm!:   FormGroup;
-//   registerForm!:  FormGroup;
-//   statusForm!:    FormGroup;
-
-//   loading     = false;
-//   submitting  = false;
-
-//   constructor(
-//     private route:        ActivatedRoute,
-//     private fb:           FormBuilder,
-//     private roomService:  RoomService,
-//     private qrService:    QrService,
-//     private alert:        AlertService,
-//   ) {}
-
-//   ngOnInit() {
-//     this.roomId = +this.route.snapshot.params['id'];
-
-//     // TODO: assign this.account from your auth/account service here if available
-//     // this.account = this.authService.accountValue;
-
-//     // Receive form
-//     this.receiveForm = this.fb.group({
-//       apparelName:      [''],
-//       apparelQuantity:  [0],
-//       supplyName:       [''],
-//       adminQuantity:    [0],
-//       receivedFrom:     ['', Validators.required],
-//       receivedBy:       ['', Validators.required],
-//       notes:            ['']
-//     });
-
-//     // Release form
-//     this.releaseForm = this.fb.group({
-//       apparelInventoryId: [null,  Validators.required],
-//       releaseQuantity:    [1,     [Validators.required, Validators.min(1)]],
-//       releasedBy:         ['',    Validators.required],
-//       claimedBy:          ['',    Validators.required],
-//       remarks:            ['']
-//     });
-
-//     this.registerForm = this.fb.group({ itemId:     [null,  Validators.required] });
-//     this.statusForm   = this.fb.group({ itemQrCode: ['',    Validators.required], newStatus: ['', Validators.required] });
-
-//     this.loadAll();
-//   }
-
-//   loadAll() {
-//     this.loading = true;
-
-//     this.roomService.getRoomById(this.roomId).pipe(first()).subscribe({
-//       next: r => this.room = r,
-//       error: e => this.alert.error(e)
-//     });
-
-//     this.roomService.getInventory(this.roomId).pipe(first()).subscribe({
-//       next: inv => this.inventory = inv || [],
-//       error: e => this.alert.error(e)
-//     });
-
-//     this.roomService.getReceivedItems(this.roomId).pipe(first()).subscribe({
-//       next: r => this.receivedItems = r?.items || r || [],
-//       error: e => this.alert.error(e)
-//     });
-
-//     this.roomService.getReleasedBatches(this.roomId).pipe(first()).subscribe({
-//       next: r => this.releasedBatches = r?.batches || r || [],
-//       error: e => this.alert.error(e)
-//     });
-
-//     this.roomService.getRoomItems(this.roomId).pipe(first()).subscribe({
-//       next: items => this.roomItems = items || [],
-//       error: e => this.alert.error(e)
-//     });
-
-//     this.roomService.getInChargeOptions().pipe(first()).subscribe({
-//       next: opts => this.inChargeOptions = opts || [],
-//       error: e => this.alert.error(e)
-//     });
-
-//     this.loading = false;
-//   }
-
-//   // ------------------------ Modal open/close helpers --------------------------
-//   openReceiveModal() {
-//     this.receiveForm.reset({
-//       apparelName: '',
-//       apparelQuantity: 0,
-//       supplyName: '',
-//       adminQuantity: 0,
-//       receivedFrom: '',
-//       receivedBy: '',
-//       notes: ''
-//     });
-//     this.showReceiveModal = true;
-//   }
-//   closeReceiveModal() { this.showReceiveModal = false; }
-
-//   openReleaseModal(prefillInventoryId?: number) {
-//     this.releaseForm.reset({
-//       apparelInventoryId: prefillInventoryId || null,
-//       releaseQuantity: 1,
-//       releasedBy: '',
-//       claimedBy: '',
-//       remarks: ''
-//     });
-//     this.showReleaseModal = true;
-//   }
-//   closeReleaseModal() { this.showReleaseModal = false; }
-  
-//   // ------------------------ Modal actions --------------------------------
-//   onReceive() {
-//     if (this.receiveForm.invalid) {
-//       this.alert.error('Please fill required receive fields.');
-//       return;
-//     }
-//     this.submitting = true;
-//     const payload = this.receiveForm.value;
-//     this.roomService.receiveItem(this.roomId, payload).pipe(first()).subscribe({
-//       next: () => {
-//         this.alert.success('Received successfully');
-//         this.submitting = false;
-//         this.closeReceiveModal();
-//         this.loadAll();
-//       },
-//       error: e => { this.alert.error(e); this.submitting = false; }
-//     });
-//   }
-//   onRelease() {
-//     if (this.releaseForm.invalid) {
-//       this.alert.error('Please fill required release fields.');
-//       return;
-//     }
-//     this.submitting = true;
-//     const payload = this.releaseForm.value;
-//     this.roomService.releaseApparel(this.roomId, payload).pipe(first()).subscribe({
-//       next: () => {
-//         this.alert.success('Released successfully');
-//         this.submitting = false;
-//         this.closeReleaseModal();
-//         this.loadAll();
-//       },
-//       error: e => { this.alert.error(e); this.submitting = false; }
-//     });
-//   }
-
-//   // ------------------------ QR Scanning handlers ------------------------------
-//   handleScannedPayload(parsedPayload: any) {
-//     this.scanned = parsedPayload;
-//     this.showScannedPanel = true;
-//   }
-
-//   releaseScannedUnit() {
-//     if (!this.scanned) return;
-
-//     if (this.scanned.unitId) {
-//       const stockroomType = this.scanned.itemType || 'apparel';
-//       const unitId = this.scanned.unitId;
-//       this.qrService.releaseUnit(stockroomType, unitId, { actorId: this.account?.accountId }).pipe(first())
-//         .subscribe({
-//           next: () => {
-//             this.alert.success('Unit released');
-//             this.showScannedPanel = false;
-//             this.loadAll();
-//           },
-//           error: e => this.alert.error(e)
-//         });
-
-//     } else if (this.scanned.id) {
-//       const qtyStr = window.prompt('Batch QR detected. How many units to release?', '1');
-//       const qty = parseInt(qtyStr || '0', 10);
-//       if (!qty || qty <= 0) return;
-
-//       const payload = {
-//         apparelInventoryId: this.scanned.id,
-//         releaseApparelQuantity: qty,
-//         releasedBy: `${this.account?.firstName || ''} ${this.account?.lastName || ''}`.trim(),
-//         claimedBy: 'CLAIMANT NAME OR ID',
-//         notes: `Released via QR on ${new Date().toISOString()}`
-//       };
-
-//       this.roomService.releaseApparel(this.roomId, payload).pipe(first()).subscribe({
-//         next: () => {
-//           this.alert.success('Batch released');
-//           this.showScannedPanel = false;
-//           this.loadAll();
-//         },
-//         error: e => this.alert.error(e)
-//       });
-//     }
-//   }
-
-//   toggleScannedStatus() {
-//     if (!this.scanned) return;
-//     const newStatus = (this.scanned.status === 'goods' || this.scanned.status === 'in_stock') ? 'damage' : 'goods';
-//     const idToUpdate = this.scanned.unitId || this.scanned.qrId || this.scanned.id;
-//     if (!idToUpdate) {
-//       this.alert.error('Cannot determine item id to update status.');
-//       return;
-//     }
-//     this.roomService.updateItemStatus(this.roomId, idToUpdate, newStatus).pipe(first()).subscribe({
-//       next: () => {
-//         this.alert.success(`Status changed to ${newStatus}`);
-//         this.loadAll();
-//         this.scanned.status = newStatus;
-//       },
-//       error: e => this.alert.error(e)
-//     });
-//   }
-
-//   downloadBlob(blob: Blob, filename: string) {
-//     const url = window.URL.createObjectURL(blob);
-//     const a = document.createElement('a');
-//     a.href = url;
-//     a.download = filename || 'qrcode.png';
-//     document.body.appendChild(a);
-//     a.click();
-//     a.remove();
-//     window.URL.revokeObjectURL(url);
-//   }
-
-//   /**
-//    * Helper: parse filename from Content-Disposition header if present.
-//    * Examples:
-//    *    Content-Disposition: attachment; filename="qr-apparel-123.png"
-//    *    Content-Disposition: attachment; filename*=UTF-8''qr-apparel-123.png
-//    */
-//   parseFilenameFromContentDisposition(cdHeader: string | null, fallback: string) {
-//     if (!cdHeader) return fallback;
-//     const match = /filename\*?=(?:UTF-8'')?\"?([^\";]+)/i.exec(cdHeader);
-//     if (match && match[1]) {
-//       try { return decodeURIComponent(match[1]); } catch (e) { return match[1]; }
-//     }
-//     return fallback;
-//   }
-
-//   /**
-//    * Called from template when user clicks QR button for a batch/inventory object
-//    */
-//   onDownloadBatchQr(invOrBatch: any) {
-//     const stockroomType = (this.room && this.room.stockroomType) ? this.room.stockroomType : 'apparel';
-//     const inventoryId = invOrBatch.receiveApparelId || invOrBatch.apparelInventoryId || invOrBatch.id || invOrBatch.inventoryId;
-//     if (!inventoryId) {
-//       this.alert.error('Cannot determine inventory id for QR generation.');
-//       return;
-//     }
-
-//     this.qrService.getBatchQr(stockroomType, inventoryId).pipe(first())
-//       .subscribe({
-//         next: (resp: HttpResponse<Blob>) => {
-//           const blob = resp.body as Blob;
-//           const cd = resp.headers.get('Content-Disposition');
-//           const fallback = `qr-${stockroomType}-${inventoryId}.png`;
-//           const filename = this.parseFilenameFromContentDisposition(cd, fallback);
-//           this.downloadBlob(blob, filename);
-//           this.alert.success('QR downloaded and backend saved/updated (if not already).');
-//         },
-//         error: err => {
-//           this.alert.error(err);
-//         }
-//       });
-//   }
-
-//   /**
-//    * Called from template when user clicks QR button for a unit
-//    */
-//   onDownloadUnitQr(unit: any) {
-//     const stockroomType = (this.room && this.room.stockroomType) ? this.room.stockroomType : 'apparel';
-//     const unitId = unit.apparelId || unit.adminSupplyId || unit.id;
-//     if (!unitId) { this.alert.error('Cannot determine unit id for QR generation.'); return; }
-  
-//     this.qrService.getUnitQr(stockroomType, unitId).pipe(first())
-//       .subscribe({
-//         next: (resp: HttpResponse<Blob>) => {
-//           const blob = resp.body as Blob;
-//           const cd = resp.headers.get('Content-Disposition');
-//           const fallback = `qr-${stockroomType}-unit-${unitId}.png`;
-//           const filename = this.parseFilenameFromContentDisposition(cd, fallback);
-//           this.downloadBlob(blob, filename);
-//           this.alert.success('Unit QR downloaded and backend saved/updated (if not already).');
-//         },
-//         error: err => {
-//           this.alert.error(err);
-//         }
-//       });
-//   }
-
-
-
-
-
-
-
-
-
-
-//   // ------- Other existing handlers -------
-//   selectInventoryForRelease(inv: any) {
-//     this.openReleaseModal(inv.id || inv.apparelInventoryId || inv.inventoryId);
-//   }
-
-//   onRegister() {
-//     if (this.registerForm.invalid) return;
-//     this.roomService.registerItem(this.roomId, this.registerForm.value.itemId).pipe(first()).subscribe({
-//       next: () => { this.alert.success('Item registered'); this.loadAll(); this.registerForm.reset(); },
-//       error: e => this.alert.error(e)
-//     });
-//   }
-
-//   onUpdateStatus() {
-//     if (this.statusForm.invalid) return;
-//     const { itemQrCode, newStatus } = this.statusForm.value;
-//     this.roomService.updateItemStatus(this.roomId, itemQrCode, newStatus).pipe(first()).subscribe({
-//       next: () => { this.alert.success('Item status updated'); this.loadAll(); this.statusForm.reset(); },
-//       error: e => this.alert.error(e)
-//     });
-//   }
-// }
-
-
 
 import { Component, OnInit }                  from '@angular/core';
 import { ActivatedRoute }                     from '@angular/router';
@@ -2564,6 +2522,8 @@ export class RoomViewComponent implements OnInit {
   scanned: any = null;
   showScannedPanel = false;
   account: any = null; // set from account/auth service if available
+
+  scannedNewStatus: string = 'damage';
 
   // modal visibility flags
   showReceiveModal = false;
@@ -2661,7 +2621,7 @@ export class RoomViewComponent implements OnInit {
             next: r => this.releasedBatches = r?.batches || r || [],
             error: e => this.alert.error(e)
           });
-          this.roomService.getRoomItems(this.roomId).pipe(first()).subscribe({
+          this.roomService.getApparelUnits(this.roomId).pipe(first()).subscribe({
             next: items => this.roomItems = items || [],
             error: e => this.alert.error(e)
           });
@@ -2867,25 +2827,6 @@ export class RoomViewComponent implements OnInit {
     }
   }
 
-  toggleScannedStatus() {
-    if (!this.scanned) return;
-    const newStatus = (this.scanned.status === 'goods' || this.scanned.status === 'in_stock') ? 'damage' : 'goods';
-    const idToUpdate = this.scanned.unitId || this.scanned.qrId || this.scanned.id;
-    if (!idToUpdate) {
-      this.alert.error('Cannot determine item id to update status.');
-      return;
-    }
-    // if roomService.updateItemStatus exists, use it
-    this.roomService.updateItemStatus(this.roomId, idToUpdate, newStatus).pipe(first()).subscribe({
-      next: () => {
-        this.alert.success(`Status changed to ${newStatus}`);
-        this.loadAll();
-        this.scanned.status = newStatus;
-      },
-      error: e => this.alert.error(e)
-    });
-  }
-
   // ------------------------ QR download helpers -------------------------------
   downloadBlob(blob: Blob, filename: string) {
     const url = window.URL.createObjectURL(blob);
@@ -2936,219 +2877,13 @@ export class RoomViewComponent implements OnInit {
     const unitId = unit.apparelId || unit.adminSupplyId || unit.id || unit.unitId;
     if (!unitId) { this.alert.error('Cannot determine unit id for QR generation.'); return; }
 
-    this.qrService.getUnitQr(stockroomType, unitId).pipe(first())
-      .subscribe({
-        next: (resp: HttpResponse<Blob>) => {
-          const blob = resp.body as Blob;
-          const cd = resp.headers.get('Content-Disposition');
-          const fallback = `qr-${stockroomType}-unit-${unitId}.png`;
-          const filename = this.parseFilenameFromContentDisposition(cd, fallback);
-          this.downloadBlob(blob, filename);
-          this.alert.success('Unit QR downloaded and backend saved/updated (if not already).');
-        },
-        error: err => {
-          this.alert.error(err);
-        }
-      });
   }
 }
 
 
 ================================================================================
-File: src\app\room\room.add-edit.component.html
-Size: 4.54 kB
-================================================================================
-
-<h1>{{title}}</h1>
-<form *ngIf="!loading" [formGroup]="form" (ngSubmit)="onSubmit()">
-    <div class="row">
-        <div class="mb-3 col-2">
-            <label class="form-label">Title</label>
-            <select formControlName="title" class="form-select" [ngClass]="{ 'is-invalid': submitted && f.title.errors }">
-                <option value=""></option>
-                <option value="Mr">Mr</option>
-                <option value="Mrs">Mrs</option>
-                <option value="Miss">Miss</option>
-                <option value="Ms">Ms</option>
-            </select>
-            <div *ngIf="submitted && f.title.errors" class="invalid-feedback">
-                <div *ngIf="f.title.errors.required">Title is required</div>
-            </div>
-        </div>
-        <div class="mb-3 col-5">
-            <label class="form-label">First Name</label>
-            <input type="text" formControlName="firstName" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.firstName.errors }" />
-            <div *ngIf="submitted && f.firstName.errors" class="invalid-feedback">
-                <div *ngIf="f.firstName.errors.required">First Name is required</div>
-            </div>
-        </div>
-        <div class="mb-3 col-5">
-            <label class="form-label">Last Name</label>
-            <input type="text" formControlName="lastName" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.lastName.errors }" />
-            <div *ngIf="submitted && f.lastName.errors" class="invalid-feedback">
-                <div *ngIf="f.lastName.errors.required">Last Name is required</div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="mb-3 col-7">
-            <label class="form-label">Email</label>
-            <input type="text" formControlName="email" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.email.errors }" />
-            <div *ngIf="submitted && f.email.errors" class="invalid-feedback">
-                <div *ngIf="f.email.errors.required">Email is required</div>
-                <div *ngIf="f.email.errors.email">Email must be a valid email address</div>
-            </div>
-        </div>
-        <div class="mb-3 col-5">
-            <label class="form-label">Role</label>
-            <select formControlName="role" class="form-select" [ngClass]="{ 'is-invalid': submitted && f.role.errors }">
-                <option value=""></option>
-                <option value="User">User</option>
-                <option value="Admin">Admin</option>
-            </select>
-            <div *ngIf="submitted && f.role.errors" class="invalid-feedback">
-                <div *ngIf="f.role.errors.required">Role is required</div>
-            </div>
-        </div>
-    </div>
-    <!-- <div *ngIf="AccountId">
-        <h3 class="pt-3">Change Password</h3>
-        <p>Leave blank to keep the same password</p>
-    </div> -->
-    <div class="row">
-        <div class="mb-3 col">
-            <label class="form-label">Password</label>
-            <input type="password" formControlName="password" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.password.errors }" />
-            <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
-                <div *ngIf="f.password.errors.required">Password is required</div>
-                <div *ngIf="f.password.errors.minlength">Password must be at least 6 characters</div>
-            </div>
-        </div>
-        <div class="mb-3 col">
-            <label class="form-label">Confirm Password</label>
-            <input type="password" formControlName="confirmPassword" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.confirmPassword.errors }" />
-            <div *ngIf="submitted && f.confirmPassword.errors" class="invalid-feedback">
-                <div *ngIf="f.confirmPassword.errors.required">Confirm Password is required</div>
-                <div *ngIf="f.confirmPassword.errors.mustMatch">Passwords must match</div>
-            </div>
-        </div>
-    </div>
-    <div class="mb-3">
-        <button [disabled]="submitting" class="btn btn-primary">
-            <span *ngIf="submitting" class="spinner-border spinner-border-sm me-1"></span>
-            Save
-        </button>
-        <a routerLink="/admin/accounts" class="btn btn-link">Cancel</a>
-    </div>
-</form>
-<div *ngIf="loading" class="text-center m-5">
-    <span class="spinner-border spinner-border-lg align-center"></span>
-</div>
-
-================================================================================
-File: src\app\room\room.add-edit.component.ts
-Size: 3.44 kB
-================================================================================
-
-import { Component, OnInit }                    from '@angular/core';
-import { Router, ActivatedRoute }               from '@angular/router';
-import { FormBuilder, FormGroup, Validators }   from '@angular/forms';
-import { first }                                from 'rxjs/operators';
-
-import { RoomService, AlertService }            from '@app/_services';
-
-@Component({ templateUrl: 'room.add-edit.component.html' })
-export class RoomAddEditComponent implements OnInit {
-    form!:      FormGroup;
-    roomId?:    number;
-    title!:     string;
-    loading     = false;
-    submitting  = false;
-    submitted   = false;
-
-    constructor(
-        private formBuilder:    FormBuilder,
-        private route:          ActivatedRoute,
-        private router:         Router,
-        private RoomService:    RoomService,
-        private alertService:   AlertService
-    ) { }
-
-    ngOnInit() {
-        this.roomId = this.route.snapshot.params['roomId'];
-
-        // Define form with necessary fields
-        this.form = this.formBuilder.group({
-            roomName:       ['',            [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
-            roomFloor:      ['',            [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
-            roomType:       ['unknownroom', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
-            stockroomType:  ['unknownType', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
-            roomInCharge:   [,              [Validators.required]],
-        });
-
-        this.title = 'Create Room';
-        if (this.roomId) {
-            // Edit mode
-            this.title = 'Edit Room';
-            this.loading = true;
-            this.RoomService.getRoomById(this.roomId)
-                .pipe(first())
-                .subscribe({
-                    next: (room) => {
-                        this.form.patchValue(room);
-                        this.loading = false;
-                    },
-                    error: () => this.loading = false
-                });
-        }
-    }
-
-    // Convenience getter for easy access to form fields
-    get f() { return this.form.controls; }
-
-    onSubmit() {
-        this.submitted = true;
-
-        // Clear alerts on submit
-        this.alertService.clear();
-
-        // Stop here if form is invalid
-        if (this.form.invalid) {
-            return;
-        }
-
-        this.submitting = true;
-
-        // Create or update Room based on id param
-        let saveRoom;
-        let message: string;
-        if (this.roomId) {
-            saveRoom = () => this.RoomService.updateRoom(this.roomId!, this.form.value);
-            message = 'Room updated successfully';
-        } else {
-            saveRoom = () => this.RoomService.createRoom(this.form.value);
-            message = 'Room created successfully';
-        }
-
-        saveRoom()
-            .pipe(first())
-            .subscribe({
-                next: () => {
-                    this.alertService.success(message, { keepAfterRouteChange: true });
-                    this.router.navigateByUrl('/rooms');
-                },
-                error: error => {
-                    this.alertService.error(error);
-                    this.submitting = false;
-                }
-            });
-    }
-}
-
-
-================================================================================
 File: src\app\room\room.module.ts
-Size: 848 B
+Size: 752 B
 ================================================================================
 
 import { NgModule } from '@angular/core';
@@ -3157,10 +2892,9 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
 import { RoomRoutingModule } from './room-routing.module';
-import { RoomListComponent } from './room-list.component';
-import { RoomAddEditComponent } from './room.add-edit.component';
-import { RoomViewComponent } from './room-view.component';
 import { LayoutComponent } from './layout.component';
+import { RoomListComponent } from './room-list.component';
+import { RoomViewComponent } from './room-view.component';
 
 @NgModule({
     imports: [
@@ -3171,13 +2905,443 @@ import { LayoutComponent } from './layout.component';
         RouterModule
     ],
     declarations: [
-        RoomAddEditComponent,
         LayoutComponent,
         RoomListComponent,
         RoomViewComponent
     ]
 })
 export class RoomModule { }
+
+
+================================================================================
+File: src\app\room\units\admin-supply-unit-list.component.html
+Size: 1.57 kB
+================================================================================
+
+<div class="card p-2">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h5 class="m-0">Admin Supply Units</h5>
+    <div>
+      <button class="btn btn-sm btn-secondary me-2" (click)="goBack()">Back</button>
+      <button class="btn btn-sm btn-outline-primary" (click)="loadUnits()" [disabled]="loading">Refresh</button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-3">Loading…</div>
+
+  <table *ngIf="!loading && units?.length" class="table table-sm">
+    <thead>
+      <tr>
+        <th>Unit ID</th>
+        <th>Supply</th>
+        <th>Qty</th>
+        <th>Status</th>
+        <th class="text-end">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let u of units">
+        <td>{{ u.id || u.supplyUnitId }}</td>
+        <td>{{ u.supplyName }}</td>
+        <td>{{ u.quantity }}</td>
+        <td>{{ u.status }}</td>
+        <td class="text-end">
+          <button class="btn btn-sm btn-outline-success me-1"
+                  (click)="updateStatus(u.id || u.supplyUnitId, 'active')"
+                  [disabled]="updatingId === (u.id || u.supplyUnitId)">Activate</button>
+          <button class="btn btn-sm btn-outline-danger"
+                  (click)="updateStatus(u.id || u.supplyUnitId, 'lost')"
+                  [disabled]="updatingId === (u.id || u.supplyUnitId)">Mark Lost</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && (!units || !units.length)" class="text-muted p-3">
+    No supply units found.
+  </div>
+</div>
+
+
+================================================================================
+File: src\app\room\units\admin-supply-unit-list.component.ts
+Size: 2.02 kB
+================================================================================
+
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { first } from 'rxjs/operators';
+import { RoomService, AlertService } from '@app/_services';
+
+@Component({
+    templateUrl: './admin-supply-unit-list.component.html'
+})
+export class AdminSupplyUnitListComponent implements OnInit {
+    roomId!: number;
+    units: any[] = [];
+    loading = false;
+    updatingId: number | null = null;
+
+    constructor(
+        private route: ActivatedRoute,
+        private router: Router,
+        private roomService: RoomService,
+        private alertService: AlertService
+    ) {}
+
+    ngOnInit(): void {
+        const parent = this.route.parent || this.route;
+        const idParam = parent.snapshot.paramMap.get('id') || this.route.snapshot.paramMap.get('id');
+        this.roomId = idParam ? +idParam : NaN;
+
+        if (!this.roomId) {
+            this.alertService.error('Invalid room id');
+            return;
+        }
+
+        this.loadUnits();
+    }
+
+    loadUnits() {
+        this.loading = true;
+        this.roomService.getAdminSupplyUnits(this.roomId).pipe(first()).subscribe({
+            next: (res: any[]) => {
+                this.units = res || [];
+                this.loading = false;
+            },
+            error: (err) => {
+                this.alertService.error(err);
+                this.loading = false;
+            }
+        });
+    }
+
+    updateStatus(unitId: number, newStatus: string) {
+        this.updatingId = unitId;
+        this.roomService.updateAdminSupplyStatus(this.roomId, unitId, newStatus).pipe(first()).subscribe({
+            next: () => {
+                this.updatingId = null;
+                this.loadUnits();
+            },
+            error: (err) => {
+                this.alertService.error(err);
+                this.updatingId = null;
+            }
+        });
+    }
+
+    goBack() {
+        this.router.navigate(['/room', this.roomId]);
+    }
+}
+
+
+================================================================================
+File: src\app\room\units\apparel-unit-list.component.html
+Size: 1.56 kB
+================================================================================
+
+<div class="card p-2">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h5 class="m-0">Apparel Units</h5>
+    <div>
+      <button class="btn btn-sm btn-secondary me-2" (click)="goBack()">Back</button>
+      <button class="btn btn-sm btn-outline-primary" (click)="loadUnits()" [disabled]="loading">Refresh</button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-3">Loading…</div>
+
+  <table *ngIf="!loading && units?.length" class="table table-sm">
+    <thead>
+      <tr>
+        <th>Unit ID</th>
+        <th>Apparel</th>
+        <th>Size</th>
+        <th>Status</th>
+        <th class="text-end">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let u of units">
+        <td>{{ u.apparelId }}</td>
+        <td>{{ u.receiveApparelId }}</td>
+        <td>{{ u.apprelSize }}</td>
+        <td>{{ u.status }}</td>
+        <td class="text-end">
+          <button class="btn btn-sm btn-outline-success me-1"
+                  (click)="updateStatus(u.id || u.apparelUnitId, 'active')"
+                  [disabled]="updatingId === (u.id || u.apparelUnitId)">Activate</button>
+          <button class="btn btn-sm btn-outline-danger"
+                  (click)="updateStatus(u.id || u.apparelUnitId, 'lost')"
+                  [disabled]="updatingId === (u.id || u.apparelUnitId)">Mark Lost</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && (!units || !units.length)" class="text-muted p-3">
+    No units found.
+  </div>
+</div>
+
+
+================================================================================
+File: src\app\room\units\apparel-unit-list.component.ts
+Size: 2.14 kB
+================================================================================
+
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { first } from 'rxjs/operators';
+import { RoomService, AlertService } from '@app/_services';
+
+@Component({
+    templateUrl: './apparel-unit-list.component.html'
+})
+export class ApparelUnitListComponent implements OnInit {
+    roomId!: number;
+    units: any[] = [];
+    loading = false;
+    updatingId: number | null = null;
+
+    constructor(
+        private route: ActivatedRoute,
+        private router: Router,
+        private roomService: RoomService,
+        private alertService: AlertService
+    ) {}
+
+    ngOnInit(): void {
+        // read room id from parent route (works for nested child route)
+        const parent = this.route.parent || this.route;
+        const idParam = parent.snapshot.paramMap.get('id') || this.route.snapshot.paramMap.get('id');
+        this.roomId = idParam ? +idParam : NaN;
+
+        if (!this.roomId) {
+            this.alertService.error('Invalid room id');
+            return;
+        }
+
+        this.loadUnits();
+    }
+
+    loadUnits() {
+        this.loading = true;
+        this.roomService.getApparelUnits(this.roomId).pipe(first()).subscribe({
+            next: (res: any[]) => {
+                this.units = res || [];
+                this.loading = false;
+            },
+            error: (err) => {
+                this.alertService.error(err);
+                this.loading = false;
+            }
+        });
+    }
+
+    updateStatus(unitId: number, newStatus: string) {
+        this.updatingId = unitId;
+        this.roomService.updateApparelStatus(this.roomId, unitId, newStatus).pipe(first()).subscribe({
+            next: () => {
+                this.updatingId = null;
+                this.loadUnits();
+            },
+            error: (err) => {
+                this.alertService.error(err);
+                this.updatingId = null;
+            }
+        });
+    }
+
+    goBack() {
+        // navigate back to the room view (without child route)
+        this.router.navigate(['/room', this.roomId]);
+    }
+}
+
+
+================================================================================
+File: src\app\room\units\gen-item-unit-list.component.html
+Size: 1.58 kB
+================================================================================
+
+<div class="card p-2">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h5 class="m-0">General Item Units</h5>
+    <div>
+      <button class="btn btn-sm btn-secondary me-2" (click)="goBack()">Back</button>
+      <button class="btn btn-sm btn-outline-primary" (click)="loadUnits()" [disabled]="loading">Refresh</button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-3">Loading…</div>
+
+  <table *ngIf="!loading && units?.length" class="table table-sm">
+    <thead>
+      <tr>
+        <th>Unit ID</th>
+        <th>Item</th>
+        <th>Qty</th>
+        <th>Status</th>
+        <th class="text-end">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let u of units">
+        <td>{{ u.id || u.genItemUnitId }}</td>
+        <td>{{ u.itemName || u.genItemName }}</td>
+        <td>{{ u.quantity }}</td>
+        <td>{{ u.status }}</td>
+        <td class="text-end">
+          <button class="btn btn-sm btn-outline-success me-1"
+                  (click)="updateStatus(u.id || u.genItemUnitId, 'active')"
+                  [disabled]="updatingId === (u.id || u.genItemUnitId)">Activate</button>
+          <button class="btn btn-sm btn-outline-danger"
+                  (click)="updateStatus(u.id || u.genItemUnitId, 'lost')"
+                  [disabled]="updatingId === (u.id || u.genItemUnitId)">Mark Lost</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && (!units || !units.length)" class="text-muted p-3">
+    No items found.
+  </div>
+</div>
+
+
+================================================================================
+File: src\app\room\units\gen-item-unit-list.component.ts
+Size: 2.01 kB
+================================================================================
+
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { first } from 'rxjs/operators';
+import { RoomService, AlertService } from '@app/_services';
+
+@Component({
+    templateUrl: './gen-item-unit-list.component.html'
+})
+export class GenItemUnitListComponent implements OnInit {
+    roomId!: number;
+    units: any[] = [];
+    loading = false;
+    updatingId: number | null = null;
+
+    constructor(
+        private route: ActivatedRoute,
+        private router: Router,
+        private roomService: RoomService,
+        private alertService: AlertService
+    ) {}
+
+    ngOnInit(): void {
+        const parent = this.route.parent || this.route;
+        const idParam = parent.snapshot.paramMap.get('id') || this.route.snapshot.paramMap.get('id');
+        this.roomId = idParam ? +idParam : NaN;
+
+        if (!this.roomId) {
+            this.alertService.error('Invalid room id');
+            return;
+        }
+
+        this.loadUnits();
+    }
+
+    loadUnits() {
+        this.loading = true;
+        this.roomService.getGenItemUnits(this.roomId).pipe(first()).subscribe({
+            next: (res: any[]) => {
+                this.units = res || [];
+                this.loading = false;
+            },
+            error: (err) => {
+                this.alertService.error(err);
+                this.loading = false;
+            }
+        });
+    }
+
+    updateStatus(unitId: number, newStatus: string) {
+        this.updatingId = unitId;
+        this.roomService.updateGenItemStatus(this.roomId, unitId, newStatus).pipe(first()).subscribe({
+            next: () => {
+                this.updatingId = null;
+                this.loadUnits();
+            },
+            error: (err) => {
+                this.alertService.error(err);
+                this.updatingId = null;
+            }
+        });
+    }
+
+    goBack() {
+        this.router.navigate(['/room', this.roomId]);
+    }
+}
+
+
+================================================================================
+File: src\app\room\units\unit-routing.module.ts
+Size: 694 B
+================================================================================
+
+import { NgModule } from '@angular/core';
+import { Routes, RouterModule } from '@angular/router';
+
+import { ApparelUnitListComponent } from './apparel-unit-list.component';
+import { AdminSupplyUnitListComponent } from './admin-supply-unit-list.component';
+import { GenItemUnitListComponent } from './gen-item-unit-list.component';
+
+const routes: Routes = [
+    { path: 'apparel', component: ApparelUnitListComponent },
+    { path: 'supply', component: AdminSupplyUnitListComponent },
+    { path: 'general', component: GenItemUnitListComponent },
+  ];
+
+@NgModule({
+    imports: [RouterModule.forChild(routes)],
+    exports: [RouterModule]
+})
+export class UnitRoutingModule { }
+
+
+================================================================================
+File: src\app\room\units\unit.module.ts
+Size: 866 B
+================================================================================
+
+import { NgModule } from '@angular/core';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+
+import { UnitRoutingModule } from './unit-routing.module';
+
+// unit list components
+import { ApparelUnitListComponent } from './apparel-unit-list.component';
+import { AdminSupplyUnitListComponent } from './admin-supply-unit-list.component';
+import { GenItemUnitListComponent } from './gen-item-unit-list.component';
+
+@NgModule({
+    imports: [
+        CommonModule,
+        UnitRoutingModule,
+        ReactiveFormsModule,
+        FormsModule,
+        RouterModule
+    ],
+    declarations: [
+        ApparelUnitListComponent,
+        AdminSupplyUnitListComponent,
+        GenItemUnitListComponent
+    ]
+})
+export class UnitModule { }
+
 
 ================================================================================
 File: src\app\scan\scan-routing.module.ts
@@ -3200,7 +3364,7 @@ export class ScanRoutingModule {}
 
 ================================================================================
 File: src\app\scan\scan.component.html
-Size: 2.66 kB
+Size: 2.86 kB
 ================================================================================
 
 <div class="scan-modal container-fluid p-0">
@@ -3241,6 +3405,10 @@ Size: 2.66 kB
       </div>
 
       <button type="button" class="btn btn-danger me-2" (click)="onReleaseClicked()">Release</button>
+      <button *ngIf="lastParsed?.unitId" type="button" class="btn btn-outline-warning me-2"
+        (click)="updateScannedStatus()" [disabled]="scanning">
+        Update status
+      </button>
       <button type="button" class="btn btn-outline-secondary" (click)="startScanner()" [disabled]="scanning">Scan again</button>
     </div>
   </div>
@@ -3344,7 +3512,7 @@ Size: 1.6 kB
 
 ================================================================================
 File: src\app\scan\scan.component.ts
-Size: 5.61 kB
+Size: 8.42 kB
 ================================================================================
 
 import { Component, OnDestroy, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
@@ -3509,6 +3677,41 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
     this.batchRoomIdInput = null;
     // optionally restart scanner
     this.startScanner();
+  }
+
+  updateScannedStatus() {
+    if (!this.lastParsed && !this.lastResult) {
+      this.alert.error('No scanned payload available.');
+      return;
+    }
+  
+    const payload = this.lastParsed || tryParseJson(this.lastResult) || { raw: this.lastResult };
+    const unitId = payload.unitId || payload.id || payload.apparelId;
+    if (!unitId) {
+      this.alert.error('Scanned QR is not a unit QR (no unitId found).');
+      return;
+    }
+  
+    const stockroomType = payload.itemType || 'apparel';
+    const suggested = payload.status || 'in_stock';
+    const newStatus = window.prompt('Enter new status for the unit (e.g. in_stock, damage, lost):', suggested);
+    if (!newStatus) return;
+  
+    console.log('[Scan] updating unit status', { stockroomType, unitId, newStatus });
+  
+    // call service
+    this.qrService.updateUnitStatus(stockroomType, unitId, { status: newStatus }).pipe(first()).subscribe({
+      next: (res) => {
+        console.log('[Scan] updateUnitStatus response', res);
+        this.alert.success(`Status updated to "${newStatus}"`);
+        this.resetAfterRelease(); // or refresh UI
+      },
+      error: (err) => {
+        console.error('[Scan] updateUnitStatus error', err);
+        const msg = err?.error?.message || err?.message || JSON.stringify(err);
+        this.alert.error(`Failed to update status: ${msg}`);
+      }
+    });
   }
 }
 
@@ -4577,7 +4780,7 @@ export * from './qr.service';
 
 ================================================================================
 File: src\app\_services\qr.service.ts
-Size: 1.23 kB
+Size: 1.53 kB
 ================================================================================
 
 import { Injectable }                 from '@angular/core';
@@ -4597,24 +4800,28 @@ export class QrService {
       responseType: 'blob'
     });
   }
-  getUnitQr(stockroomType: string, apparelId: number): Observable<HttpResponse<Blob>> {
-    return this.http.get(`${this.base}/${stockroomType}/unit/${apparelId}/qrcode`, {
-      observe: 'response',
-      responseType: 'blob'
-    });
-  }
   releaseUnit(stockroomType: string, apparelId: number, body: { actorId?: number } = {}): Observable<any> {
     return this.http.post<any>(`${this.base}/${stockroomType}/unit/${apparelId}/release`, body);
   }
   verifyQr(payload: any): Observable<any> {
     return this.http.post<any>(`${this.base}/scan`, payload);
   }
+  updateUnitStatus(stockroomType: string, unitId: number, body: { status: string }) {
+    // ensure responseType default so we get JSON back
+    return this.http.put<any>(`${this.base}/${stockroomType}/unit/${unitId}/status`, body, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+  getUnitQr(stockroomType: string, unitId: number) {
+    // backend route: GET /qr/:stockroomType/unit/:unitId/qrcode
+    return this.http.get(`${this.base}/${stockroomType}/unit/${unitId}/qrcode`, { responseType: 'blob' });
+  }
 }
 
 
 ================================================================================
 File: src\app\_services\room.service.ts
-Size: 5.67 kB
+Size: 5.98 kB
 ================================================================================
 
 import { Injectable }   from '@angular/core';
@@ -4656,7 +4863,7 @@ export class RoomService {
     return this.http.get<any>(`${this.baseUrl}/${roomId}/release-apparels`);
   }
   // Get unit items inside a room (Apparel units)
-  getRoomItems(roomId: number): Observable<any> {
+  getApparelUnits(roomId: number): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/${roomId}/apparels`);
   }
 
@@ -4668,11 +4875,6 @@ export class RoomService {
   // helper: get specific apparel inventory row
   getInventoryById(roomId: number, inventoryId: number): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/${roomId}/apparel-inventory/${inventoryId}`);
-  }
-
-  // Update an item's status (goods / damage) by QR or unitId
-  updateItemStatus(roomId: number, itemQrCodeOrId: string | number, newStatus: string): Observable<any> {
-    return this.http.put<any>(`${this.baseUrl}/${roomId}/item/status`, { id: itemQrCodeOrId, status: newStatus });
   }
 
   // ------------- ADMIN/SUPPLY endpoints (NEW) -------------
@@ -4744,6 +4946,18 @@ export class RoomService {
     // backend route is /rooms/:roomId/release/apparel
     return this.http.post<any>(`${this.baseUrl}/${roomId}/release`, body);
   }
+
+  updateApparelStatus(roomId: number, apparelId: number, newStatus: string) {
+    return this.http.put(`${this.baseUrl}/${roomId}/apparels/${apparelId}/status`, { status: newStatus });
+  }
+  
+  updateAdminSupplyStatus(roomId: number, supplyId: number, newStatus: string) {
+    return this.http.put(`${this.baseUrl}/${roomId}/admin-supplies/${supplyId}/status`, { status: newStatus });
+  }
+  
+  updateGenItemStatus(roomId: number, genItemId: number, newStatus: string) {
+    return this.http.put(`${this.baseUrl}/${roomId}/gen-items/${genItemId}/status`, { status: newStatus });
+  }
 }
 
 
@@ -4783,9 +4997,254 @@ export const environment = {
 
 
 ================================================================================
-File: src\favicon.ico
-Size: 948 B
+File: src\index.html
+Size: 849 B
 ================================================================================
 
-�PNG
-
+<!DOCTYPE html>
+<html>
+<head>
+    <base href="/" />
+    <title>Angular 18 Auth Boilerplate - Sign Up with Verification, Login and Forgot Password</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- bootstrap css -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <app-root></app-root>
+
+    <!-- credits -->
+    <div class="text-center mt-4">
+        <p>
+            <a href="https://jasonwatmore.com/angular-18-auth-boilerplate-sign-up-with-verification-login-and-forgot-password" target="_blank">Angular 9999  Auth Boilerplate - Sign Up with Verification, Login and Forgot Password</a>
+        </p>
+        <p>
+            <a href="https://github.com/JakeRojas/IMPF" target="_blank">IMP</a>
+        </p>
+    </div>
+</body>
+</html>
+
+================================================================================
+File: src\main.ts
+Size: 376 B
+================================================================================
+
+import { enableProdMode } from '@angular/core';
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+
+import { AppModule } from './app/app.module';
+import { environment } from './environments/environment';
+
+if (environment.production) {
+    enableProdMode();
+}
+
+platformBrowserDynamic().bootstrapModule(AppModule)
+    .catch(err => console.error(err));
+
+
+================================================================================
+File: src\polyfills.ts
+Size: 2.34 kB
+================================================================================
+
+/**
+ * This file includes polyfills needed by Angular and is loaded before the app.
+ * You can add your own extra polyfills to this file.
+ *
+ * This file is divided into 2 sections:
+ *   1. Browser polyfills. These are applied before loading ZoneJS and are sorted by browsers.
+ *   2. Application imports. Files imported after ZoneJS that should be loaded before your main
+ *      file.
+ *
+ * The current setup is for so-called "evergreen" browsers; the last versions of browsers that
+ * automatically update themselves. This includes recent versions of Safari, Chrome (including
+ * Opera), Edge on the desktop, and iOS and Chrome on mobile.
+ *
+ * Learn more in https://angular.io/guide/browser-support
+ */
+
+/***************************************************************************************************
+ * BROWSER POLYFILLS
+ */
+
+/**
+ * By default, zone.js will patch all possible macroTask and DomEvents
+ * user can disable parts of macroTask/DomEvents patch by setting following flags
+ * because those flags need to be set before `zone.js` being loaded, and webpack
+ * will put import in the top of bundle, so user need to create a separate file
+ * in this directory (for example: zone-flags.ts), and put the following flags
+ * into that file, and then add the following code before importing zone.js.
+ * import './zone-flags';
+ *
+ * The flags allowed in zone-flags.ts are listed here.
+ *
+ * The following flags will work for all browsers.
+ *
+ * (window as any).__Zone_disable_requestAnimationFrame = true; // disable patch requestAnimationFrame
+ * (window as any).__Zone_disable_on_property = true; // disable patch onProperty such as onclick
+ * (window as any).__zone_symbol__UNPATCHED_EVENTS = ['scroll', 'mousemove']; // disable patch specified eventNames
+ *
+ *  in IE/Edge developer tools, the addEventListener will also be wrapped by zone.js
+ *  with the following flag, it will bypass `zone.js` patch for IE/Edge
+ *
+ *  (window as any).__Zone_enable_cross_context_check = true;
+ *
+ */
+
+/***************************************************************************************************
+ * Zone JS is required by default for Angular itself.
+ */
+import 'zone.js';  // Included with Angular CLI.
+
+
+/***************************************************************************************************
+ * APPLICATION IMPORTS
+ */
+
+
+================================================================================
+File: src\styles.less
+Size: 341 B
+================================================================================
+
+/* You can add global styles to this file, and also import other style files */
+.app-container {
+    min-height: 320px;
+}
+
+.admin-nav {
+    padding-top: 0;
+    padding-bottom: 0;
+    background-color: #e8e9ea;
+    border-bottom: 1px solid #ccc;
+}
+
+.btn-delete-account {
+    width: 40px;
+    text-align: center;
+    box-sizing: content-box;
+}
+
+================================================================================
+File: src\test.ts
+Size: 749 B
+================================================================================
+
+// This file is required by karma.conf.js and loads recursively all the .spec and framework files
+
+import 'zone.js/testing';
+import { getTestBed } from '@angular/core/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting
+} from '@angular/platform-browser-dynamic/testing';
+
+declare const require: {
+  context(path: string, deep?: boolean, filter?: RegExp): {
+    <T>(id: string): T;
+    keys(): string[];
+  };
+};
+
+// First, initialize the Angular testing environment.
+getTestBed().initTestEnvironment(
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting(),
+);
+
+// Then we find all the tests.
+const context = require.context('./', true, /\.spec\.ts$/);
+// And load the modules.
+context.keys().forEach(context);
+
+
+================================================================================
+File: tsconfig.app.json
+Size: 320 B
+================================================================================
+
+/* To learn more about this file see: https://angular.io/config/tsconfig. */
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "outDir": "./out-tsc/app",
+        "types": []
+    },
+    "files": [
+        "src/main.ts",
+        "src/polyfills.ts"
+    ],
+    "include": [
+        "src/**/*.d.ts"
+    ]
+}
+
+================================================================================
+File: tsconfig.json
+Size: 1.14 kB
+================================================================================
+
+/* To learn more about this file see: https://angular.io/config/tsconfig. */
+{
+    "compileOnSave": false,
+    "compilerOptions": {
+        "baseUrl": "./",
+        "outDir": "./dist/out-tsc",
+        "allowSyntheticDefaultImports": true,
+        "forceConsistentCasingInFileNames": true,
+        "strict": true,
+        "noImplicitOverride": true,
+        "noPropertyAccessFromIndexSignature": false,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "sourceMap": true,
+        "declaration": false,
+        "downlevelIteration": true,
+        "experimentalDecorators": true,
+        "moduleResolution": "node",
+        "importHelpers": true,
+        "target": "es2020",
+        "module": "es2020",
+        "lib": [
+            "es2020",
+            "dom"
+        ],
+        "paths": {
+            "@app/*": ["src/app/*"],
+            "@environments/*": ["src/environments/*"]
+        }
+    },
+    "angularCompilerOptions": {
+        "enableI18nLegacyMessageIdFormat": false,
+        "strictInjectionParameters": true,
+        "strictInputAccessModifiers": true,
+        "strictTemplates": true
+    }
+}
+
+================================================================================
+File: tsconfig.spec.json
+Size: 380 B
+================================================================================
+
+/* To learn more about this file see: https://angular.io/config/tsconfig. */
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "outDir": "./out-tsc/spec",
+        "types": [
+            "jasmine"
+        ]
+    },
+    "files": [
+        "src/test.ts",
+        "src/polyfills.ts"
+    ],
+    "include": [
+        "src/**/*.spec.ts",
+        "src/**/*.d.ts"
+    ]
+}

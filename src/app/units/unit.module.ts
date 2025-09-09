@@ -3,23 +3,21 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
-import { RoomRoutingModule } from './room-routing.module';
+import { UnitRoutingModule } from './unit-routing.module';
+import { UnitListComponent } from './unit-list.component';
 import { LayoutComponent } from './layout.component';
-import { RoomListComponent } from './room-list.component';
-import { RoomViewComponent } from './room-view.component';
 
 @NgModule({
     imports: [
         CommonModule,
-        RoomRoutingModule,
+        UnitRoutingModule,
         ReactiveFormsModule,
         FormsModule,
         RouterModule
     ],
     declarations: [
         LayoutComponent,
-        RoomListComponent,
-        RoomViewComponent
+        UnitListComponent
     ]
 })
 export class RoomModule { }

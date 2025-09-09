@@ -1,4 +1,4 @@
-<div class="card p-3">
+<!-- <div>
   <h3>Rooms</h3>
   <table class="table table-striped">
     <thead>
@@ -17,4 +17,30 @@
       </tr>
     </tbody>
   </table>
+</div> -->
+
+<div>
+  <h3>Rooms</h3>
+
+  <div class="row">
+    <div class="col-md-3 mb-3" *ngFor="let r of rooms">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">{{ r.roomName }}</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Floor: {{ r.roomFloor }}</h6>
+          
+          <p class="card-text">
+            <strong>Type:</strong> {{ r.roomType }}
+            <span *ngIf="r.stockroomType"> / {{ r.stockroomType }}</span>
+            <br>
+            <strong>In Charge:</strong> {{ r.roomInChargeName || r.roomInCharge }}
+          </p>
+        </div>
+        <div class="card-footer d-flex justify-content-between">
+          <button class="btn btn-sm btn-primary" [routerLink]="['/room', r.roomId]">View</button>
+          <button class="btn btn-sm btn-secondary" (click)="updateRoom(r)">Edit</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
