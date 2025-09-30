@@ -20,7 +20,7 @@ export class AddEditComponent implements OnInit {
         private formBuilder: FormBuilder,
         private route: ActivatedRoute,
         private router: Router,
-        private accountService: AccountService,
+        public accountService: AccountService,
         private alertService: AlertService
     ) { }
 
@@ -33,6 +33,7 @@ export class AddEditComponent implements OnInit {
             lastName:           ['', Validators.required],
             email:              ['', [Validators.required, Validators.email]],
             role:               ['', Validators.required],
+            status:             ['', Validators.required],
             // password only required in add mode
             password:           ['', [Validators.minLength(6), ...(!this.AccountId ? [Validators.required] : [])]],
             confirmPassword:    ['']

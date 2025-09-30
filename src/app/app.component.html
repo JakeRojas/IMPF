@@ -7,6 +7,19 @@
             <a *ngIf="account.role === Role.SuperAdmin" routerLink="/room" routerLinkActive="active" class="nav-item nav-link">Room</a>
             <a *ngIf="account.role === Role.SuperAdmin" routerLink="/scan" routerLinkActive="active" class="nav-item nav-link">Scan</a>
             <a *ngIf="account.role === Role.SuperAdmin" routerLink="/admin" routerLinkActive="active" class="nav-item nav-link">Admin</a>
+
+            <a *ngIf="account.role === Role.SuperAdmin || account.role === Role.Admin"
+             routerLink="/req-stock"
+             routerLinkActive="active"
+             class="nav-item nav-link">Stock Requests</a>
+
+             <a *ngIf="account.role === Role.SuperAdmin || account.role === Role.Admin || account.role === 'teacher'"
+             routerLink="/req-item" routerLinkActive="active" class="nav-item nav-link">Item Request</a>
+
+             <a class="nav-link" routerLink="/transfers" routerLinkActive="active">
+                <i class="fa fa-exchange"></i> Transfers
+              </a>
+
             <button (click)="logout()" class="btn btn-link nav-item nav-link">Logout</button>
         </div>
     </nav>

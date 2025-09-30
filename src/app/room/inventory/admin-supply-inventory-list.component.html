@@ -1,0 +1,32 @@
+<div class="container py-2">
+  <h4>Admin Supply Inventory (Room #{{ roomId }})</h4>
+
+  <div *ngIf="loading">Loading...</div>
+
+  <table *ngIf="!loading && inventory?.length" class="table table-sm">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Measure</th>
+        <th>Unit</th>
+        <th>Qty</th>
+        <th>Status</th>
+        <th>Updated</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let i of inventory">
+        <td>{{ i.supplyName || i.name }}</td>
+        <td>{{ i.supplyType || i.type || '-' }}</td>
+        <td>{{ measureOf(i) || '-' }}</td>
+        <td>{{ qtyOf(i) }}</td>
+        <td>{{ i.status || '-' }}</td>
+        <td>{{ i.updatedAt ? (i.updatedAt | date:'short') : (i.createdAt | date:'short') }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && (!inventory || inventory.length === 0)">
+    No admin supply inventory found.
+  </div>
+</div>

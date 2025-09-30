@@ -7,6 +7,7 @@
             <th style="width:30%">Name</th>
             <th style="width:30%">Email</th>
             <th style="width:30%">Role</th>
+            <th style="width:30%">Status</th>
             <th style="width:10%"></th>
         </tr>
     </thead>
@@ -15,12 +16,14 @@
             <td class="align-middle">{{account.title}} {{account.firstName}} {{account.lastName}}</td>
             <td class="align-middle">{{account.email}}</td>
             <td class="align-middle">{{account.role}}</td>
+            <td class="align-middle">{{account.status}}</td>
             <td style="white-space: nowrap">
-                <a routerLink="edit/{{account.AccountId}}" class="btn btn-sm btn-primary me-1">Edit</a>
-                <button (click)="deleteAccount(account.AccountId)" class="btn btn-sm btn-danger btn-delete-account" [disabled]="account.isDeleting">
+                <a [routerLink]="['/admin','accounts','edit', account.AccountId]" class="btn btn-sm btn-primary me-1">Edit</a>
+                <!-- <a routerLink="edit/{{account.id}}" class="btn btn-sm btn-primary me-1">Edit</a> -->
+                <!-- <button (click)="deleteAccount(account.AccountId)" class="btn btn-sm btn-danger btn-delete-account" [disabled]="account.isDeleting">
                     <span *ngIf="account.isDeleting" class="spinner-border spinner-border-sm"></span>
                     <span *ngIf="!account.isDeleting">Delete</span>
-                </button>
+                </button> -->
             </td>
         </tr>
         <tr *ngIf="!accounts">

@@ -1,0 +1,25 @@
+<!-- src/app/room/inventory/apparel-inventory-list.component.html -->
+<div class="container py-2">
+  <h4>Apparel Inventory (Room #{{ roomId }})</h4>
+  <div *ngIf="loading">Loading...</div>
+  <table *ngIf="!loading && inventory?.length" class="table table-sm">
+    <thead>
+      <tr>
+        <th>Name</th><th>Level</th><th>Type</th><th>For</th><th>Size</th><th>Qty</th><th>Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let i of inventory">
+        <td>{{ i.apparelName || i.name }}</td>
+        <td>{{ i.apparelLevel || '-' }}</td>
+        <td>{{ i.apparelType || '-' }}</td>
+        <td>{{ i.apparelFor || '-' }}</td>
+        <td>{{ i.apparelSize || '-' }}</td>
+        <td>{{ i.totalQuantity || i.quantity || '-' }}</td>
+        <td>{{ i.createdAt }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && (!inventory || inventory.length === 0)">No inventory found.</div>
+</div>

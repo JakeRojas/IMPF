@@ -1,5 +1,5 @@
-<h1>{{title}}</h1>
-<form *ngIf="!loading" [formGroup]="form" (ngSubmit)="onSubmit()">
+<!-- <h1>{{title}}</h1> -->
+<!-- <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="row">
         <div class="mb-3 col-2">
             <label class="form-label">Title</label>
@@ -54,7 +54,7 @@
         <h3 class="pt-3">Change Password</h3>
         <p>Leave blank to keep the same password</p>
     </div> -->
-    <div class="row">
+    <!-- <div class="row">
         <div class="mb-3 col">
             <label class="form-label">Password</label>
             <input type="password" formControlName="password" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.password.errors }" />
@@ -79,7 +79,84 @@
         </button>
         <a routerLink="/admin/accounts" class="btn btn-link">Cancel</a>
     </div>
-</form>
-<div *ngIf="loading" class="text-center m-5">
+</form>  -->
+<!-- <div *ngIf="loading" class="text-center m-5">
     <span class="spinner-border spinner-border-lg align-center"></span>
+</div> -->
+
+<!-- room.add-edit.component.html (full form skeleton) -->
+<h1>{{ title }}</h1>
+
+<!-- IMPORTANT: (ngSubmit) on the form + [formGroup] binding -->
+<form *ngIf="!loading" [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div class="row">
+    <div class="mb-3 col-6">
+      <label class="form-label">Room Name</label>
+      <input class="form-control" formControlName="roomName" placeholder="e.g. Stockroom A" />
+      <div *ngIf="submitted && f.roomName.errors" class="invalid-feedback d-block">
+        <div *ngIf="f.roomName.errors.required">Room name is required</div>
+      </div>
+    </div>
+
+    <div class="mb-3 col-6">
+      <label class="form-label">Floor</label>
+      <input class="form-control" formControlName="roomFloor" placeholder="e.g. 2nd Floor" />
+      <div *ngIf="submitted && f.roomFloor.errors" class="invalid-feedback d-block">
+        <div *ngIf="f.roomFloor.errors.required">Floor is required</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="mb-3 col-4">
+      <label class="form-label">Room Type</label>
+      <select class="form-select" formControlName="roomType">
+        <option value="classroom">Classroom</option>
+        <option value="office">Office</option>
+        <option value="stockroom">Stockroom</option>
+        <option value="subStockroom">Sub Stockroom</option>
+      </select>
+    </div>
+
+    <div class="mb-3 col-4" *ngIf="showStockroomType">
+      <label class="form-label">Stockroom Type</label>
+      <select class="form-select" formControlName="stockroomType">
+        <option [ngValue]="null">-- Select stockroom type --</option>
+        <option value="apparel">Apparel</option>
+        <option value="supply">Supply</option>
+        <option value="it">IT</option>
+        <option value="maintenance">Maintenance</option>
+      </select>
+      <div *ngIf="submitted && f.stockroomType.errors" class="invalid-feedback d-block">
+        <div *ngIf="f.stockroomType.errors.required">Stockroom type is required when room is a stockroom</div>
+      </div>
+    </div>
+
+    <div class="mb-3 col-4">
+      <label class="form-label">Room In Charge</label>
+      <select class="form-select" formControlName="roomInCharge">
+        <option [ngValue]="null">-- Select --</option>
+        <option *ngFor="let a of inChargeOptions" [ngValue]="a.accountId || a.AccountId || a.id">
+          {{ a.firstName ? (a.firstName + ' ' + (a.lastName||'')) : (a.name || a.username) }}
+        </option>
+      </select>
+      <div *ngIf="submitted && f.roomInCharge.errors" class="invalid-feedback d-block">
+        <div *ngIf="f.roomInCharge.errors.required">Room in charge is required</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <!-- type="submit" is required for ngSubmit to trigger.
+         We also add a (click) call as a fallback for debugging -->
+    <button type="submit" (click)="onSubmit()" [disabled]="submitting" class="btn btn-primary">
+      <span *ngIf="submitting" class="spinner-border spinner-border-sm me-1"></span>
+      Save
+    </button>
+    <a routerLink="/room" class="btn btn-link">Cancel</a>
+  </div>
+</form>
+
+<div *ngIf="loading" class="text-center m-5">
+  <span class="spinner-border spinner-border-lg align-center"></span>
 </div>

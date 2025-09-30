@@ -1,0 +1,86 @@
+<!-- src/app/room/release/apparel-release.component.html -->
+<div class="container py-2">
+  <h4>Release Admin Supply (Room #{{ roomId }})</h4>
+
+  <form [formGroup]="releaseForm" (ngSubmit)="submit()">
+    <div class="mb-2">
+      <label class="form-label">Item</label>
+      <select class="form-select" formControlName="adminSupplyInventoryId">
+        <option value="" disabled>Select item to release</option>
+        <option *ngFor="let it of inventory" [value]="(it.adminSupplyInventoryId)">
+          {{ it.supplyName }} 
+          <span *ngIf="it.supplyMeasure"> ({{ it.supplyMeasure }})</span>
+          - Qty: {{ it.totalQuantity ??  0 }}
+        </option>
+      </select>
+      <div *ngIf="releaseForm.get('adminSupplyInventoryId')?.touched && releaseForm.get('adminSupplyInventoryId')?.invalid" class="text-danger small">
+        Please choose an item.
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-3 mb-2">
+        <label class="form-label">Quantity</label>
+        <input type="number" class="form-control" formControlName="releaseQuantity" min="1" />
+        <div *ngIf="releaseForm.get('releaseQuantity')?.touched && releaseForm.get('releaseQuantity')?.invalid" class="text-danger small">
+          Enter a valid quantity (min 1).
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-2">
+        <label class="form-label">Claimed By</label>
+        <input class="form-control" formControlName="claimedBy" placeholder="Name of claimant" />
+        <div *ngIf="releaseForm.get('claimedBy')?.touched && releaseForm.get('claimedBy')?.invalid" class="text-danger small">
+          Claimed by is required.
+        </div>
+      </div>
+
+      <div class="col-md-5 mb-2">
+        <label class="form-label">Released By</label>
+        <input class="form-control" formControlName="releasedBy" placeholder="Your name or account id" />
+        <div *ngIf="releaseForm.get('releasedBy')?.touched && releaseForm.get('releasedBy')?.invalid" class="text-danger small">
+          Released by is required.
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-2">
+      <label class="form-label">Remarks</label>
+      <input class="form-control" formControlName="remarks" placeholder="Optional remarks" />
+    </div>
+
+    <div class="mb-3">
+      <button type="submit" class="btn btn-danger" [disabled]="submitting || releaseForm.invalid">
+        <span *ngIf="!submitting">Release</span>
+        <span *ngIf="submitting">Releasing...</span>
+      </button>
+
+      <button type="button" class="btn btn-secondary ms-2" (click)="router.navigate(['../', '..', 'inventory', 'supply'])" [disabled]="submitting">
+        Cancel
+      </button>
+    </div>
+  </form>
+
+  <!-- Quick inventory view (kept per your request) -->
+  <div *ngIf="inventory?.length" class="mt-4">
+    <h6>Inventory (quick view)</h6>
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Measure</th>
+          <th>Qty</th>
+          <th>Added</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let it of inventory">
+          <td>{{ it.supplyName  }}</td>
+          <td>{{ it.supplyMeasure || '-' }}</td>
+          <td>{{ it.totalQuantity ??  0 }}</td>
+          <td>{{ it.createdAt ? (it.createdAt | date:'short') : '-' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

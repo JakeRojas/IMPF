@@ -1,0 +1,53 @@
+<!-- src/app/room/receive/apparel-receive.component.html -->
+<div class="container py-2">
+  <h4>Receive Admin Supply (Room #{{ roomId }})</h4>
+
+  <form [formGroup]="receiveForm" (ngSubmit)="submit()">
+    <div class="mb-2">
+      <label class="form-label">Name</label>
+      <input class="form-control" formControlName="supplyName" />
+      <div *ngIf="receiveForm.get('supplyName')?.touched && receiveForm.get('supplyName')?.invalid" class="text-danger small">Name is required</div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-3">
+        <label class="form-label">Quantity</label>
+        <input type="number" class="form-control" formControlName="supplyQuantity" />
+      </div>
+
+      <div class="col-md-3 mb-2">
+        <label class="form-label">Measure</label>
+        <select class="form-select" formControlName="apparelType">
+          <option *ngFor="let o of supplyMeasures" [value]="o.value">{{ o.label }}</option>
+        </select>
+      </div>
+    </div>
+    <div class="mb-2 row">
+      <div class="col-md-4">
+        <label class="form-label">Received From</label>
+        <input class="form-control" formControlName="receivedFrom" />
+      </div>
+
+      <!-- <div class="col-md-4">
+        <label class="form-label">Received By (accountId)</label>
+        <input type="number" class="form-control" formControlName="receivedBy" />
+      </div> -->
+      <div class="mb-2">
+        <label class="form-label">Received By</label>
+        <!-- <input type="number" formControlName="receivedBy" class="form-control" readonly /> -->
+        <ng-container *ngIf="currentUserName">
+          <input class="form-control" [value]="currentUserName" readonly />
+          <!-- Hidden field: still binds numeric id into the form -->
+          <input type="hidden" formControlName="receivedBy" />
+        </ng-container>
+      </div>
+    </div>
+
+    <div class="mb-2">
+      <label class="form-label">Notes</label>
+      <textarea class="form-control" formControlName="notes"></textarea>
+    </div>
+
+    <button class="btn btn-primary" type="submit" [disabled]="submitting">Receive</button>
+  </form>
+</div>

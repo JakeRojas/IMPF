@@ -1,26 +1,6 @@
-<!-- <div>
-  <h3>Rooms</h3>
-  <table class="table table-striped">
-    <thead>
-      <tr><th>Name</th><th>Floor</th><th>Type</th><th>In Charge</th><th>Actions</th></tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let r of rooms">
-        <td>{{r.roomName}}</td>
-        <td>{{r.roomFloor}}</td>
-        <td>{{r.roomType}} <span *ngIf="r.stockroomType">/ {{r.stockroomType}}</span></td>
-        <td>{{ r.roomInChargeName || r.roomInCharge }}</td>
-        <td>
-          <button class="btn btn-sm btn-primary" [routerLink]="['/room', r.roomId]">View</button>
-          <button class="btn btn-sm btn-secondary" (click)="updateRoom(r)">Edit</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div> -->
-
 <div>
   <h3>Rooms</h3>
+  <a class="btn btn-sm btn-success" routerLink="add">Create Room</a>
 
   <div class="row">
     <div class="col-md-3 mb-3" *ngFor="let r of rooms">
@@ -33,12 +13,12 @@
             <strong>Type:</strong> {{ r.roomType }}
             <span *ngIf="r.stockroomType"> / {{ r.stockroomType }}</span>
             <br>
-            <strong>In Charge:</strong> {{ r.roomInChargeName || r.roomInCharge }}
+            <strong>In Charge:</strong> {{ r.Account.firstName }} {{ r.Account.lastName }}
           </p>
         </div>
-        <div class="card-footer d-flex justify-content-between">
-          <button class="btn btn-sm btn-primary" [routerLink]="['/room', r.roomId]">View</button>
-          <button class="btn btn-sm btn-secondary" (click)="updateRoom(r)">Edit</button>
+        <div class="card-footer d-flex justify-content-end">
+          <button class="btn btn-primary btn-sm" [routerLink]="['/room', r.roomId]">View</button>
+          <button class="btn btn-secondary btn-sm" (click)="updateRoom(r)">Edit</button>
         </div>
       </div>
     </div>
