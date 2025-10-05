@@ -19,7 +19,7 @@ export interface ItemRequestedEntry {
     itemRequestId?: number;
     id?: number;
     acccountId?: number;
-    requesterRoomId?: number | string | null;
+    requesterRoomId?: number | null;
     items?: ItemRequestedEntry[];          // list of requested entries
     status?: string;                       // 'pending'|'accepted'|'declined'|'fulfilled'
     note?: string | null;

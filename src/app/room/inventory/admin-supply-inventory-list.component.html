@@ -8,7 +8,6 @@
       <tr>
         <th>Name</th>
         <th>Measure</th>
-        <th>Unit</th>
         <th>Qty</th>
         <th>Status</th>
         <th>Updated</th>
@@ -16,10 +15,9 @@
     </thead>
     <tbody>
       <tr *ngFor="let i of inventory">
-        <td>{{ i.supplyName || i.name }}</td>
-        <td>{{ i.supplyType || i.type || '-' }}</td>
-        <td>{{ measureOf(i) || '-' }}</td>
-        <td>{{ qtyOf(i) }}</td>
+        <td>{{ i.supplyName }}</td>
+        <td>{{ i.supplyMeasure || '-' }}</td>
+        <td>{{ i.totalQuantity || '-' }}</td>
         <td>{{ i.status || '-' }}</td>
         <td>{{ i.updatedAt ? (i.updatedAt | date:'short') : (i.createdAt | date:'short') }}</td>
       </tr>

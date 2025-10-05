@@ -26,8 +26,8 @@ const routes: Routes = [
     { path: 'room', loadChildren: roomModule, canActivate: [AuthGuard], data: { roles: [Role.SuperAdmin] } },
     { path: 'scan', loadChildren: scanModule, canActivate: [AuthGuard], data: { roles: [Role.SuperAdmin] } },
 
-    { path: 'req-stock', loadChildren: stockRequestModule, canActivate: [AuthGuard], data: { roles: [Role.SuperAdmin, Role.Admin] } },
-    { path: 'req-item', loadChildren: itemRequestModule, canActivate: [AuthGuard], data: { roles: [Role.SuperAdmin, Role.Admin, Role.Teacher] } },
+    { path: 'req-stock', loadChildren: stockRequestModule, canActivate: [AuthGuard], data: { roles: [Role.SuperAdmin, Role.Admin, Role.StockroomAdmin] } },
+    { path: 'req-item', loadChildren: itemRequestModule, canActivate: [AuthGuard], data: { roles: [Role.SuperAdmin, Role.StockroomAdmin, Role.Teacher] } },
 
     { path: 'transfers', loadChildren: transferModule, canActivate: [AuthGuard], data: { roles: [Role.SuperAdmin, Role.Admin, Role.StockroomAdmin, Role.Teacher] } },
 

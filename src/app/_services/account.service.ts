@@ -143,6 +143,15 @@ export class AccountService {
     private stopRefreshTokenTimer() {
         clearTimeout(this.refreshTokenTimeout);
     }
+
+    hasAnyAccount() {
+        return this.http.get<{ exists: boolean }>(`${baseUrl}/exists`);
+      }
+      hasAnyAccountFlag() {
+        return this.hasAnyAccount().pipe(
+          map(resp => !!(resp && resp.exists))
+        );
+      }
 }
 
 // // src/app/_services/account.service.ts

@@ -1,10 +1,14 @@
-// src/app/item-request/item-request-list.component.ts
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { first } from 'rxjs/operators';
-import { ItemRequestService } from '@app/_services/item-request.service';
-import { AlertService, AccountService } from '@app/_services';
+
+import { 
+  AlertService, 
+  AccountService, 
+  ItemRequestService 
+} from '@app/_services';
 import { ItemRequest } from '@app/_models/item-request.model';
+// ==============================================================
 
 @Component({
   templateUrl: './item-request-list.component.html'
@@ -23,7 +27,9 @@ export class ItemRequestListComponent implements OnInit {
     this.account = this.accountService.accountValue;
   }
 
-  ngOnInit() { this.load(); }
+  ngOnInit() { 
+    this.load(); 
+  }
 
   private _errToString(err: any) {
     if (!err && err !== 0) return 'Unknown error';
@@ -64,6 +70,20 @@ export class ItemRequestListComponent implements OnInit {
     this.ir.decline(id, reason).pipe(first()).subscribe({ next: () => { this.alert.success('Declined'); this.load(); }, error: e => this.alert.error(this._errToString(e)) });
   }
 
+  release(r: ItemRequest) {
+    const id = Number(r?.itemRequestId ?? r?.id);
+    if (!Number.isFinite(id)) return this.alert.error('Invalid id');
+    if (!confirm('Release this accepted item request?')) return;
+
+    this.ir.release(id).pipe(first()).subscribe({
+      next: () => {
+        this.alert.success('Released');
+        this.load();   // keep using your existing loader method to refresh the list
+      },
+      error: e => this.alert.error(this._errToString(e))
+    });
+  }
+
   // Teacher/room-in-charge action: fulfill when accepted
   fulfill(r: ItemRequest) {
     const id = Number(r?.itemRequestId ?? r?.id);
@@ -73,6 +93,7 @@ export class ItemRequestListComponent implements OnInit {
   }
 
   // role helpers
-  isStockroomAdmin() { return this.account?.role === 'stockroom' || this.account?.role === 'admin' || this.account?.role === 'superAdmin'; }
+  isStockroomAdmin() { return this.account?.role === 'stockroomAdmin' || this.account?.role === 'admin' || this.account?.role === 'superAdmin'; }
   isTeacher() { return this.account?.role === 'teacher' || this.account?.role === 'roomInCharge' || this.account?.role === 'user'; }
+  isSuperAdmin() { return this.account?.role === 'superAdmin'; }
 }

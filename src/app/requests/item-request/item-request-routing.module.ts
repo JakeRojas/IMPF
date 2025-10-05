@@ -1,9 +1,9 @@
-// src/app/item-request/item-request-routing.module.ts
-import { NgModule } from '@angular/core';
+import { NgModule             } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { ItemRequestListComponent } from './item-request-list.component';
+
+import { ItemRequestListComponent   } from './item-request-list.component';
 import { ItemRequestCreateComponent } from './item-request-create.component';
-import { ItemRequestViewComponent } from './item-request-view.component';
+import { ItemRequestViewComponent   } from './item-request-view.component';
 
 const routes: Routes = [
   { path: '', component: ItemRequestListComponent },

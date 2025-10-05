@@ -1,0 +1,58 @@
+<div class="container py-2">
+    <h4>Released Apparel Batches (Room #{{ roomId }})</h4>
+  
+    <div *ngIf="loading">Loading...</div>
+  
+    <table *ngIf="!loading && batches?.length" class="table table-sm">
+      <thead>
+        <tr>
+          <th>Batch ID</th>
+          <th>Item</th>
+          <th>Qty</th>
+          <th>Claimed By</th>
+          <th>Released By</th>
+          <th>Date</th>
+          <th>Remarks</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let b of batches">
+          <td>{{ b.releaseAdminSupplyId }}</td>
+          <td>{{ b.adminSupplyInventoryId }}</td>
+          <td>{{ b.releaseAdminSupplyQuantity }}</td>
+          <td>{{ b.claimedBy }}</td>
+          <td>{{ b.releasedBy }}</td>
+          <td>{{ b.createdAt ? (b.createdAt | date:'short') : (b.releasedAt ? (b.releasedAt | date:'short') : '-') }}</td>
+          <td>{{ b.remarks ?? '-' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  
+    <div *ngIf="!loading && (!batches || batches.length === 0)">
+      No released apparel batches found.
+    </div>
+  </div>
+  <!-- Quick inventory view (kept per your request) -->
+  <div *ngIf="inventory?.length" class="mt-4">
+    <h6>Inventory (quick view)</h6>
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th>Inv. ID</th>
+          <th>Name</th>
+          <th>Measure</th>
+          <th>Qty</th>
+          <th>Added</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let it of inventory">
+          <td>{{ it.adminSupplyInventoryId }}</td>
+          <td>{{ it.supplyName }}</td>
+          <td>{{ it.supplyMeasure }}</td>
+          <td>{{ it.totalQuantity ?? it.quantity ?? 0 }}</td>
+          <td>{{ it.createdAt ? (it.createdAt | date:'short') : '-' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>

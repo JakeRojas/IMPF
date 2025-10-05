@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute }     from '@angular/router';
 import { first }              from 'rxjs/operators';
-import { RoomService, AlertService } from '@app/_services';
+import { RoomService, AlertService, QrService  } from '@app/_services';
 
 @Component({
   templateUrl: './apparel-inventory-list.component.html'
@@ -14,7 +14,8 @@ export class ApparelInventoryListComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private roomService: RoomService,
-    private alert: AlertService
+    private alert: AlertService,
+    private qrService: QrService
   ) {}
 
   ngOnInit(): void {
@@ -38,6 +39,31 @@ export class ApparelInventoryListComponent implements OnInit {
     this.roomService.getApparelInventory(this.roomId).pipe(first()).subscribe({
       next: (res: any[]) => { this.inventory = res || []; this.loading = false; },
       error: (e) => { this.loading = false; this.alert.error(e); }
+    });
+  }
+
+  generateAllQr() {
+    if (!Number.isFinite(this.roomId)) { this.alert.error('Invalid room'); return; }
+    // stockroomType for this list is 'supply' (example). Adjust for other inventory views.
+    const stockroomType = 'apparel'; // change to 'apparel' or 'genitem' where appropriate
+  
+    this.qrService.downloadAllPdf(stockroomType, this.roomId).pipe(first()).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `qrcodes-${stockroomType}-room-${this.roomId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        this.alert.success('PDF downloaded');
+      },
+      error: (err) => {
+        console.error('generateAllQr error', err);
+        const msg = err?.error?.message || err?.message || 'Failed to generate PDF';
+        this.alert.error(msg);
+      }
     });
   }
 }

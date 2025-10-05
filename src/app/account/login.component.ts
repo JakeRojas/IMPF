@@ -10,6 +10,7 @@ export class LoginComponent implements OnInit {
     form!: FormGroup;
     submitting = false;
     submitted = false;
+    showRegister = false;
 
     constructor(
         private formBuilder: FormBuilder,
@@ -24,6 +25,18 @@ export class LoginComponent implements OnInit {
             email: ['', [Validators.required, Validators.email]],
             password: ['', Validators.required]
         });
+        this.accountService.hasAnyAccount()
+      .pipe(first())
+      .subscribe({
+        next: res => {
+          this.showRegister = !(res && res.exists);
+        },
+        error: err => {
+          // If the check fails, be conservative: show Register so user can create an account
+          console.warn('hasAnyAccount failed (showing register):', err);
+          this.showRegister = true;
+        }
+      });
     }
 
     // convenience getter for easy access to form fields

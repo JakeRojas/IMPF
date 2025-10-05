@@ -2,7 +2,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h3>Item Requests</h3>
       <div>
-        <button class="btn btn-sm btn-success" (click)="create()" *ngIf="isTeacher()">New Request</button>
+        <button class="btn btn-sm btn-success" (click)="create()" *ngIf="isTeacher() || isSuperAdmin()">New Request</button>
       </div>
     </div>
   
@@ -23,8 +23,9 @@
   
             <button *ngIf="isStockroomAdmin() && r.status === 'pending'" class="btn btn-sm btn-success ms-1" (click)="accept(r)">Accept</button>
             <button *ngIf="isStockroomAdmin() && r.status === 'pending'" class="btn btn-sm btn-warning ms-1" (click)="decline(r)">Decline</button>
+            <button *ngIf="isStockroomAdmin() && r.status === 'accepted'" class="btn btn-sm btn-secondary ms-1" (click)="release(r)">Release</button>
   
-            <button *ngIf="isTeacher() && r.status === 'accepted'" class="btn btn-sm btn-danger ms-1" (click)="fulfill(r)">Fulfill</button>
+            <button *ngIf="isTeacher() && r.status === 'released'" class="btn btn-sm btn-danger ms-1" (click)="fulfill(r)">Fulfill</button>
           </td>
         </tr>
       </tbody>

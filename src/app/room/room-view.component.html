@@ -9,17 +9,23 @@
   </p>
 
   <div *ngIf="room?.roomType === 'stockroom' || room?.roomType === 'subStockroom'" class="mb-3">
-    <!-- <button type="button" class="btn btn-primary me-2" (click)="goTo('receive')">Receive</button>
-    <button type="button" class="btn btn-danger me-2" (click)="goTo('release')">Release</button> -->
-    <button class="btn btn-sm btn-outline-primary ms-3" [routerLink]="['/room', roomId, 'units']">
+    <button class="btn btn-sm btn-outline-primary ms-3" [routerLink]="['units', stockPath]">
       Unit List
     </button>
     <button class="btn btn-sm btn-outline-secondary ms-1" [routerLink]="['inventory', stockPath]">
       Inventory List
     </button>
+    <button class="btn btn-sm btn-outline-secondary ms-1"
+        [routerLink]="['receive', stockPath, 'list']">
+      Receive List
+    </button>
+    <button class="btn btn-sm btn-outline-secondary ms-1"
+        [routerLink]="['release', stockPath, 'list']">
+      Release List
+    </button>
   </div>
   <a class="btn btn-success me-2" [routerLink]="['receive', stockPath]">Receive</a>
-    <a class="btn btn-danger me-2" [routerLink]="['release', stockPath]">Release</a>
+  <a class="btn btn-danger me-2" [routerLink]="['release', stockPath]">Release</a>
 
   <!-- children (inventory / receive / release / units) will render here -->
   <router-outlet></router-outlet>

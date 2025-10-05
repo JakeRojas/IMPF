@@ -1,12 +1,18 @@
-// src/app/item-request/item-request-view.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit      } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ItemRequestService } from '@app/_services/item-request.service';
-import { AlertService, AccountService } from '@app/_services';
 import { first } from 'rxjs/operators';
-import { ItemRequest } from '@app/_models/item-request.model';
 
-@Component({ templateUrl: './item-request-view.component.html' })
+import { 
+  AlertService, 
+  AccountService, 
+  ItemRequestService 
+} from '@app/_services';
+import { ItemRequest } from '@app/_models/item-request.model';
+// ==============================================================
+
+@Component({ 
+  templateUrl: './item-request-view.component.html' 
+})
 export class ItemRequestViewComponent implements OnInit {
   id!: number;
   request: ItemRequest | null = null;

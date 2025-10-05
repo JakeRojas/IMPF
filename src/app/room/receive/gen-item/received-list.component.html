@@ -1,0 +1,41 @@
+<div class="container py-2">
+    <h4>Received genItem Batches (Room #{{ roomId }})</h4>
+  
+    <div *ngIf="loading">Loading...</div>
+  
+    <table *ngIf="!loading && batches?.length" class="table table-sm">
+      <thead>
+        <tr>
+          <th>Batch ID</th>
+          <th>Item</th>
+          <th>Size</th>
+          <th>Qty</th>
+          <th>Type</th>
+          <th>From</th>
+          <th>Received By</th>
+          <th>Date</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let b of batches">
+          <td>{{ b.receiveGenItemId ?? '-' }}</td>
+          <td>{{ b.genItemName      ?? '-' }}</td>
+          <td>{{ b.genItemSize     ?? '-' }}</td>
+          <td>{{ b.genItemQuantity     ?? '-' }}</td>
+          <td>{{ b.genItemType       ?? '-' }}</td>
+          <td>{{ b.receivedFrom     ?? '-' }}</td>
+          <td>
+            <!-- show name when available, otherwise id -->
+            {{ b.receivedByName ?? (b.receivedBy ?? '-') }}
+          </td>
+          <td>{{ b.createdAt ? (b.createdAt | date:'short') : (b.receivedAt ? (b.receivedAt | date:'short') : '-') }}</td>
+          <td>{{ b.notes || '-' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  
+    <div *ngIf="!loading && (!batches || batches.length === 0)">
+      No received genItem batches found.
+    </div>
+  </div>

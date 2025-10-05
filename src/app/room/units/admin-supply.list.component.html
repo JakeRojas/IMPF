@@ -1,0 +1,32 @@
+<div class="container py-2">
+  <h4>Apparel Units (Room #{{ roomId }})</h4>
+
+  <div *ngIf="loading">Loading...</div>
+
+  <table *ngIf="!loading && units?.length" class="table table-sm">
+    <thead>
+      <tr>
+        <th>Unit ID</th>
+        <th>Unit Name</th>
+        <th>Status</th>
+        <th>Assigned To</th>
+        <th>Qty</th>
+        <th>Last Updated</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let u of units">
+        <td>{{ u.adminSupplyId}}</td>
+        <td>{{ u.receiveAdminSupplyId}}</td>
+        <td>{{ u.status }}</td>
+        <td>{{ u.assignedToName || u.assignedTo || '-' }}</td>
+        <td>{{ u.quantity ?? u.totalQuantity ?? 0 }}</td>
+        <td>{{ u.updatedAt ? (u.updatedAt | date:'short') : (u.createdAt ? (u.createdAt | date:'short') : '-') }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && (!units || units.length === 0)">
+    No apparel units found.
+  </div>
+</div>

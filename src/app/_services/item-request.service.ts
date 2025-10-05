@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '@environments/environment';
 import { Observable, throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ItemRequest } from '@app/_models/item-request.model';
+import { ItemRequest } from '@app/_models';
 
 @Injectable({ providedIn: 'root' })
 export class ItemRequestService {
@@ -36,6 +36,12 @@ export class ItemRequestService {
     const n = Number(id);
     if (!Number.isFinite(n) || n <= 0) return throwError(() => new Error('Invalid id'));
     return this.http.post<any>(`${this.base}/${n}/decline`, { reason });
+  }
+
+  release(id: any): Observable<any> {
+    const n = Number(id);
+    if (!Number.isFinite(n) || n <= 0) return throwError(() => new Error('Invalid id'));
+    return this.http.post<any>(`${this.base}/${n}/release`, {});
   }
 
   fulfill(id: any): Observable<any> {

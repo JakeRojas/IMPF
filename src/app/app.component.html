@@ -8,12 +8,12 @@
             <a *ngIf="account.role === Role.SuperAdmin" routerLink="/scan" routerLinkActive="active" class="nav-item nav-link">Scan</a>
             <a *ngIf="account.role === Role.SuperAdmin" routerLink="/admin" routerLinkActive="active" class="nav-item nav-link">Admin</a>
 
-            <a *ngIf="account.role === Role.SuperAdmin || account.role === Role.Admin"
+            <a *ngIf="account.role === Role.SuperAdmin || account.role === Role.Admin || account.role === Role.StockroomAdmin"
              routerLink="/req-stock"
              routerLinkActive="active"
              class="nav-item nav-link">Stock Requests</a>
 
-             <a *ngIf="account.role === Role.SuperAdmin || account.role === Role.Admin || account.role === 'teacher'"
+             <a *ngIf="account.role === Role.SuperAdmin || account.role === Role.StockroomAdmin || account.role === Role.Teacher"
              routerLink="/req-item" routerLinkActive="active" class="nav-item nav-link">Item Request</a>
 
              <a class="nav-link" routerLink="/transfers" routerLinkActive="active">
