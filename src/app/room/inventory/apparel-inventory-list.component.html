@@ -8,18 +8,39 @@
         <i class="fa fa-qrcode"></i> Generate All (PDF)
       </button>
       <tr>
-        <th>Name</th><th>Level</th><th>Type</th><th>For</th><th>Size</th><th>Qty</th><th>Date</th>
+        <th>Name</th>
+        <th>Level</th>
+        <th>Type</th>
+        <th>For</th>
+        <th>Size</th>
+        <th>Qty</th>
+        <th>Stock Status</th>
+        <th>Date</th>
+        <th>Generate Status</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let i of inventory">
-        <td>{{ i.apparelName || i.name }}</td>
+        <td>{{ i.apparelName }}</td>
         <td>{{ i.apparelLevel || '-' }}</td>
         <td>{{ i.apparelType || '-' }}</td>
         <td>{{ i.apparelFor || '-' }}</td>
         <td>{{ i.apparelSize || '-' }}</td>
         <td>{{ i.totalQuantity || i.quantity || '-' }}</td>
+        <td>{{ i.status || '-' }}</td>
         <td>{{ i.createdAt }}</td>
+        <td *ngIf="i.qrStatus">generated</td>
+        <td *ngIf="!i.qrStatus">-</td>
+        <td>
+        
+          <!-- Generate button: hide or change text if already generated -->
+          <button class="btn btn-outline-secondary btn-sm"
+                  (click)="downloadItemQr(i)"
+                  [disabled]="i.qrStatus">
+            <ng-container *ngIf="!i.qrStatus">Generate QR</ng-container>
+            <ng-container *ngIf="i.qrStatus">Downloaded</ng-container>
+          </button>
+        </td>
       </tr>
     </tbody>
   </table>

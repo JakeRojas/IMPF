@@ -19,11 +19,6 @@
             <td class="align-middle">{{account.status}}</td>
             <td style="white-space: nowrap">
                 <a [routerLink]="['/admin','accounts','edit', account.AccountId]" class="btn btn-sm btn-primary me-1">Edit</a>
-                <!-- <a routerLink="edit/{{account.id}}" class="btn btn-sm btn-primary me-1">Edit</a> -->
-                <!-- <button (click)="deleteAccount(account.AccountId)" class="btn btn-sm btn-danger btn-delete-account" [disabled]="account.isDeleting">
-                    <span *ngIf="account.isDeleting" class="spinner-border spinner-border-sm"></span>
-                    <span *ngIf="!account.isDeleting">Delete</span>
-                </button> -->
             </td>
         </tr>
         <tr *ngIf="!accounts">

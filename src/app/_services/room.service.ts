@@ -34,67 +34,6 @@ export class RoomService {
       return this.http.post<any>(`${this.baseUrl}/${roomId}/receive/item`, payload);
     }
   }
-  // receiveApparel(roomId: number, payload: any) {
-  //   return this.http.post(`/rooms/${roomId}/receive/apparel`, payload);
-  // }
-  // receiveAdminSupply(roomId: number, payload: any) {
-  //   return this.http.post(`/rooms/${roomId}/receive/supply`, payload);
-  // }
-  // receiveGenItem(roomId: number, payload: any) {
-  //   return this.http.post(`/rooms/${roomId}/receive/item`, payload);
-  // }
-
-  // releaseApparel(roomId: number, payload: any) {
-  //   return this.http.post(`/rooms/${roomId}/release/apparel`, payload);
-  // }
-  // releaseAdminSupply(roomId: number, payload: any) {
-  //   return this.http.post(`/rooms/${roomId}/release/supply`, payload);
-  // }
-  // releaseGenItem(roomId: number, payload: any) {
-  //   return this.http.post(`/rooms/${roomId}/release/item`, payload);
-  // }
-
-  // // ------------- APPAREL -------------
-  // getApparelInventory(roomId: number): Observable<any> {
-  //   return this.http.get<any>(`${this.baseUrl}/${roomId}/apparel-inventory`);
-  // }
-  // getReceivedBatchApparels(roomId: number): Observable<any> {
-  //   return this.http.get<any>(`${this.baseUrl}/${roomId}/receive-apparels`);
-  // }
-  // getReleasedBatchAppparel(roomId: number): Observable<any> {
-  //   return this.http.get<any>(`${this.baseUrl}/${roomId}/release-apparels`);
-  // }
-  // getApparelUnits(roomId: number): Observable<any> {
-  //   return this.http.get<any>(`${this.baseUrl}/${roomId}/apparels`);
-  // }
-
-  // // ------------- ADMIN/SUPPLY -------------
-  // getAdminSupplyInventory(roomId: number): Observable<any> {
-  //   return this.http.get<any>(`${this.baseUrl}/${roomId}/supply-inventory`);
-  // }
-  // getReceivedBatchAdminSupply(roomId: number): Observable<any> {
-  //   return this.http.get<any>(`${this.baseUrl}/${roomId}/receive-supply`);
-  // }
-  // getReleasedBatchAdminSupply(roomId: number): Observable<any> {
-  //   return this.http.get<any>(`${this.baseUrl}/${roomId}/release-supply`);
-  // }
-  // getAdminSupplyUnits(roomId: number): Observable<any> {
-  //   return this.http.get<any>(`${this.baseUrl}/${roomId}/supply`);
-  // }
-
-  // // ------------- GENERAL / IT / MAINTENANCE (NEW) -------------
-  // getGenItemInventory(roomId: number): Observable<any> {
-  //   return this.http.get<any>(`${this.baseUrl}/${roomId}/items-inventory`);
-  // }
-  // getReceivedBatchGenItem(roomId: number): Observable<any> {
-  //   return this.http.get<any>(`${this.baseUrl}/${roomId}/receive-items`);
-  // }
-  // getGenItemUnits(roomId: number): Observable<any> {
-  //   return this.http.get<any>(`${this.baseUrl}/${roomId}/items`);
-  // }
-  // getReleasedBatchGenItem(roomId: number): Observable<any> {
-  //   return this.http.get<any>(`${this.baseUrl}/${roomId}/release-gen-item`);
-  // }
 
   // APPAREL
   getApparelInventory(roomId: number)       { return this.http.get<any>(`${this.baseUrl}/${roomId}/apparel-inventory`); }
@@ -142,19 +81,6 @@ export class RoomService {
     return this.http.get<any>(`${environment.apiUrl}/accounts`); // filter client-side if needed
   }
 
-  // releaseApparel(roomId: number, payload: any): Observable<any> {
-  //   // make a shallow copy so we don't mutate callers' objects
-  //   const body = { ...payload };
-  
-  //   // backend expects releaseApparelQuantity (room.service.releaseApparelInRoomHandler)
-  //   if (body.releaseQuantity != null && body.releaseApparelQuantity == null) {
-  //     body.releaseApparelQuantity = body.releaseQuantity;
-  //     // optional: delete body.releaseQuantity; // not required but clearer
-  //   }
-  
-  //   // backend route is /rooms/:roomId/release/apparel
-  //   return this.http.post<any>(`${this.baseUrl}/${roomId}/release`, body);
-  // }
   releaseApparel(roomId: number, payload: any): Observable<any> {
     // make a shallow copy so we don't mutate callers' objects
     const body: any = { ...payload };

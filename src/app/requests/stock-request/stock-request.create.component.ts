@@ -22,7 +22,6 @@ export class StockRequestCreateComponent {
   submitting = false;
   account: any;
 
-  // allowed backend item types (exact)
   private readonly VALID_ITEM_TYPES = ['apparel', 'supply', 'genItem'];
 
   constructor(
@@ -69,22 +68,19 @@ submit() {
     return;
   }
 
-  // Use the correct account property name and ensure it's present
   const accountId = this.account?.accountId ?? this.account?.id ?? null;
   if (!accountId) {
     this.alert.error('Unable to determine your account id. Re-login or check session.');
     return;
   }
 
-  // coerce inputs
   const itemId = raw.itemId ? Number(raw.itemId) : null;
   const requesterRoomId = raw.requesterRoomId ? Number(raw.requesterRoomId) : null;
 
-  // convert empty note to null (so Joi won't treat '' as invalid)
   const note = raw.note && String(raw.note).trim() !== '' ? String(raw.note).trim() : null;
 
   const payload: any = {
-    accountId,          // <<--- FIXED: backend expects "accountId"
+    accountId,
     requesterRoomId,
     itemId,
     itemType,

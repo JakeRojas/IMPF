@@ -309,7 +309,7 @@ Size: 937 B
 
 ================================================================================
 File: src\app\account\forgot-password.component.ts
-Size: 1.46 kB
+Size: 1.32 kB
 ================================================================================
 
 ﻿import { Component, OnInit } from '@angular/core';
@@ -336,16 +336,13 @@ export class ForgotPasswordComponent implements OnInit {
         });
     }
 
-    // convenience getter for easy access to form fields
     get f() { return this.form.controls; }
 
     onSubmit() {
         this.submitted = true;
 
-        // reset alerts on submit
         this.alertService.clear();
 
-        // stop here if form is invalid
         if (this.form.invalid) {
             return;
         }
@@ -401,7 +398,7 @@ export class LayoutComponent {
 
 ================================================================================
 File: src\app\account\login.component.html
-Size: 1.6 kB
+Size: 1.62 kB
 ================================================================================
 
 ﻿<h3 class="card-header">Login</h3>
@@ -428,7 +425,7 @@ Size: 1.6 kB
                     <span *ngIf="submitting" class="spinner-border spinner-border-sm me-1"></span>
                     Login
                 </button>
-                <a routerLink="../register" class="btn btn-link">Register</a>
+                <a *ngIf="showRegister" routerLink="../register" class="btn btn-link">Register</a>
             </div>
             <div class="mb-3 col text-end">
                 <a routerLink="../forgot-password" class="btn btn-link pe-0">Forgot Password?</a>
@@ -439,7 +436,7 @@ Size: 1.6 kB
 
 ================================================================================
 File: src\app\account\login.component.ts
-Size: 1.82 kB
+Size: 1.96 kB
 ================================================================================
 
 ﻿import { Component, OnInit } from '@angular/core';
@@ -454,6 +451,7 @@ export class LoginComponent implements OnInit {
     form!: FormGroup;
     submitting = false;
     submitted = false;
+    showRegister = false;
 
     constructor(
         private formBuilder: FormBuilder,
@@ -468,18 +466,26 @@ export class LoginComponent implements OnInit {
             email: ['', [Validators.required, Validators.email]],
             password: ['', Validators.required]
         });
+        this.accountService.hasAnyAccount()
+      .pipe(first())
+      .subscribe({
+        next: res => {
+          this.showRegister = !(res && res.exists);
+        },
+        error: err => {
+          console.warn('hasAnyAccount failed (showing register):', err);
+          this.showRegister = true;
+        }
+      });
     }
 
-    // convenience getter for easy access to form fields
     get f() { return this.form.controls; }
 
     onSubmit() {
         this.submitted = true;
 
-        // reset alerts on submit
         this.alertService.clear();
 
-        // stop here if form is invalid
         if (this.form.invalid) {
             return;
         }
@@ -489,7 +495,6 @@ export class LoginComponent implements OnInit {
             .pipe(first())
             .subscribe({
                 next: () => {
-                    // get return url from query parameters or default to home page
                     const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
                     this.router.navigateByUrl(returnUrl);
                 },
@@ -581,7 +586,7 @@ Size: 4.29 kB
 
 ================================================================================
 File: src\app\account\register.component.ts
-Size: 2.22 kB
+Size: 2.09 kB
 ================================================================================
 
 ﻿import { Component, OnInit } from '@angular/core';
@@ -620,16 +625,13 @@ export class RegisterComponent implements OnInit {
         });
     }
 
-    // convenience getter for easy access to form fields
     get f() { return this.form.controls; }
 
     onSubmit() {
         this.submitted = true;
 
-        // reset alerts on submit
         this.alertService.clear();
 
-        // stop here if form is invalid
         if (this.form.invalid) {
             return;
         }
@@ -692,7 +694,7 @@ Size: 1.91 kB
 
 ================================================================================
 File: src\app\account\reset-password.component.ts
-Size: 2.72 kB
+Size: 2.53 kB
 ================================================================================
 
 ﻿import { Component, OnInit } from '@angular/core';
@@ -736,7 +738,6 @@ export class ResetPasswordComponent implements OnInit {
 
         const token = this.route.snapshot.queryParams['token'];
 
-        // remove token from url to prevent http referer leakage
         this.router.navigate([], { relativeTo: this.route, replaceUrl: true });
 
         this.accountService.validateResetToken(token)
@@ -752,16 +753,13 @@ export class ResetPasswordComponent implements OnInit {
             });
     }
 
-    // convenience getter for easy access to form fields
     get f() { return this.form.controls; }
 
     onSubmit() {
         this.submitted = true;
 
-        // reset alerts on submit
         this.alertService.clear();
 
-        // stop here if form is invalid
         if (this.form.invalid) {
             return;
         }
@@ -799,7 +797,7 @@ Size: 355 B
 
 ================================================================================
 File: src\app\account\verify-email.component.ts
-Size: 1.36 kB
+Size: 1.29 kB
 ================================================================================
 
 ﻿import { Component, OnInit } from '@angular/core';
@@ -828,7 +826,6 @@ export class VerifyEmailComponent implements OnInit {
     ngOnInit() {
         const token = this.route.snapshot.queryParams['token'];
 
-        // remove token from url to prevent http referer leakage
         this.router.navigate([], { relativeTo: this.route, replaceUrl: true });
 
         this.accountService.verifyEmail(token)
@@ -896,11 +893,10 @@ export class AccountsModule { }
 
 ================================================================================
 File: src\app\admin\accounts\add-edit.component.html
-Size: 5.2 kB
+Size: 5.17 kB
 ================================================================================
 
-﻿<!-- <h1>{{title}}</h1> -->
-<form *ngIf="!loading" [formGroup]="form" (ngSubmit)="onSubmit()">
+﻿<form *ngIf="!loading" [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="row">
         <div class="mb-3 col-2">
             <label class="form-label">Title</label>
@@ -1001,11 +997,10 @@ Size: 5.2 kB
 
 ================================================================================
 File: src\app\admin\accounts\add-edit.component.ts
-Size: 3.31 kB
+Size: 3.04 kB
 ================================================================================
 
-﻿// main
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
@@ -1040,7 +1035,6 @@ export class AddEditComponent implements OnInit {
             email:              ['', [Validators.required, Validators.email]],
             role:               ['', Validators.required],
             status:             ['', Validators.required],
-            // password only required in add mode
             password:           ['', [Validators.minLength(6), ...(!this.AccountId ? [Validators.required] : [])]],
             confirmPassword:    ['']
         }, {
@@ -1049,7 +1043,6 @@ export class AddEditComponent implements OnInit {
 
         this.title = 'Create Account';
         if (this.AccountId) {
-            // edit mode
             this.title = 'Edit Account';
             this.loading = true;
             this.accountService.getById(this.AccountId)
@@ -1061,23 +1054,19 @@ export class AddEditComponent implements OnInit {
         }
     }
 
-    // convenience getter for easy access to form fields
     get f() { return this.form.controls; }
 
     onSubmit() {
         this.submitted = true;
 
-        // reset alerts on submit
         this.alertService.clear();
 
-        // stop here if form is invalid
         if (this.form.invalid) {
             return;
         }
 
         this.submitting = true;
 
-        // create or update account based on id param
         let saveAccount;
         let message: string;
         if (this.AccountId) {
@@ -1106,7 +1095,7 @@ export class AddEditComponent implements OnInit {
 
 ================================================================================
 File: src\app\admin\accounts\list.component.html
-Size: 1.69 kB
+Size: 1.23 kB
 ================================================================================
 
 ﻿<h1>Accounts</h1>
@@ -1130,11 +1119,6 @@ Size: 1.69 kB
             <td class="align-middle">{{account.status}}</td>
             <td style="white-space: nowrap">
                 <a [routerLink]="['/admin','accounts','edit', account.AccountId]" class="btn btn-sm btn-primary me-1">Edit</a>
-                <!-- <a routerLink="edit/{{account.id}}" class="btn btn-sm btn-primary me-1">Edit</a> -->
-                <!-- <button (click)="deleteAccount(account.AccountId)" class="btn btn-sm btn-danger btn-delete-account" [disabled]="account.isDeleting">
-                    <span *ngIf="account.isDeleting" class="spinner-border spinner-border-sm"></span>
-                    <span *ngIf="!account.isDeleting">Delete</span>
-                </button> -->
             </td>
         </tr>
         <tr *ngIf="!accounts">
@@ -1147,7 +1131,7 @@ Size: 1.69 kB
 
 ================================================================================
 File: src\app\admin\accounts\list.component.ts
-Size: 2.46 kB
+Size: 1.15 kB
 ================================================================================
 
 ﻿import { Component, OnInit } from '@angular/core';
@@ -1162,7 +1146,6 @@ import { AccountService, AlertService } from '@app/_services';
 export class ListComponent implements OnInit {
     accounts?: any[];
     loading = false;
-    //accUpdating: number | null = null;
 
     constructor(
         private accountService: AccountService,
@@ -1181,7 +1164,6 @@ export class ListComponent implements OnInit {
           next: (accounts: any[]) => {
             this.accounts = (accounts || []).map(a => ({
               ...a,
-              // normalize id field so templates can rely on AccountId
               AccountId: a.accountId ?? a.AccountId ?? a.id,
               status: a.status ?? a._status ?? (a.isActive ? 'active' : 'deactivated'),
               toggling: false
@@ -1194,16 +1176,6 @@ export class ListComponent implements OnInit {
           }
         });
       }
-
-    // deleteAccount(AccountId: number) {
-    //     const account = this.accounts!.find(x => x.AccountId === AccountId);
-    //     account.isDeleting = true;
-    //     this.accountService.delete(AccountId)
-    //         .pipe(first())
-    //         .subscribe(() => {
-    //             this.accounts = this.accounts!.filter(x => x.AccountId !== AccountId)
-    //         });
-    // }
 }
 
 ================================================================================
@@ -1703,7 +1675,7 @@ Size: 3.87 kB
 
 ================================================================================
 File: src\app\profile\update.component.ts
-Size: 2.59 kB
+Size: 2.46 kB
 ================================================================================
 
 ﻿import { Component, OnInit } from '@angular/core';
@@ -1743,16 +1715,13 @@ export class UpdateComponent implements OnInit {
         });
     }
 
-    // convenience getter for easy access to form fields
     get f() { return this.form.controls; }
 
     onSubmit() {
         this.submitted = true;
 
-        // reset alerts on submit
         this.alertService.clear();
 
-        // stop here if form is invalid
         if (this.form.invalid) {
             return;
         }
@@ -1839,7 +1808,7 @@ Size: 1.93 kB
 
 ================================================================================
 File: src\app\requests\item-request\item-request-create.component.ts
-Size: 2.45 kB
+Size: 3.05 kB
 ================================================================================
 
 import { 
@@ -1850,6 +1819,7 @@ import {
 import { Component  } from '@angular/core';
 import { Router     } from '@angular/router';
 import { first      } from 'rxjs/operators';
+import { forkJoin   } from 'rxjs';
 
 import { 
   AlertService, 
@@ -1868,8 +1838,8 @@ export class ItemRequestCreateComponent {
     note: ['']
   });
 
-  account: any;
   submitting = false;
+  account: any;
 
   constructor(
     private fb: FormBuilder,
@@ -1894,45 +1864,64 @@ export class ItemRequestCreateComponent {
   addItem() { this.items.push(this._createItem()); }
   removeItem(i: number) { if (this.items.length > 1) this.items.removeAt(i); }
 
+  private _errToString(err: any) {
+    if (!err && err !== 0) return 'Unknown error';
+    if (typeof err === 'string') return err;
+    if (err?.error?.message) return String(err.error.message);
+    if (err?.message) return String(err.message);
+    try { return JSON.stringify(err); } catch { return String(err); }
+  }
+
   submit() {
-    if (this.form.invalid) { this.alert.error('Please fix validation errors'); return; }
+    if (this.form.invalid) {
+      this.alert.error('Please fix validation errors');
+      return;
+    }
 
-    const acccountId = this.account?.acccountId ?? this.account?.accountId ?? this.account?.id ?? null;
-    if (!acccountId) { this.alert.error('Account id missing'); return; }
+    const raw = this.form.value;
+    const requesterRoomId = raw.requesterRoomId ? Number(raw.requesterRoomId) : null;
 
-    // prepare payload
-    const payload: any = {
-      acccountId,
-      requesterRoomId: this.form.value.requesterRoomId ?? null,
-      items: (this.form.value.items || []).map((it: any) => ({
-        itemType: it.itemType,
-        itemId: it.itemId ? Number(it.itemId) : null,
-        quantity: Number(it.quantity) || 0,
-        note: it.note ?? null
-      })),
-      note: this.form.value.note ?? null
-    };
+    const payloads = (raw.items || []).map((it: any) => ({
+      requesterRoomId,
+      itemType: String(it.itemType || '').trim(),
+      itemId: it.itemId ? Number(it.itemId) : null,
+      quantity: Number(it.quantity) || 0,
+      note: it.note && String(it.note).trim() !== '' ? String(it.note).trim() : null
+    }));
 
-    console.log('Create item request payload:', payload);
+    if (payloads.some(p => !p.itemType || !Number.isFinite(p.quantity) || p.quantity <= 0)) {
+      this.alert.error('Each item must have a valid type and a positive integer quantity.');
+      return;
+    }
+
     this.submitting = true;
-    this.ir.create(payload).pipe(first()).subscribe({
-      next: () => { this.alert.success('Item request created'); this.router.navigate(['/req-item']); },
-      error: e => { this.alert.error(e?.error?.message ?? e?.message ?? 'Server error'); this.submitting = false; }
+
+    const calls = payloads.map(p => this.ir.create(p));
+
+    forkJoin(calls).pipe(first()).subscribe({
+      next: () => {
+        this.alert.success(payloads.length > 1 ? 'Item requests created' : 'Item request created', { keepAfterRouteChange: true });
+        this.router.navigate(['/req-item']);
+      },
+      error: e => {
+        this.alert.error(this._errToString(e));
+        console.error('Create item request error (full):', e);
+        this.submitting = false;
+      }
     });
   }
 }
 
-
 ================================================================================
 File: src\app\requests\item-request\item-request-list.component.html
-Size: 1.53 kB
+Size: 1.7 kB
 ================================================================================
 
 <div class="container p-3">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h3>Item Requests</h3>
       <div>
-        <button class="btn btn-sm btn-success" (click)="create()" *ngIf="isTeacher()">New Request</button>
+        <button class="btn btn-sm btn-success" (click)="create()" *ngIf="isTeacher() || isSuperAdmin()">New Request</button>
       </div>
     </div>
   
@@ -1953,8 +1942,9 @@ Size: 1.53 kB
   
             <button *ngIf="isStockroomAdmin() && r.status === 'pending'" class="btn btn-sm btn-success ms-1" (click)="accept(r)">Accept</button>
             <button *ngIf="isStockroomAdmin() && r.status === 'pending'" class="btn btn-sm btn-warning ms-1" (click)="decline(r)">Decline</button>
+            <button *ngIf="isStockroomAdmin() && r.status === 'accepted'" class="btn btn-sm btn-secondary ms-1" (click)="release(r)">Release</button>
   
-            <button *ngIf="isTeacher() && r.status === 'accepted'" class="btn btn-sm btn-danger ms-1" (click)="fulfill(r)">Fulfill</button>
+            <button *ngIf="isTeacher() && r.status === 'released'" class="btn btn-sm btn-danger ms-1" (click)="fulfill(r)">Fulfill</button>
           </td>
         </tr>
       </tbody>
@@ -1966,7 +1956,7 @@ Size: 1.53 kB
 
 ================================================================================
 File: src\app\requests\item-request\item-request-list.component.ts
-Size: 3.26 kB
+Size: 3.75 kB
 ================================================================================
 
 import { Component, OnInit } from '@angular/core';
@@ -1998,7 +1988,9 @@ export class ItemRequestListComponent implements OnInit {
     this.account = this.accountService.accountValue;
   }
 
-  ngOnInit() { this.load(); }
+  ngOnInit() { 
+    this.load(); 
+  }
 
   private _errToString(err: any) {
     if (!err && err !== 0) return 'Unknown error';
@@ -2024,7 +2016,6 @@ export class ItemRequestListComponent implements OnInit {
 
   create() { this.router.navigate(['/req-item','create']); }
 
-  // Stockroom actions
   accept(r: ItemRequest) {
     const id = Number(r?.itemRequestId ?? r?.id);
     if (!Number.isFinite(id)) return this.alert.error('Invalid id');
@@ -2039,6 +2030,20 @@ export class ItemRequestListComponent implements OnInit {
     this.ir.decline(id, reason).pipe(first()).subscribe({ next: () => { this.alert.success('Declined'); this.load(); }, error: e => this.alert.error(this._errToString(e)) });
   }
 
+  release(r: ItemRequest) {
+    const id = Number(r?.itemRequestId ?? r?.id);
+    if (!Number.isFinite(id)) return this.alert.error('Invalid id');
+    if (!confirm('Release this accepted item request?')) return;
+
+    this.ir.release(id).pipe(first()).subscribe({
+      next: () => {
+        this.alert.success('Released');
+        this.load();
+      },
+      error: e => this.alert.error(this._errToString(e))
+    });
+  }
+
   // Teacher/room-in-charge action: fulfill when accepted
   fulfill(r: ItemRequest) {
     const id = Number(r?.itemRequestId ?? r?.id);
@@ -2048,8 +2053,9 @@ export class ItemRequestListComponent implements OnInit {
   }
 
   // role helpers
-  isStockroomAdmin() { return this.account?.role === 'stockroom' || this.account?.role === 'admin' || this.account?.role === 'superAdmin'; }
+  isStockroomAdmin() { return this.account?.role === 'stockroomAdmin' || this.account?.role === 'admin' || this.account?.role === 'superAdmin'; }
   isTeacher() { return this.account?.role === 'teacher' || this.account?.role === 'roomInCharge' || this.account?.role === 'user'; }
+  isSuperAdmin() { return this.account?.role === 'superAdmin'; }
 }
 
 
@@ -2125,7 +2131,7 @@ Size: 1.82 kB
 
 ================================================================================
 File: src\app\requests\item-request\item-request-view.component.ts
-Size: 2.77 kB
+Size: 2.97 kB
 ================================================================================
 
 import { Component, OnInit      } from '@angular/core';
@@ -2185,9 +2191,35 @@ export class ItemRequestViewComponent implements OnInit {
     });
   }
 
-  accept() { if (!confirm('Accept?')) return; this.ir.accept(this.id).pipe(first()).subscribe(() => { this.alert.success('Accepted'); this.load(); }, e => this.alert.error(this._errToString(e))); }
-  decline() { const reason = prompt('Reason?') ?? undefined; this.ir.decline(this.id, reason).pipe(first()).subscribe(() => { this.alert.success('Declined'); this.load(); }, e => this.alert.error(this._errToString(e))); }
-  fulfill() { if (!confirm('Fulfill?')) return; this.ir.fulfill(this.id).pipe(first()).subscribe(() => { this.alert.success('Fulfilled'); this.load(); }, e => this.alert.error(this._errToString(e))); }
+  accept() { 
+    if (!confirm('Accept?')) 
+    return; 
+      this.ir.accept(this.id)
+        .pipe(first())
+        .subscribe(() => { 
+          this.alert.success('Accepted'); 
+          this.load(); 
+        }, e => this.alert.error(this._errToString(e))); 
+  }
+  decline() {
+    const reason = prompt('Reason?') ?? undefined; 
+    this.ir.decline(this.id, reason)
+      .pipe(first())
+      .subscribe(() => { 
+        this.alert.success('Declined'); 
+        this.load(); 
+      }, e => this.alert.error(this._errToString(e))); 
+  }
+  fulfill() { 
+    if (!confirm('Fulfill?')) 
+    return; 
+      this.ir.fulfill(this.id)
+        .pipe(first())
+        .subscribe(() => { 
+      this.alert.success('Fulfilled'); 
+      this.load(); 
+    }, e => this.alert.error(this._errToString(e))); 
+  }
 
   isStockroomAdmin() { return this.account?.role === 'stockroom' || this.account?.role === 'admin' || this.account?.role === 'superAdmin'; }
   isTeacher() { return this.account?.role === 'teacher' || this.account?.role === 'roomInCharge' || this.account?.role === 'user'; }
@@ -2296,7 +2328,7 @@ Size: 1.28 kB
 
 ================================================================================
 File: src\app\requests\stock-request\stock-request.create.component.ts
-Size: 3.52 kB
+Size: 3.27 kB
 ================================================================================
 
 import { Component  } from '@angular/core';
@@ -2323,7 +2355,6 @@ export class StockRequestCreateComponent {
   submitting = false;
   account: any;
 
-  // allowed backend item types (exact)
   private readonly VALID_ITEM_TYPES = ['apparel', 'supply', 'genItem'];
 
   constructor(
@@ -2370,22 +2401,19 @@ submit() {
     return;
   }
 
-  // Use the correct account property name and ensure it's present
   const accountId = this.account?.accountId ?? this.account?.id ?? null;
   if (!accountId) {
     this.alert.error('Unable to determine your account id. Re-login or check session.');
     return;
   }
 
-  // coerce inputs
   const itemId = raw.itemId ? Number(raw.itemId) : null;
   const requesterRoomId = raw.requesterRoomId ? Number(raw.requesterRoomId) : null;
 
-  // convert empty note to null (so Joi won't treat '' as invalid)
   const note = raw.note && String(raw.note).trim() !== '' ? String(raw.note).trim() : null;
 
   const payload: any = {
-    accountId,          // <<--- FIXED: backend expects "accountId"
+    accountId,
     requesterRoomId,
     itemId,
     itemType,
@@ -2646,7 +2674,7 @@ Size: 2.08 kB
 
 ================================================================================
 File: src\app\requests\stock-request\stock-request.view.component.ts
-Size: 9.14 kB
+Size: 9 kB
 ================================================================================
 
 import { Component, OnInit      } from '@angular/core';
@@ -2767,15 +2795,11 @@ export class StockRequestViewComponent implements OnInit {
     try { return JSON.stringify(val, null, 0); } catch { return String(val); }
   }
 
-  /**
-   * Convert requestedItem into array of {label, value} rows for template.
-   */
   getRequestedItemDisplayRows(ri?: RequestedItem | null): Array<{ label: string; value: string | number | null }> {
     if (!ri) return [];
 
     const rows: Array<{ label: string; value: any }> = [];
 
-    // -- inventory aggregate preferred --
     if (ri.kind === 'inventory' && ri.inventory) {
       const inv: any = ri.inventory;
 
@@ -3237,7 +3261,7 @@ export class RoomAddEditComponent implements OnInit, OnDestroy {
 
 ================================================================================
 File: src\app\room\inventory\admin-supply-inventory-list.component.html
-Size: 864 B
+Size: 1.02 kB
 ================================================================================
 
 <div class="container py-2">
@@ -3247,6 +3271,9 @@ Size: 864 B
 
   <table *ngIf="!loading && inventory?.length" class="table table-sm">
     <thead>
+      <button class="btn btn-primary btn-sm me-2" (click)="generateAllQr()">
+        <i class="fa fa-qrcode"></i> Generate All (PDF)
+      </button>
       <tr>
         <th>Name</th>
         <th>Measure</th>
@@ -3274,13 +3301,13 @@ Size: 864 B
 
 ================================================================================
 File: src\app\room\inventory\admin-supply-inventory-list.component.ts
-Size: 1.55 kB
+Size: 3.81 kB
 ================================================================================
 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute }     from '@angular/router';
 import { first }              from 'rxjs/operators';
-import { RoomService, AlertService } from '@app/_services';
+import { RoomService, AlertService, QrService } from '@app/_services';
 
 @Component({
   templateUrl: './admin-supply-inventory-list.component.html'
@@ -3293,7 +3320,8 @@ export class AdminSupplyInventoryListComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private roomService: RoomService,
-    private alert: AlertService
+    private alert: AlertService,
+    private qrService: QrService
   ) {}
 
   ngOnInit(): void {
@@ -3328,12 +3356,70 @@ export class AdminSupplyInventoryListComponent implements OnInit {
   measureOf(item: any) {
     return item.supplyMeasure ?? item.measure ?? '';
   }
+
+  generateAllQr() {
+    if (!Number.isFinite(this.roomId)) { this.alert.error('Invalid room'); return; }
+    // stockroomType for this list is 'supply' (example). Adjust for other inventory views.
+    const stockroomType = 'supply'; // change to 'apparel' or 'genitem' where appropriate
+  
+    this.qrService.downloadAllPdf(stockroomType, this.roomId).pipe(first()).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `qrcodes-${stockroomType}-room-${this.roomId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        this.alert.success('PDF downloaded');
+      },
+      error: (err) => {
+        console.error('generateAllQr error', err);
+        const msg = err?.error?.message || err?.message || 'Failed to generate PDF';
+        this.alert.error(msg);
+      }
+    });
+  }
+
+  downloadItemQr(i: any) {
+    // determine correct stockroomType and id field for this view
+    const stockroomType = 'supply'; // change as appropriate per list
+    const inventoryId = i.adminSupplyInventoryId;
+  
+    this.qrService.getBatchQr(stockroomType, inventoryId).pipe(first()).subscribe({
+      next: (blob: Blob) => {
+        // download the blob
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `qr-${stockroomType}-${inventoryId}.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+  
+        // Mark item as generated in UI
+        i.qrStatus = true;
+  
+        // Optional: show confirmation and/or refresh from server to sync state
+        this.alert.success('QR downloaded and marked generated');
+  
+        // OPTIONAL: if you prefer to get canonical value from server:
+        // this.load(); // reload items from API
+      },
+      error: err => {
+        const msg = err?.error?.message || err?.message || 'Failed to download QR';
+        this.alert.error(msg);
+      }
+    });
+  }
 }
 
 
 ================================================================================
 File: src\app\room\inventory\apparel-inventory-list.component.html
-Size: 937 B
+Size: 1.77 kB
 ================================================================================
 
 <!-- src/app/room/inventory/apparel-inventory-list.component.html -->
@@ -3342,19 +3428,43 @@ Size: 937 B
   <div *ngIf="loading">Loading...</div>
   <table *ngIf="!loading && inventory?.length" class="table table-sm">
     <thead>
+      <button class="btn btn-primary btn-sm me-2" (click)="generateAllQr()">
+        <i class="fa fa-qrcode"></i> Generate All (PDF)
+      </button>
       <tr>
-        <th>Name</th><th>Level</th><th>Type</th><th>For</th><th>Size</th><th>Qty</th><th>Date</th>
+        <th>Name</th>
+        <th>Level</th>
+        <th>Type</th>
+        <th>For</th>
+        <th>Size</th>
+        <th>Qty</th>
+        <th>Stock Status</th>
+        <th>Date</th>
+        <th>Generate Status</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let i of inventory">
-        <td>{{ i.apparelName || i.name }}</td>
+        <td>{{ i.apparelName }}</td>
         <td>{{ i.apparelLevel || '-' }}</td>
         <td>{{ i.apparelType || '-' }}</td>
         <td>{{ i.apparelFor || '-' }}</td>
         <td>{{ i.apparelSize || '-' }}</td>
         <td>{{ i.totalQuantity || i.quantity || '-' }}</td>
+        <td>{{ i.status || '-' }}</td>
         <td>{{ i.createdAt }}</td>
+        <td *ngIf="i.qrStatus">generated</td>
+        <td *ngIf="!i.qrStatus">-</td>
+        <td>
+        
+          <!-- Generate button: hide or change text if already generated -->
+          <button class="btn btn-outline-secondary btn-sm"
+                  (click)="downloadItemQr(i)"
+                  [disabled]="i.qrStatus">
+            <ng-container *ngIf="!i.qrStatus">Generate QR</ng-container>
+            <ng-container *ngIf="i.qrStatus">Downloaded</ng-container>
+          </button>
+        </td>
       </tr>
     </tbody>
   </table>
@@ -3365,13 +3475,13 @@ Size: 937 B
 
 ================================================================================
 File: src\app\room\inventory\apparel-inventory-list.component.ts
-Size: 1.31 kB
+Size: 3.57 kB
 ================================================================================
 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute }     from '@angular/router';
 import { first }              from 'rxjs/operators';
-import { RoomService, AlertService } from '@app/_services';
+import { RoomService, AlertService, QrService  } from '@app/_services';
 
 @Component({
   templateUrl: './apparel-inventory-list.component.html'
@@ -3384,7 +3494,8 @@ export class ApparelInventoryListComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private roomService: RoomService,
-    private alert: AlertService
+    private alert: AlertService,
+    private qrService: QrService
   ) {}
 
   ngOnInit(): void {
@@ -3410,11 +3521,69 @@ export class ApparelInventoryListComponent implements OnInit {
       error: (e) => { this.loading = false; this.alert.error(e); }
     });
   }
+
+  generateAllQr() {
+    if (!Number.isFinite(this.roomId)) { this.alert.error('Invalid room'); return; }
+    // stockroomType for this list is 'supply' (example). Adjust for other inventory views.
+    const stockroomType = 'apparel'; // change to 'apparel' or 'genitem' where appropriate
+  
+    this.qrService.downloadAllPdf(stockroomType, this.roomId).pipe(first()).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `qrcodes-${stockroomType}-room-${this.roomId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        this.alert.success('PDF downloaded');
+      },
+      error: (err) => {
+        console.error('generateAllQr error', err);
+        const msg = err?.error?.message || err?.message || 'Failed to generate PDF';
+        this.alert.error(msg);
+      }
+    });
+  }
+
+  downloadItemQr(i: any) {
+    // determine correct stockroomType and id field for this view
+    const stockroomType = 'apparel'; // change as appropriate per list
+    const inventoryId = i.apparelInventoryId;
+  
+    this.qrService.getBatchQr(stockroomType, inventoryId).pipe(first()).subscribe({
+      next: (blob: Blob) => {
+        // download the blob
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `qr-${stockroomType}-${inventoryId}.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+  
+        // Mark item as generated in UI
+        i.qrStatus = true;
+  
+        // Optional: show confirmation and/or refresh from server to sync state
+        this.alert.success('QR downloaded and marked generated');
+  
+        // OPTIONAL: if you prefer to get canonical value from server:
+        // this.load(); // reload items from API
+      },
+      error: err => {
+        const msg = err?.error?.message || err?.message || 'Failed to download QR';
+        this.alert.error(msg);
+      }
+    });
+  }
 }
 
 ================================================================================
 File: src\app\room\inventory\gen-item-inventory-list.component.html
-Size: 974 B
+Size: 1.13 kB
 ================================================================================
 
 <div class="container py-2">
@@ -3424,6 +3593,9 @@ Size: 974 B
   
     <table *ngIf="!loading && inventory?.length" class="table table-sm">
       <thead>
+        <button class="btn btn-primary btn-sm me-2" (click)="generateAllQr()">
+          <i class="fa fa-qrcode"></i> Generate All (PDF)
+        </button>
         <tr>
           <th>Name</th>
           <th>Type</th>
@@ -3452,13 +3624,13 @@ Size: 974 B
 
 ================================================================================
 File: src\app\room\inventory\gen-item-inventory-list.component.ts
-Size: 1.4 kB
+Size: 3.66 kB
 ================================================================================
 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute }     from '@angular/router';
 import { first }              from 'rxjs/operators';
-import { RoomService, AlertService } from '@app/_services';
+import { RoomService, AlertService, QrService } from '@app/_services';
 
 @Component({
   templateUrl: './gen-item-inventory-list.component.html'
@@ -3471,7 +3643,8 @@ export class GenItemInventoryListComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private roomService: RoomService,
-    private alert: AlertService
+    private alert: AlertService,
+    private qrService: QrService
   ) {}
 
   ngOnInit(): void {
@@ -3500,6 +3673,64 @@ export class GenItemInventoryListComponent implements OnInit {
 
   displayQty(it: any) {
     return it.totalQuantity ?? it.quantity ?? '-';
+  }
+
+  generateAllQr() {
+    if (!Number.isFinite(this.roomId)) { this.alert.error('Invalid room'); return; }
+    // stockroomType for this list is 'supply' (example). Adjust for other inventory views.
+    const stockroomType = 'it' || 'maintenance'; // change to 'apparel' or 'genitem' where appropriate
+  
+    this.qrService.downloadAllPdf(stockroomType, this.roomId).pipe(first()).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `qrcodes-${stockroomType}-room-${this.roomId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        this.alert.success('PDF downloaded');
+      },
+      error: (err) => {
+        console.error('generateAllQr error', err);
+        const msg = err?.error?.message || err?.message || 'Failed to generate PDF';
+        this.alert.error(msg);
+      }
+    });
+  }
+
+  downloadItemQr(i: any) {
+    // determine correct stockroomType and id field for this view
+    const stockroomType = 'general'; // change as appropriate per list
+    const inventoryId = i.genItemInventoryId;
+  
+    this.qrService.getBatchQr(stockroomType, inventoryId).pipe(first()).subscribe({
+      next: (blob: Blob) => {
+        // download the blob
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `qr-${stockroomType}-${inventoryId}.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+  
+        // Mark item as generated in UI
+        i.qrStatus = true;
+  
+        // Optional: show confirmation and/or refresh from server to sync state
+        this.alert.success('QR downloaded and marked generated');
+  
+        // OPTIONAL: if you prefer to get canonical value from server:
+        // this.load(); // reload items from API
+      },
+      error: err => {
+        const msg = err?.error?.message || err?.message || 'Failed to download QR';
+        this.alert.error(msg);
+      }
+    });
   }
 }
 
@@ -5816,6 +6047,7 @@ File: src\app\room\room-view.component.ts
 Size: 38.99 kB
 ================================================================================
 
+// src/app/room/room-view.component.ts
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute }     from '@angular/router';
 import { first }              from 'rxjs/operators';
@@ -6271,7 +6503,7 @@ export class ScanRoutingModule {}
 
 ================================================================================
 File: src\app\scan\scan.component.html
-Size: 3.58 kB
+Size: 4 kB
 ================================================================================
 
 <div class="scan-modal container-fluid p-0">
@@ -6285,10 +6517,8 @@ Size: 3.58 kB
 
   <div class="scan-body d-flex justify-content-center align-items-center">
     <div class="scanner-wrapper">
-      <!-- video element (camera preview) -->
       <video #video autoplay muted playsinline></video>
 
-      <!-- square overlay to indicate scanning area -->
       <div #overlay class="scan-square">
         <div class="corner top-left"></div>
         <div class="corner top-right"></div>
@@ -6303,39 +6533,42 @@ Size: 3.58 kB
 
   <div *ngIf="lastResult && !showBatchQtyInput" class="card">
     <div class="card-body">
-      <h5 class="card-title">Scanned result</h5>
-      <pre style="max-height:140px;overflow:auto">{{ lastResult }}</pre>
-
-      <div *ngIf="lastParsed">
-        <h6>Parsed JSON</h6>
-        <pre style="max-height:140px;overflow:auto">{{ lastParsed | json }}</pre>
+      <h5 class="card-title">Scanned item</h5>
+  
+      <div *ngIf="lastScannedItem; else rawView">
+        <!-- Friendly table for common fields returned by backend -->
+        <table class="table table-sm">
+          <tr><th>Kind</th><td>{{ lastScannedItem.kind || (lastScannedItem.payload?.unitId ? 'unit' : 'batch') || '-' }}</td></tr>
+          <tr><th>Item type</th><td>{{ lastScannedItem.payload?.itemType || lastScannedItem.type || '-' }}</td></tr>
+          <tr><th>Unit ID</th><td>{{ lastScannedItem.unit?.id || lastScannedItem.payload?.unitId || '-' }}</td></tr>
+          <tr><th>Inventory / Batch ID</th><td>{{ lastScannedItem.inventory?.id || lastScannedItem.payload?.id || lastScannedItem.payload?.inventoryId || '-' }}</td></tr>
+          <tr><th>Name / Label</th><td>
+            {{ lastScannedItem.unit?.apparelName || lastScannedItem.inventory?.apparelName || lastScannedItem.payload?.name || lastScannedItem.payload?.sku || '-' }}
+          </td></tr>
+          <tr><th>Qty (live)</th><td>{{ getDisplayedQuantity() }}</td></tr>
+          <tr><th>Status</th><td>{{ lastScannedItem.unit?.status || lastScannedItem.inventory?.status || lastScannedItem.payload?.status || '-' }}</td></tr>
+          <tr><th>Raw payload</th><td style="word-break:break-all;font-size:12px">{{ lastResult }}</td></tr>
+        </table>
       </div>
-
-      <button type="button" class="btn btn-danger me-2" (click)="onReleaseClicked()">Release</button>
-
-      <!-- REPLACED: previously a single prompt-based updateScannedStatus() button.
-           Now an Angular-driven Update status dropdown (no bootstrap JS required). -->
-      <div *ngIf="lastParsed?.unitId" class="d-inline-block me-2 position-relative">
-        <button type="button"
-                class="btn btn-outline-warning"
-                (click)="toggleUpdateMenu($event)"
-                [disabled]="scanning || updating">
-          Update status
-        </button>
-
-        <ul *ngIf="openUpdateMenu" class="dropdown-menu show" style="display:block; position:absolute; z-index:2000; min-width:160px;">
-          <li *ngFor="let s of statuses">
-            <a href="#" class="dropdown-item"
-               (click)="updateScannedStatusTo(s); $event.preventDefault(); $event.stopPropagation()">
-              {{ s }}
-            </a>
-          </li>
-        </ul>
+  
+      <ng-template #rawView>
+        <!-- fallback: show raw text + parsed JSON if any -->
+        <p><strong>Scanned text</strong></p>
+        <pre style="max-height:120px;overflow:auto">{{ lastResult }}</pre>
+        <div *ngIf="lastParsed">
+          <p><strong>Parsed JSON</strong></p>
+          <pre style="max-height:120px;overflow:auto">{{ lastParsed | json }}</pre>
+        </div>
+      </ng-template>
+  
+      <div class="mt-2">
+        <button class="btn btn-danger me-2" (click)="onReleaseClicked()">Release</button>
+        <button class="btn btn-secondary me-2" (click)="scanAgain()">Scan again</button>
+  
       </div>
-
-      <button type="button" class="btn btn-outline-secondary" (click)="startScanner()" [disabled]="scanning">Scan again</button>
     </div>
   </div>
+  
 
   <div *ngIf="showBatchQtyInput" class="card">
     <div class="card-body">
@@ -6353,13 +6586,19 @@ Size: 3.58 kB
       </div>
 
       <div class="d-flex">
-        <!-- IMPORTANT: type="button" so it doesn't submit any form -->
         <button type="button" class="btn btn-danger me-2" (click)="confirmBatchRelease()">Confirm release</button>
         <button type="button" class="btn btn-secondary" (click)="cancelBatchRelease()">Cancel</button>
       </div>
     </div>
   </div>
 </div>
+
+
+
+
+
+
+
 
 
 ================================================================================
@@ -6437,15 +6676,14 @@ Size: 1.6 kB
 
 ================================================================================
 File: src\app\scan\scan.component.ts
-Size: 20.53 kB
+Size: 9.11 kB
 ================================================================================
 
-import { Component, OnDestroy, AfterViewInit, ViewChild, ElementRef, HostListener, ChangeDetectorRef  } from '@angular/core';
+import { Component, OnDestroy, AfterViewInit, ViewChild, ElementRef, ChangeDetectorRef  } from '@angular/core';
 import { BrowserQRCodeReader } from '@zxing/library';
 import { first } from 'rxjs/operators';
 
 import { QrService, RoomService, AlertService } from '@app/_services';
-
 
 @Component({
   selector: 'app-scan',
@@ -6457,19 +6695,19 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
 
   private codeReader = new BrowserQRCodeReader();
   scanning = false;
-  lastResult: string | null = null;
-  lastParsed: any = null;
+  lastResult: string | null = null;        // raw scanned text
+  lastParsed: any = null;                 // parsed JSON (if any)
+  lastScannedItem: any = null;            // enriched object returned by backend
   errorMsg: string | null = null;
 
   // batch-release UI state
   showBatchQtyInput = false;
   batchQty = 1;
-  batchRoomIdInput: number | null = null; // used if payload lacks roomId
+  batchRoomIdInput: number | null = null;
 
-  // UPDATE-STATUS UI state (added)
+  // update-status UI state
   openUpdateMenu = false;
   updating = false;
-  // statuses (adjust to your backend values if needed)
   statuses: string[] = ['in_stock', 'active', 'released', 'lost', 'damaged', 'repair'];
 
   constructor(
@@ -6479,26 +6717,23 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
     private cd: ChangeDetectorRef
   ) {}
 
-  // async ngAfterViewInit() {
-  //   await this.startScanner();
-  // }
   async ngAfterViewInit() {
-    // Start the scanner *after* initial change detection to avoid ExpressionChangedAfterItHasBeenCheckedError
-    setTimeout(() => {
-      // ignore returned promise; startScanner handles errors internally
-      this.startScanner();
-    }, 0);
+    // start after initial detection
+    setTimeout(() => this.startScanner(), 0);
   }
+
   async startScanner() {
     this.errorMsg = null;
     try {
       this.scanning = true;
+      // decodeFromVideoDevice calls our callback each time a result or error occurs
       await this.codeReader.decodeFromVideoDevice(null, this.videoRef.nativeElement, (result, err) => {
         if (result) {
           this.lastResult = result.getText();
-          try { this.lastParsed = JSON.parse(this.lastResult); } catch (e) { this.lastParsed = null; }
-          // stop scanning after a result
+          this.lastParsed = tryParseJson(this.lastResult);
+          // stop live scanning and fetch canonical/enriched data from backend
           this.stopScanner();
+          this.fetchScannedDetails(this.lastResult);
         }
       });
     } catch (err: any) {
@@ -6517,110 +6752,112 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
     this.stopScanner();
   }
 
+  // New: ask backend to verify the scanned text and return canonical item/unit/inventory
+  fetchScannedDetails(qrText: string) {
+    this.lastScannedItem = null;
+    this.errorMsg = null;
+    if (!qrText) { this.errorMsg = 'Empty QR payload'; return; }
+
+    // match backend API signature: verifyQr expects payload object (qrId)
+    this.qrService.verifyQr({ qrId: qrText }).pipe(first()).subscribe({
+      next: (res: any) => {
+        // backend returns { item } — but some implementations might return item directly
+        this.lastScannedItem = res?.item || res;
+        // keep parsed JSON handy
+        this.lastParsed = this.lastParsed || tryParseJson(this.lastResult);
+        this.cd.detectChanges();
+      },
+      error: (err: any) => {
+        this.lastScannedItem = null;
+        this.errorMsg = err?.error?.message || err?.message || 'Item not found';
+        this.cd.detectChanges();
+      }
+    });
+  }
+
+  // Keep Release logic but prefer lastScannedItem for canonical fields
   onReleaseClicked() {
-    if (!this.lastParsed && !this.lastResult) {
-      this.alert.error('No scanned payload available.');
-      return;
-    }
+    const payload = this.lastScannedItem?.payload || this.lastParsed || tryParseJson(this.lastResult) || { raw: this.lastResult };
 
-    const payload = this.lastParsed || tryParseJson(this.lastResult) || { raw: this.lastResult };
-
-    // unit-level QR detection: uses unitId in your payload builder.
+    // unit-level QR
     if (payload.unitId) {
       this.releaseUnit(payload);
       return;
     }
 
-    // batch-level QR detection: presence of id/inventoryId/apparelInventoryId
+    // batch-level QR (inventory id)
     const inventoryId = payload.id || payload.inventoryId || payload.apparelInventoryId;
     if (inventoryId) {
-      // If payload includes roomId we can proceed to qty input immediately
-      if (payload.roomId) {
-        this.batchRoomIdInput = payload.roomId;
-      } else {
-        this.batchRoomIdInput = null; // will prompt user
-      }
-      // show inline qty UI
+      this.batchRoomIdInput = payload.roomId || null;
       this.showBatchQtyInput = true;
       this.batchQty = 1;
       return;
     }
 
-    // unknown payload — fallback: show error
     this.alert.error('Scanned QR is not a recognizable unit or batch payload.');
   }
 
+  // existing releaseUnit kept (uses roomService or qrService as before)
   private releaseUnit(payload: any) {
     const stockroomType = payload.itemType || 'apparel';
     const unitId = payload.unitId;
     if (!unitId) { this.alert.error('Unit ID not found in QR payload.'); return; }
 
-    // If your backend requires roomId for release, prefer using payload.roomId or batchRoomIdInput
+    // prefer roomService call when roomId exists
     const roomId = payload.roomId || this.batchRoomIdInput || null;
-
     if (stockroomType === 'apparel' && roomId) {
       const roomIdNum = Number(roomId);
       const releasePayload = { unitId: Number(unitId) };
-      // call the room service and SUBSCRIBE (very important)
       this.roomService.releaseApparel(Number(roomIdNum), releasePayload).pipe(first()).subscribe({
-        next: (res: any) => {
-          this.alert.success('Unit released successfully.');
-          // reset UI and restart scanner
-          this.resetAfterRelease();
-          this.cd.detectChanges();
-          // Restart scanning after a short delay so camera restarts cleanly
-          setTimeout(() => this.startScanner(), 300);
-        },
-        error: (err: any) => {
-          const msg = err?.error?.message || err?.message || String(err);
-          this.alert.error(`Failed to release: ${msg}`);
-          this.cd.detectChanges();
-        }
+        next: () => { this.alert.success('Unit released successfully.'); this.resetAfterRelease(); setTimeout(()=>this.startScanner(), 300); },
+        error: (err) => { const msg = err?.error?.message || err?.message || String(err); this.alert.error(`Failed to release: ${msg}`); }
       });
       return;
     }
 
-    // fallback: if you have a generic qrService.releaseUnit
+    // fallback to qrService.releaseUnit (if implemented)
     if (typeof this.qrService.releaseUnit === 'function') {
       this.qrService.releaseUnit(stockroomType, unitId).pipe(first()).subscribe({
-        next: () => {
-          this.alert.success('Unit released successfully.');
-          this.resetAfterRelease();
-          setTimeout(() => this.startScanner(), 300);
-        },
-        error: (err: any) => {
-          const msg = err?.error?.message || err?.message || String(err);
-          this.alert.error(`Failed to release: ${msg}`);
-        }
+        next: () => { this.alert.success('Unit released successfully.'); this.resetAfterRelease(); setTimeout(()=>this.startScanner(), 300); },
+        error: (err) => { const msg = err?.error?.message || err?.message || String(err); this.alert.error(`Failed to release: ${msg}`); }
       });
       return;
     }
 
-    // no release implementation available
     this.alert.error('Release not implemented for this payload (adapt releaseUnit to call your API).');
   }
 
-  // batch release confirm (keeps your original behavior)
   confirmBatchRelease() {
-    if (!this.lastParsed && !this.lastResult) { this.alert.error('No scanned payload available.'); return; }
-
+    if (!this.lastParsed && !this.lastResult) {
+      this.alert.error('No scanned payload available.');
+      return;
+    }
+  
     const payload = this.lastParsed || tryParseJson(this.lastResult) || { raw: this.lastResult };
+  
+    // prefer the inventory id names used across backend
     const inventoryId = payload.id || payload.inventoryId || payload.apparelInventoryId;
-    if (!inventoryId) { this.alert.error('Inventory id not found'); return; }
-
+    if (!inventoryId) {
+      this.alert.error('Inventory id not found in scanned QR payload.');
+      return;
+    }
+  
     const roomId = payload.roomId || this.batchRoomIdInput;
-    if (!roomId) { this.alert.error('Room id required for batch release'); return; }
-
-    const releasePayload = {
-      inventoryId: inventoryId,
-      qty: Number(this.batchQty)
+    if (!roomId) {
+      this.alert.error('Room id required for batch release.');
+      return;
+    }
+  
+    // Build payload with the exact field names backend expects
+    const releasePayload: any = {
+      apparelInventoryId: Number(inventoryId),
+      releaseApparelQuantity: Number(this.batchQty)
     };
-
-    // call the room service and SUBSCRIBE (very important)
+  
+    // Call the room service (subscribe is important)
     this.roomService.releaseApparel(Number(roomId), releasePayload).pipe(first()).subscribe({
       next: (res: any) => {
         this.alert.success('Batch released successfully.');
-        // reset UI and restart scanner
         this.resetAfterRelease();
         // Restart scanning after a short delay so camera restarts cleanly
         setTimeout(() => this.startScanner(), 300);
@@ -6638,128 +6875,54 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
     this.batchRoomIdInput = null;
   }
 
-  private resetAfterRelease() {
+  resetAfterRelease() {
     this.lastResult = null;
     this.lastParsed = null;
+    this.lastScannedItem = null;
     this.showBatchQtyInput = false;
     this.batchQty = 1;
     this.batchRoomIdInput = null;
-    // optionally restart scanner
-    this.startScanner();
+    this.openUpdateMenu = false;
+    this.updating = false;
     this.cd.detectChanges();
   }
 
-  /***********************
-   * UPDATE STATUS feature
-   * Replaces the old prompt-based update. Adds Angular dropdown + API calls.
-   ***********************/
-
-  /** Toggle the update status menu (angular-driven) */
-  toggleUpdateMenu(event?: Event) {
-    if (event) event.stopPropagation();
-    this.openUpdateMenu = !this.openUpdateMenu;
+  // New user action: restart scanning without leaving the view
+  scanAgain() {
+    this.resetAfterRelease();
+    setTimeout(()=> this.startScanner(), 100);
   }
 
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(_: Event) {
-    // close menu when clicking outside
-    this.openUpdateMenu = false;
-  }
+  // Friendly quantity extractor (defensive: many possible shapes)
+  getDisplayedQuantity(): number | string {
+    const it = this.lastScannedItem;
+    if (!it) return '-';
 
-  /** Try to extract a numeric unit id from the scanned payload or raw string. */
-  private extractUnitId(): number | null {
-    const p = this.lastParsed;
-    if (!p && !this.lastResult) return null;
+    // If backend returned a "unit" with a parent inventory
+    const unit = it.unit || (it.payload && it.payload.unit) || null;
+    const inv = it.inventory || it.batch || it.inventoryRecord || null;
 
-    const candidates = [
-      p?.unitId, p?.id, p?.apparelId, p?.apparelUnitId,
-      p?.adminSupplyUnitId, p?.genItemUnitId, p?.unit_id
+    const cand = [
+      unit?.totalQuantity, unit?.quantity, unit?.qty,
+      inv?.totalQuantity, inv?.quantity, inv?.qty,
+      it?.totalQuantity, it?.quantity, it?.qty
     ];
-
-    for (const c of candidates) {
-      if (c !== undefined && c !== null && c !== '') return +c;
-    }
-
-    // try parse as plain number string
-    if (!p && this.lastResult && /^\d+$/.test(this.lastResult)) return +this.lastResult;
-
-    return null;
+    for (const c of cand) if (c !== undefined && c !== null) return c;
+    return '-';
   }
 
-  /** Get item type encoded in payload if present */
-  private extractItemType(): string | null {
-    const p = this.lastParsed;
-    if (!p) return null;
-    return p.itemType || p.type || p.stockroomType || p.kind || null;
+  // helpers used by update/status UI (left unchanged)
+  extractUnitId() {
+    const p = this.lastScannedItem?.payload || this.lastParsed || tryParseJson(this.lastResult);
+    return p?.unitId || null;
   }
-
-  /** Optional: room id encoded in QR payload */
-  private extractRoomId(): number | null {
-    const p = this.lastParsed;
-    if (!p) return null;
-    const r = p.roomId || p.room_id || p.room || null;
-    return r ? +r : null;
+  extractItemType() {
+    const p = this.lastScannedItem?.payload || this.lastParsed || tryParseJson(this.lastResult);
+    return p?.itemType || p?.type || null;
   }
-
-  /**
-   * Called when user selects a status from the dropdown.
-   * Uses roomService.updateApparelStatus(...) if itemType === 'apparel' and roomId exists,
-   * otherwise falls back to qrService.updateUnitStatus(itemType, unitId, { status }).
-   */
-  updateScannedStatusTo(status: string) {
-    const unitId = this.extractUnitId();
-    if (!unitId) {
-      this.alert.error('Scanned QR does not contain a unit id.');
-      return;
-    }
-
-    const itemTypeRaw = this.extractItemType();
-    const itemType = itemTypeRaw ? itemTypeRaw.toString() : 'apparel'; // default to apparel
-    const roomId = this.extractRoomId();
-
-    this.updating = true;
-    // optional immediate UI feedback
-    this.alert.success(`Updating status to "${status}"...`);
-
-    // Preferred: if it's an apparel and roomId exists use the room-scoped endpoint
-    if (itemType === 'apparel' && roomId) {
-      this.roomService.updateApparelStatus(Number(roomId), Number(unitId), status).pipe(first()).subscribe({
-        next: () => {
-          this.updating = false;
-          this.openUpdateMenu = false;
-          this.alert.success(`Status set to "${status}"`);
-          this.resetAfterRelease();
-          this.cd.detectChanges();
-        },
-        error: (err) => {
-          this.updating = false;
-          this.openUpdateMenu = false;
-          console.error('[Scan] updateApparelStatus error', err);
-          const msg = err?.error?.message || err?.message || 'Failed to update status';
-          this.alert.error(msg);
-          this.cd.detectChanges();
-        }
-      });
-      return;
-    }
-
-    // Fallback: generic QR/unit update endpoint
-    // IMPORTANT: ensure qrService.updateUnitStatus(type, unitId, payload) exists in your project.
-    this.qrService.updateUnitStatus(itemType, unitId, { status }).pipe(first()).subscribe({
-      next: () => {
-        this.updating = false;
-        this.openUpdateMenu = false;
-        this.alert.success(`Status set to "${status}"`);
-        this.resetAfterRelease();
-      },
-      error: (err) => {
-        this.updating = false;
-        this.openUpdateMenu = false;
-        console.error('[Scan] updateUnitStatus error', err);
-        const msg = err?.error?.message || err?.message || 'Failed to update status';
-        this.alert.error(msg);
-      }
-    });
+  extractRoomId() {
+    const p = this.lastScannedItem?.payload || this.lastParsed || tryParseJson(this.lastResult);
+    return p?.roomId || null;
   }
 }
 
@@ -6767,7 +6930,6 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
 function tryParseJson(s: any) {
   try { return JSON.parse(s); } catch (e) { return null; }
 }
-
 
 ================================================================================
 File: src\app\scan\scan.module.ts
@@ -7120,15 +7282,15 @@ Size: 307 B
 
 ================================================================================
 File: src\app\_components\alert.component.ts
-Size: 3.07 kB
+Size: 2.51 kB
 ================================================================================
 
-﻿import { Component, OnInit, OnDestroy, Input } from '@angular/core';
-import { Router, NavigationStart } from '@angular/router';
-import { Subscription } from 'rxjs';
+﻿import { Component, OnInit, OnDestroy, Input }  from '@angular/core';
+import { Router, NavigationStart }              from '@angular/router';
+import { Subscription }                         from 'rxjs';
 
 import { Alert, AlertType } from '@app/_models';
-import { AlertService } from '@app/_services';
+import { AlertService }     from '@app/_services';
 
 @Component({ selector: 'alert', templateUrl: 'alert.component.html' })
 export class AlertComponent implements OnInit, OnDestroy {
@@ -7142,29 +7304,22 @@ export class AlertComponent implements OnInit, OnDestroy {
     constructor(private router: Router, private alertService: AlertService) { }
 
     ngOnInit() {
-        // subscribe to new alert notifications
         this.alertSubscription = this.alertService.onAlert(this.id)
             .subscribe(alert => {
-                // clear alerts when an empty alert is received
                 if (!alert.message) {
-                    // filter out alerts without 'keepAfterRouteChange' flag
                     this.alerts = this.alerts.filter(x => x.keepAfterRouteChange);
 
-                    // remove 'keepAfterRouteChange' flag on the rest
                     this.alerts.forEach(x => delete x.keepAfterRouteChange);
                     return;
                 }
 
-                // add alert to array
                 this.alerts.push(alert);
 
-                // auto close alert if required
                 if (alert.autoClose) {
                     setTimeout(() => this.removeAlert(alert), 3000);
                 }
             });
 
-        // clear alerts on location change
         this.routeSubscription = this.router.events.subscribe(event => {
             if (event instanceof NavigationStart) {
                 this.alertService.clear(this.id);
@@ -7173,25 +7328,20 @@ export class AlertComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy() {
-        // unsubscribe to avoid memory leaks
         this.alertSubscription.unsubscribe();
         this.routeSubscription.unsubscribe();
     }
 
     removeAlert(alert: Alert) {
-        // check if already removed to prevent error on auto close
         if (!this.alerts.includes(alert)) return;
 
         if (this.fade) {
-            // fade out alert
             alert.fade = true;
 
-            // remove alert after faded out
             setTimeout(() => {
                 this.alerts = this.alerts.filter(x => x !== alert);
             }, 250);
         } else {
-            // remove alert
             this.alerts = this.alerts.filter(x => x !== alert);
         }
     }
@@ -7230,29 +7380,49 @@ export * from './alert.component';
 
 ================================================================================
 File: src\app\_helpers\app.initializer.ts
-Size: 326 B
+Size: 871 B
 ================================================================================
 
-import { catchError, of } from 'rxjs';
-
-import { AccountService } from '@app/_services';
+import { APP_INITIALIZER }  from '@angular/core';
+import { of }               from 'rxjs';
+import { catchError }       from 'rxjs/operators';
+import { AccountService }   from '@app/_services';
 
 export function appInitializer(accountService: AccountService) {
-    return () => accountService.refreshToken()
-        .pipe(
-            // catch error to start app on success or failure
-            catchError(() => of())
-        );
+  return () => {
+    try {
+      const hasAccount = !!localStorage.getItem('account');
+      const hasRefreshCookie = typeof document !== 'undefined' && document.cookie && document.cookie.includes('refreshToken=');
+
+      if (!hasAccount && !hasRefreshCookie) {
+        return Promise.resolve();
+      }
+
+      return accountService.refreshToken().pipe(
+        catchError(() => of(null))
+      ).toPromise();
+    } catch (e) {
+      return Promise.resolve();
+    }
+  };
 }
+
+export const appInitializerProvider = [
+  { provide: APP_INITIALIZER, useFactory: appInitializer, deps: [AccountService], multi: true }
+];
 
 ================================================================================
 File: src\app\_helpers\auth.guard.ts
-Size: 2.51 kB
+Size: 895 B
 ================================================================================
 
-﻿//main
-import { Injectable } from '@angular/core';
-import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+﻿import { Injectable } from '@angular/core';
+import { 
+    Router, 
+    CanActivate, 
+    ActivatedRouteSnapshot, 
+    RouterStateSnapshot 
+} from '@angular/router';
 
 import { AccountService } from '@app/_services';
 
@@ -7266,18 +7436,13 @@ export class AuthGuard implements CanActivate {
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
         const account = this.accountService.accountValue;
         if (account) {
-            // check if route is restricted by role
             if (route.data.roles && !route.data.roles.includes(account.role)) {
-                // role not authorized so redirect to home page
                 this.router.navigate(['/']);
                 return false;
             }
-
-            // authorized so return true
             return true;
         }
 
-        // not logged in so redirect to login page with the return url 
         this.router.navigate(['/account/login'], { queryParams: { returnUrl: state.url } });
         return false;
     }
@@ -7285,41 +7450,50 @@ export class AuthGuard implements CanActivate {
 
 ================================================================================
 File: src\app\_helpers\error.interceptor.ts
-Size: 2.31 kB
+Size: 1.31 kB
 ================================================================================
 
-//main
 import { Injectable } from '@angular/core';
-import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { 
+  Observable, 
+  throwError 
+} from 'rxjs';
+import { 
+  HttpRequest, 
+  HttpHandler, 
+  HttpEvent, 
+  HttpInterceptor 
+} from '@angular/common/http';
 
 import { AccountService, AlertService } from '@app/_services';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
-    constructor(private accountService: AccountService, private alertService: AlertService) { }
+  constructor(private accountService: AccountService, private alertService: AlertService) {}
 
-    intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-        return next.handle(request).pipe(catchError(err => {
+  intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    return next.handle(request).pipe(catchError(err => {
+      const url = (err && err.url) || request?.url || '';
 
-            if (err.status === 401 && this.accountService.accountValue) {
-                console.warn('Unauthorize  (401).', err);
-                this.accountService.logout();
-            }
-            
-            // (optional) handle 403 gracefully: notify user but do NOT logout
-            if (err.status === 403) {
-                console.warn('Permission denied (403).', err);
-                // optionally show an alert instead of logging out:
-                this.alertService?.error('You do not have permission to perform this action.');
-            }
+      if (typeof url === 'string' && url.includes('/accounts/refresh-token')) {
+        return throwError(() => new Error('refresh-failed'));
+      }
 
-            const error = (err && err.error && err.error.message) || err.statusText;
-            console.error(err);
-            return throwError(() => error);
-        }))
-    }
+      if (err.status === 401 && this.accountService.accountValue) {
+        console.warn('Unauthorized - logging out', err);
+        this.accountService.logout();
+      }
+
+      if (err.status === 403) {
+        this.alertService?.error('You do not have permission to perform this action.');
+      }
+
+      const error = (err && err.error && err.error.message) || err.statusText || 'Server error';
+      console.error(err);
+      return throwError(() => (error));
+    }));
+  }
 }
 
 ================================================================================
@@ -7739,14 +7913,19 @@ export * from './must-match.validator';
 
 ================================================================================
 File: src\app\_helpers\jwt.interceptor.ts
-Size: 998 B
+Size: 1.02 kB
 ================================================================================
 
 import { Injectable } from '@angular/core';
-import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { 
+    HttpRequest, 
+    HttpHandler, 
+    HttpEvent, 
+    HttpInterceptor 
+} from '@angular/common/http';
 
-import { environment } from '@environments/environment';
+import { environment }    from '@environments/environment';
 import { AccountService } from '@app/_services';
 
 @Injectable()
@@ -7770,12 +7949,11 @@ export class JwtInterceptor implements HttpInterceptor {
 
 ================================================================================
 File: src\app\_helpers\must-match.validator.ts
-Size: 889 B
+Size: 689 B
 ================================================================================
 
 import { AbstractControl } from '@angular/forms';
 
-// custom validator to check that two fields match
 export function MustMatch(controlName: string, matchingControlName: string) {
     return (group: AbstractControl) => {
         const control = group.get(controlName);
@@ -7785,12 +7963,10 @@ export function MustMatch(controlName: string, matchingControlName: string) {
             return null;
         }
 
-        // return if another validator has already found an error on the matchingControl
         if (matchingControl.errors && !matchingControl.errors.mustMatch) {
             return null;
         }
 
-        // set error on matchingControl if validation fails
         if (control.value !== matchingControl.value) {
             matchingControl.setErrors({ mustMatch: true });
         } else {
@@ -7802,33 +7978,33 @@ export function MustMatch(controlName: string, matchingControlName: string) {
 
 ================================================================================
 File: src\app\_models\account.ts
-Size: 210 B
+Size: 225 B
 ================================================================================
 
 ﻿import { Role } from './role';
 
 export class Account {
     AccountId?: number;
-    title?: string;
+    title?:     string;
     firstName?: string;
-    lastName?: string;
-    email?: string;
-    role?: Role;
-    jwtToken?: string;
+    lastName?:  string;
+    email?:     string;
+    role?:      Role;
+    jwtToken?:  string;
 }
 
 ================================================================================
 File: src\app\_models\alert.ts
-Size: 429 B
+Size: 541 B
 ================================================================================
 
 export class Alert {
-    id?: string;
-    type?: AlertType;
-    message?: string;
-    autoClose?: boolean;
-    keepAfterRouteChange?: boolean;
-    fade?: boolean;
+    id?:                    string;
+    type?:                  AlertType;
+    message?:               string;
+    autoClose?:             boolean;
+    keepAfterRouteChange?:  boolean;
+    fade?:                  boolean;
 
     constructor(init?: Partial<Alert>) {
         Object.assign(this, init);
@@ -7843,9 +8019,9 @@ export enum AlertType {
 }
 
 export class AlertOptions {
-    id?: string;
-    autoClose?: boolean;
-    keepAfterRouteChange?: boolean;
+    id?:                    string;
+    autoClose?:             boolean;
+    keepAfterRouteChange?:  boolean;
 }
 
 ================================================================================
@@ -7864,78 +8040,77 @@ export * from './inventory.model';
 
 ================================================================================
 File: src\app\_models\inventory.model.ts
-Size: 2.29 kB
+Size: 949 B
 ================================================================================
 
 export interface BaseReceivePayload {
-    receivedFrom?: string;
-    receivedBy?: number; // accountId
-    notes?: string;
+    receivedFrom?:  string;
+    receivedBy?:    number;
+    notes?:         string;
   }
   
   export interface ApparelReceivePayload extends BaseReceivePayload {
-    apparelName: string;
-    apparelLevel: string;
-    apparelType: string;
-    apparelFor: string;
-    apparelSize: string;
-    apparelQuantity: number;
+    apparelName:      string;
+    apparelLevel:     string;
+    apparelType:      string;
+    apparelFor:       string;
+    apparelSize:      string;
+    apparelQuantity:  number;
   }
   
   export interface SupplyReceivePayload extends BaseReceivePayload {
-    supplyName: string;
-    supplyType?: string;
+    supplyName:     string;
+    supplyType?:    string;
     supplyMeasure?: string;
     supplyQuantity: number;
   }
   
   export interface GenItemReceivePayload extends BaseReceivePayload {
-    genItemName: string;
-    genItemType?: string;
-    genItemSize?: string;
-    genItemQuantity: number;
+    genItemName:      string;
+    genItemType?:     string;
+    genItemSize?:     string;
+    genItemQuantity:  number;
   }
   
   // Optional: API response type
   export interface ReceiveResult {
-    success: boolean;
-    message?: string;
+    success:    boolean;
+    message?:   string;
     createdId?: number;
   }
 
 ================================================================================
 File: src\app\_models\item-request.model.ts
-Size: 1.06 kB
+Size: 897 B
 ================================================================================
 
-// src/app/_models/item-request.model.ts
 export interface ItemRequestedEntry {
-    id?: number;           // optional row id in item request
-    itemId?: number | null;
-    itemType?: string | null; // e.g. 'apparel'|'supply'|'genItem'
-    quantity?: number;
-    note?: string | null;
+    id?:        number;  
+    itemId?:    number | null;
+    itemType?:  string | null;
+    quantity?:  number;
+    note?:      string | null;
     [key: string]: any;
   }
   
   export interface ItemRequestedInfo {
-    kind?: 'inventory' | 'unit' | 'unknown' | null;
-    type?: string | null;
+    kind?:      'inventory' | 'unit' | 'unknown' | null;
+    type?:      string | null;
     inventory?: any | null;
-    unit?: any | null;
+    unit?:      any | null;
   }
   
   export interface ItemRequest {
-    itemRequestId?: number;
-    id?: number;
-    acccountId?: number;
-    requesterRoomId?: number | string | null;
-    items?: ItemRequestedEntry[];          // list of requested entries
-    status?: string;                       // 'pending'|'accepted'|'declined'|'fulfilled'
-    note?: string | null;
-    createdAt?: string | Date;
-    updatedAt?: string | Date;
-    requestedItemsInfo?: ItemRequestedInfo[] | null; // additional details loaded from backend for each item
+    itemRequestId?:       number;
+    id?:                  number;
+    acccountId?:          number;
+    requesterRoomId?:     number | null;
+    items?:               ItemRequestedEntry[];
+    status?:              string; 
+    note?:                string | null;
+    createdAt?:           string | Date;
+    updatedAt?:           string | Date;
+    requestedItemsInfo?:  ItemRequestedInfo[] | null;
     [key: string]: any;
   }
   
@@ -7964,119 +8139,116 @@ export default ReceiveApparel;
 
 ================================================================================
 File: src\app\_models\role.ts
-Size: 154 B
+Size: 199 B
 ================================================================================
 
 export enum Role {
-    SuperAdmin = 'superAdmin',
-    Admin = 'admin',
-    User = 'user',
-    StockroomAdmin = 'stockroomAdmin',
-    Teacher = 'teacher'
+    SuperAdmin =        'superAdmin',
+    Admin =             'admin',
+    User =              'user',
+    StockroomAdmin =    'stockroomAdmin',
+    Teacher =           'teacher'
 }
 
 ================================================================================
 File: src\app\_models\room.ts
-Size: 215 B
+Size: 243 B
 ================================================================================
 
 import { Account} from '@app/_models';
 
 export interface Room {
-    roomId: number;
-    roomName: string;
-    roomFloor: string;
-    roomType: string;
-    stockroomType: string;
-    roomInCharge: Account;
+    roomId:         number;
+    roomName:       string;
+    roomFloor:      string;
+    roomType:       string;
+    stockroomType:  string;
+    roomInCharge:   Account;
 }
 
 ================================================================================
 File: src\app\_models\stock-request.model.ts
-Size: 1.36 kB
+Size: 1.43 kB
 ================================================================================
 
-// src/app/_models/stock-request.model.ts
 export interface InventoryModel {
-  // inventory aggregate (fields vary across models; keep flexible)
-  id?: number;
-  apparelInventoryId?: number;
-  adminSupplyInventoryId?: number;
-  genItemInventoryId?: number;
-  apparelName?: string;
-  supplyName?: string;
-  genItemName?: string;
-  roomId?: number;
-  totalQuantity?: number;
-  supplyQuantity?: number;
-  quantity?: number;
+  id?:                      number;
+  apparelInventoryId?:      number;
+  adminSupplyInventoryId?:  number;
+  genItemInventoryId?:      number;
+  apparelName?:             string;
+  supplyName?:              string;
+  genItemName?:             string;
+  roomId?:                  number;
+  totalQuantity?:           number;
+  supplyQuantity?:          number;
+  quantity?:                number;
   [key: string]: any;
 }
 
 export interface UnitModel {
-  // unit row (individual item) — fields vary per model
-  id?: number;
-  apparelInventoryId?: number;
-  adminSupplyInventoryId?: number;
-  genItemInventoryId?: number;
-  status?: string;
-  roomId?: number;
+  id?:                      number;
+  apparelInventoryId?:      number;
+  adminSupplyInventoryId?:  number;
+  genItemInventoryId?:      number;
+  status?:                  string;
+  roomId?:                  number;
   [key: string]: any;
 }
 
 export interface RequestedItem {
-  kind: 'inventory' | 'unit' | 'unknown' | null;
-  type?: 'apparel' | 'supply' | 'genitem' | string | null;
+  kind:   'inventory' | 'unit' | 'unknown' | null;
+  type?:  'apparel' | 'supply' | 'genitem' | string | null;
   inventory?: InventoryModel | null;
-  unit?: UnitModel | null;
+  unit?:      UnitModel | null;
 }
 
 export interface StockRequest {
-  stockRequestId?: number;
-  id?: number; // sometimes backend uses id
-  acccountId?: number;
+  stockRequestId?:  number;
+  id?:              number;
+  acccountId?:      number;
   requesterRoomId?: number | string;
-  itemId?: number | null;
-  itemType?: string | null;
-  quantity?: number;
-  note?: string;
-  status?: string;
-  createdAt?: string | Date;
-  updatedAt?: string | Date;
-  requestedItem?: RequestedItem | null;
+  itemId?:          number | null;
+  itemType?:        string | null;
+  quantity?:        number;
+  note?:            string;
+  status?:          string;
+  createdAt?:       string | Date;
+  updatedAt?:       string | Date;
+  requestedItem?:   RequestedItem | null;
   [key: string]: any;
 }
 
 
 ================================================================================
 File: src\app\_models\transfer.model.ts
-Size: 474 B
+Size: 511 B
 ================================================================================
 
 export interface TransferItem {
-    itemType?: 'apparel' | 'supply' | 'genItem' | string;
-    itemId?: number | null;
-    quantity?: number;
-    note?: string | null;
+    itemType?:  'apparel' | 'supply' | 'genItem' | string;
+    itemId?:    number | null;
+    quantity?:  number;
+    note?:      string | null;
     [key: string]: any;
   }
   
   export interface Transfer {
-    transferId?: number;
-    fromRoomId?: number;
-    toRoomId?: number;
-    createdBy?: number;
-    createdAt?: string;
-    status?: string; 
-    items?: TransferItem[];
-    note?: string | null;
+    transferId?:  number;
+    fromRoomId?:  number;
+    toRoomId?:    number;
+    createdBy?:   number;
+    createdAt?:   string;
+    status?:      string; 
+    items?:       TransferItem[];
+    note?:        string | null;
     [key: string]: any;
   }
   
 
 ================================================================================
 File: src\app\_services\account.service.ts
-Size: 13.9 kB
+Size: 5.36 kB
 ================================================================================
 
 ﻿import { Injectable }                       from '@angular/core';
@@ -8099,16 +8271,12 @@ export class AccountService {
         private router: Router,
         private http: HttpClient,
     ) {
-        // this.accountSubject = new BehaviorSubject<Account | null>(null);
-        // this.account = this.accountSubject.asObservable();
         const stored = localStorage.getItem('account');
         const initialAccount = stored ? JSON.parse(stored) : null;
         this.accountSubject = new BehaviorSubject<Account | null>(initialAccount);
         this.account = this.accountSubject.asObservable();
 
-        // if there is an account saved, start the refresh timer
         if (initialAccount) {
-            // ensure timer starts (in case account was loaded from localStorage)
             this.startRefreshTokenTimer();
         }
     }
@@ -8136,7 +8304,6 @@ export class AccountService {
     refreshToken() {
         return this.http.post<any>(`${baseUrl}/refresh-token`, {}, { withCredentials: true })
             .pipe(map((account) => {
-                // persist
                 localStorage.setItem('account', JSON.stringify(account));
                 this.accountSubject.next(account);
                 this.startRefreshTokenTimer();
@@ -8144,9 +8311,8 @@ export class AccountService {
             }));
     }
     revokeToken() {
-        const refreshToken = /* this.currentRefreshToken() || */ localStorage.getItem('refreshToken');
+        const refreshToken = localStorage.getItem('refreshToken');
         if (!refreshToken) {
-          // nothing to revoke
           return of(null);
         }
     
@@ -8159,10 +8325,6 @@ export class AccountService {
             })
           );
     }
-    // currentRefreshToken(): string | null {
-    //     const acct = JSON.parse(localStorage.getItem('account') || 'null');
-    //     return acct?.refreshToken ?? null;
-    // }
     register(account: Account) {
         return this.http.post(`${baseUrl}/register`, account);
     }
@@ -8190,9 +8352,7 @@ export class AccountService {
     update(AccountId: number, params: any) {
         return this.http.put(`${baseUrl}/${AccountId}`, params)
             .pipe(map((account: any) => {
-                // update the current account if it was updated
                 if (account.AccountId === this.accountValue?.AccountId) {
-                    // publish updated account to subscribers
                     account = { ...this.accountValue, ...account };
                     this.accountSubject.next(account);
                     localStorage.setItem('account', JSON.stringify(account));
@@ -8203,7 +8363,6 @@ export class AccountService {
     delete(AccountId: number) {
         return this.http.delete(`${baseUrl}/${AccountId}`)
             .pipe(finalize(() => {
-                // auto logout if the logged in account was deleted
                 if (AccountId === this.accountValue?.AccountId)
                     this.logout();
             }));
@@ -8212,11 +8371,9 @@ export class AccountService {
     // helper methods
     private refreshTokenTimeout?: any;
     private startRefreshTokenTimer() {
-        // parse json object from base64 encoded jwt token
         const jwtBase64 = this.accountValue!.jwtToken!.split('.')[1];
         const jwtToken = JSON.parse(atob(jwtBase64));
 
-        // set a timeout to refresh the token a minute before it expires
         const expires = new Date(jwtToken.exp * 1000);
         const timeout = expires.getTime() - Date.now() - (60 * 1000);
         this.refreshTokenTimeout = setTimeout(() => this.refreshToken().subscribe(), timeout);
@@ -8224,7 +8381,17 @@ export class AccountService {
     private stopRefreshTokenTimer() {
         clearTimeout(this.refreshTokenTimeout);
     }
+
+    hasAnyAccount() {
+        return this.http.get<{ exists: boolean }>(`${baseUrl}/exists`);
+      }
+      hasAnyAccountFlag() {
+        return this.hasAnyAccount().pipe(
+          map(resp => !!(resp && resp.exists))
+        );
+      }
 }
+
 
 ================================================================================
 File: src\app\_services\alert.service.ts
@@ -8289,10 +8456,9 @@ export * from './transfer.service';
 
 ================================================================================
 File: src\app\_services\item-request.service.ts
-Size: 1.76 kB
+Size: 1.95 kB
 ================================================================================
 
-// src/app/_services/item-request.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '@environments/environment';
@@ -8332,6 +8498,12 @@ export class ItemRequestService {
     return this.http.post<any>(`${this.base}/${n}/decline`, { reason });
   }
 
+  release(id: any): Observable<any> {
+    const n = Number(id);
+    if (!Number.isFinite(n) || n <= 0) return throwError(() => new Error('Invalid id'));
+    return this.http.post<any>(`${this.base}/${n}/release`, {});
+  }
+
   fulfill(id: any): Observable<any> {
     const n = Number(id);
     if (!Number.isFinite(n) || n <= 0) return throwError(() => new Error('Invalid id'));
@@ -8342,7 +8514,7 @@ export class ItemRequestService {
 
 ================================================================================
 File: src\app\_services\qr.service.ts
-Size: 1.4 kB
+Size: 1.54 kB
 ================================================================================
 
 import { Injectable }                 from '@angular/core';
@@ -8356,12 +8528,6 @@ export class QrService {
 
   constructor(private http: HttpClient) {}
 
-  getBatchQr(stockroomType: string, inventoryId: number): Observable<HttpResponse<Blob>> {
-    return this.http.get(`${this.base}/${stockroomType}/${inventoryId}/qrcode`, {
-      observe: 'response',
-      responseType: 'blob'
-    });
-  }
   releaseUnit(stockroomType: string, apparelId: number, body: { actorId?: number } = {}): Observable<any> {
     return this.http.post<any>(`${this.base}/${stockroomType}/unit/${apparelId}/release`, body);
   }
@@ -8376,12 +8542,19 @@ export class QrService {
   getUnitQr(stockroomType: string, unitId: number) {
     return this.http.get(`${this.base}/${stockroomType}/unit/${unitId}/qrcode`, { responseType: 'blob' });
   }
+  getBatchQr(stockroomType: string, inventoryId: number): Observable<Blob> {
+    return this.http.get(`${this.base}/${stockroomType}/${inventoryId}/qrcode`, { responseType: 'blob' });
+  }
+
+  downloadAllPdf(stockroomType: string, roomId: number): Observable<Blob> {
+    return this.http.get(`${this.base}/${stockroomType}/room/${roomId}/pdf-all`, { responseType: 'blob' });
+  }
 }
 
 
 ================================================================================
 File: src\app\_services\room.service.ts
-Size: 11.27 kB
+Size: 7.83 kB
 ================================================================================
 
 import { Injectable }   from '@angular/core';
@@ -8590,10 +8763,9 @@ export class StockRequestService {
 
 ================================================================================
 File: src\app\_services\transfer.service.ts
-Size: 2.03 kB
+Size: 1.73 kB
 ================================================================================
 
-// src/app/_services/transfer.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '@environments/environment';
@@ -8619,26 +8791,22 @@ export class TransferService {
     return this.http.get<any>(`${this.base}/${n}`).pipe(map(res => (res?.data || res) as Transfer));
   }
 
-  // create transfer (from -> to). backend should set initial status 'in_transfer'
   create(payload: Partial<Transfer>): Observable<any> {
     return this.http.post<any>(this.base, payload);
   }
 
-  // accept transferred items (receiver confirms)
   accept(id: any): Observable<any> {
     const n = Number(id);
     if (!Number.isFinite(n) || n <= 0) return throwError(() => new Error('Invalid id'));
     return this.http.post<any>(`${this.base}/${n}/accept`, {});
   }
 
-  // create a return request for a transfer (receiver returns items)
   return(id: any): Observable<any> {
     const n = Number(id);
     if (!Number.isFinite(n) || n <= 0) return throwError(() => new Error('Invalid id'));
     return this.http.post<any>(`${this.base}/${n}/return`, {});
   }
 
-  // accept the returned items (original sender confirms)
   acceptReturn(id: any): Observable<any> {
     const n = Number(id);
     if (!Number.isFinite(n) || n <= 0) return throwError(() => new Error('Invalid id'));

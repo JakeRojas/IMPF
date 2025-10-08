@@ -55,9 +55,35 @@ export class ItemRequestViewComponent implements OnInit {
     });
   }
 
-  accept() { if (!confirm('Accept?')) return; this.ir.accept(this.id).pipe(first()).subscribe(() => { this.alert.success('Accepted'); this.load(); }, e => this.alert.error(this._errToString(e))); }
-  decline() { const reason = prompt('Reason?') ?? undefined; this.ir.decline(this.id, reason).pipe(first()).subscribe(() => { this.alert.success('Declined'); this.load(); }, e => this.alert.error(this._errToString(e))); }
-  fulfill() { if (!confirm('Fulfill?')) return; this.ir.fulfill(this.id).pipe(first()).subscribe(() => { this.alert.success('Fulfilled'); this.load(); }, e => this.alert.error(this._errToString(e))); }
+  accept() { 
+    if (!confirm('Accept?')) 
+    return; 
+      this.ir.accept(this.id)
+        .pipe(first())
+        .subscribe(() => { 
+          this.alert.success('Accepted'); 
+          this.load(); 
+        }, e => this.alert.error(this._errToString(e))); 
+  }
+  decline() {
+    const reason = prompt('Reason?') ?? undefined; 
+    this.ir.decline(this.id, reason)
+      .pipe(first())
+      .subscribe(() => { 
+        this.alert.success('Declined'); 
+        this.load(); 
+      }, e => this.alert.error(this._errToString(e))); 
+  }
+  fulfill() { 
+    if (!confirm('Fulfill?')) 
+    return; 
+      this.ir.fulfill(this.id)
+        .pipe(first())
+        .subscribe(() => { 
+      this.alert.success('Fulfilled'); 
+      this.load(); 
+    }, e => this.alert.error(this._errToString(e))); 
+  }
 
   isStockroomAdmin() { return this.account?.role === 'stockroom' || this.account?.role === 'admin' || this.account?.role === 'superAdmin'; }
   isTeacher() { return this.account?.role === 'teacher' || this.account?.role === 'roomInCharge' || this.account?.role === 'user'; }

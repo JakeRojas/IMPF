@@ -32,23 +32,19 @@ export class LoginComponent implements OnInit {
           this.showRegister = !(res && res.exists);
         },
         error: err => {
-          // If the check fails, be conservative: show Register so user can create an account
           console.warn('hasAnyAccount failed (showing register):', err);
           this.showRegister = true;
         }
       });
     }
 
-    // convenience getter for easy access to form fields
     get f() { return this.form.controls; }
 
     onSubmit() {
         this.submitted = true;
 
-        // reset alerts on submit
         this.alertService.clear();
 
-        // stop here if form is invalid
         if (this.form.invalid) {
             return;
         }
@@ -58,7 +54,6 @@ export class LoginComponent implements OnInit {
             .pipe(first())
             .subscribe({
                 next: () => {
-                    // get return url from query parameters or default to home page
                     const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
                     this.router.navigateByUrl(returnUrl);
                 },

@@ -116,15 +116,11 @@ export class StockRequestViewComponent implements OnInit {
     try { return JSON.stringify(val, null, 0); } catch { return String(val); }
   }
 
-  /**
-   * Convert requestedItem into array of {label, value} rows for template.
-   */
   getRequestedItemDisplayRows(ri?: RequestedItem | null): Array<{ label: string; value: string | number | null }> {
     if (!ri) return [];
 
     const rows: Array<{ label: string; value: any }> = [];
 
-    // -- inventory aggregate preferred --
     if (ri.kind === 'inventory' && ri.inventory) {
       const inv: any = ri.inventory;
 

@@ -55,7 +55,6 @@ export class ItemRequestListComponent implements OnInit {
 
   create() { this.router.navigate(['/req-item','create']); }
 
-  // Stockroom actions
   accept(r: ItemRequest) {
     const id = Number(r?.itemRequestId ?? r?.id);
     if (!Number.isFinite(id)) return this.alert.error('Invalid id');
@@ -78,7 +77,7 @@ export class ItemRequestListComponent implements OnInit {
     this.ir.release(id).pipe(first()).subscribe({
       next: () => {
         this.alert.success('Released');
-        this.load();   // keep using your existing loader method to refresh the list
+        this.load();
       },
       error: e => this.alert.error(this._errToString(e))
     });

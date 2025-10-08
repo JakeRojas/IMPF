@@ -1,5 +1,4 @@
-﻿// main
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
@@ -34,7 +33,6 @@ export class AddEditComponent implements OnInit {
             email:              ['', [Validators.required, Validators.email]],
             role:               ['', Validators.required],
             status:             ['', Validators.required],
-            // password only required in add mode
             password:           ['', [Validators.minLength(6), ...(!this.AccountId ? [Validators.required] : [])]],
             confirmPassword:    ['']
         }, {
@@ -43,7 +41,6 @@ export class AddEditComponent implements OnInit {
 
         this.title = 'Create Account';
         if (this.AccountId) {
-            // edit mode
             this.title = 'Edit Account';
             this.loading = true;
             this.accountService.getById(this.AccountId)
@@ -55,23 +52,19 @@ export class AddEditComponent implements OnInit {
         }
     }
 
-    // convenience getter for easy access to form fields
     get f() { return this.form.controls; }
 
     onSubmit() {
         this.submitted = true;
 
-        // reset alerts on submit
         this.alertService.clear();
 
-        // stop here if form is invalid
         if (this.form.invalid) {
             return;
         }
 
         this.submitting = true;
 
-        // create or update account based on id param
         let saveAccount;
         let message: string;
         if (this.AccountId) {
