@@ -1,6 +1,6 @@
 ================================================================================
 File: angular.json
-Size: 3.23 kB
+Size: 3.75 kB
 ================================================================================
 
 {
@@ -30,12 +30,16 @@ Size: 3.23 kB
             "inlineStyleLanguage": "less",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              { "glob": "**/*", "input": "src/gsc-gsu-logo-header.png", "output": "gsc-gsu-logo-header.png" }
             ],
             "styles": [
-              "src/styles.less"
+              "src/styles.less",
+              "node_modules/bootstrap/dist/css/bootstrap.min.css"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+            ]
           },
           "configurations": {
             "production": {
@@ -98,12 +102,16 @@ Size: 3.23 kB
             "inlineStyleLanguage": "less",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              { "glob": "**/*", "input": "src/gsc-gsu-logo-header.png", "output": "gsc-gsu-logo-header.png" }
             ],
             "styles": [
-              "src/styles.less"
+              "src/styles.less",
+              "node_modules/bootstrap/dist/css/bootstrap.min.css"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+            ]
           }
         }
       }
@@ -155,7 +163,7 @@ Size: 56 B
 
 ================================================================================
 File: package.json
-Size: 1.39 kB
+Size: 1.42 kB
 ================================================================================
 
 {
@@ -180,6 +188,7 @@ Size: 1.39 kB
         "@angular/platform-browser-dynamic": "^15.0.0",
         "@angular/router": "^15.0.0",
         "@zxing/library": "^0.21.3",
+        "bootstrap": "^5.3.8",
         "folder2txt": "^1.0.2",
         "rxjs": "~7.5.0",
         "tslib": "^2.3.0",
@@ -1180,20 +1189,20 @@ export class ListComponent implements OnInit {
 
 ================================================================================
 File: src\app\admin\admin-routing.module.ts
-Size: 786 B
+Size: 790 B
 ================================================================================
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { SubNavComponent } from './subnav.component';
+//import { SubNavComponent } from './subnav.component';
 import { LayoutComponent } from './layout.component';
 import { OverviewComponent } from './overview.component';
 
 const accountsModule = () => import('./accounts/accounts.module').then(x => x.AccountsModule);
 
 const routes: Routes = [
-    { path: '', component: SubNavComponent, outlet: 'subnav' },
+    //{ path: '', component: SubNavComponent, outlet: 'subnav' },
     {
         path: '', component: LayoutComponent,
         children: [
@@ -1211,7 +1220,7 @@ export class AdminRoutingModule { }
 
 ================================================================================
 File: src\app\admin\admin.module.ts
-Size: 618 B
+Size: 622 B
 ================================================================================
 
 import { NgModule } from '@angular/core';
@@ -1219,7 +1228,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 import { AdminRoutingModule } from './admin-routing.module';
-import { SubNavComponent } from './subnav.component';
+//import { SubNavComponent } from './subnav.component';
 import { LayoutComponent } from './layout.component';
 import { OverviewComponent } from './overview.component';
 
@@ -1230,7 +1239,7 @@ import { OverviewComponent } from './overview.component';
         AdminRoutingModule
     ],
     declarations: [
-        SubNavComponent,
+        //SubNavComponent,
         LayoutComponent,
         OverviewComponent
     ]
@@ -1283,28 +1292,28 @@ export class OverviewComponent { }
 
 ================================================================================
 File: src\app\admin\subnav.component.html
-Size: 207 B
+Size: 216 B
 ================================================================================
 
-<nav class="admin-nav navbar navbar-expand navbar-light px-3">
+<!-- <nav class="admin-nav navbar navbar-expand navbar-light px-3">
     <div class="navbar-nav">
         <a routerLink="accounts" routerLinkActive="active" class="nav-item nav-link">Accounts</a>
     </div>
-</nav>
+</nav> -->
 
 ================================================================================
 File: src\app\admin\subnav.component.ts
-Size: 129 B
+Size: 138 B
 ================================================================================
 
-import { Component } from '@angular/core';
+// import { Component } from '@angular/core';
 
-@Component({ templateUrl: 'subnav.component.html' })
-export class SubNavComponent { }
+// @Component({ templateUrl: 'subnav.component.html' })
+// export class SubNavComponent { }
 
 ================================================================================
 File: src\app\app-routing.module.ts
-Size: 2.21 kB
+Size: 2.25 kB
 ================================================================================
 
 import { NgModule } from '@angular/core';
@@ -1332,7 +1341,7 @@ const routes: Routes = [
     { path: 'profile', loadChildren: profileModule, canActivate: [AuthGuard] },
     { path: 'admin', loadChildren: adminModule, canActivate: [AuthGuard], data: { roles: [Role.SuperAdmin] } },
 
-    { path: 'room', loadChildren: roomModule, canActivate: [AuthGuard], data: { roles: [Role.SuperAdmin] } },
+    { path: 'room', loadChildren: roomModule, canActivate: [AuthGuard], data: { roles: [Role.SuperAdmin, Role.Admin, Role.StockroomAdmin] } },
     { path: 'scan', loadChildren: scanModule, canActivate: [AuthGuard], data: { roles: [Role.SuperAdmin] } },
 
     { path: 'req-stock', loadChildren: stockRequestModule, canActivate: [AuthGuard], data: { roles: [Role.SuperAdmin, Role.Admin, Role.StockroomAdmin] } },
@@ -1353,11 +1362,11 @@ export class AppRoutingModule { }
 
 ================================================================================
 File: src\app\app.component.html
-Size: 1.83 kB
+Size: 4.79 kB
 ================================================================================
 
-﻿<div class="app-container" [ngClass]="{ 'bg-light': account }">
-    <!-- main nav -->
+﻿<!-- <div class="app-container" [ngClass]="{ 'bg-light': account }">
+    
     <nav class="navbar navbar-expand navbar-dark bg-dark px-3" *ngIf="account">
         <div class="navbar-nav">
             <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item nav-link">Home</a>
@@ -1382,14 +1391,86 @@ Size: 1.83 kB
         </div>
     </nav>
 
-    <!-- subnav router outlet -->
     <router-outlet name="subnav"></router-outlet>
 
-    <!-- global alert -->
     <alert></alert>
 
-    <!-- main router outlet -->
     <router-outlet></router-outlet>
+</div> -->
+
+<div class="container-fluid">
+  <div class="row min-vh-100 gx-0">
+
+    <!-- LEFT COLUMN: logo (div1) + links (div2) -->
+    <aside *ngIf="account" class="col-12 col-md-2 bg-light border-end d-flex flex-column p-3">
+      <!-- div1: logo (top of sidebar) -->
+      <div class="mb-4 text-center">
+        <!-- replace src with your logo path -->
+        <a routerLink="/" class="d-inline-block">
+          <img src="assets/gsc-gsu-logo-header.png" alt="Logo" class="img-fluid" style="max-height: 65px;">
+        </a>
+      </div>
+
+      <!-- div2: vertical nav links (fills the rest of the sidebar) -->
+      <nav *ngIf="account" class="nav nav-pills flex-column">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+           class="nav-link">Home</a>
+
+        <a routerLink="/profile" routerLinkActive="active" class="nav-link">Profile</a>
+
+        <a *ngIf="account.role" routerLink="/room" routerLinkActive="active"
+           class="nav-link">Room</a>
+
+        <a *ngIf="account.role === Role.SuperAdmin" routerLink="/scan" routerLinkActive="active"
+           class="nav-link">Scan</a>
+
+        <a *ngIf="account.role === Role.SuperAdmin" routerLink="/admin" routerLinkActive="active"
+           class="nav-link">Admin</a>
+
+        <a *ngIf="account.role === Role.SuperAdmin || account.role === Role.Admin || account.role === Role.StockroomAdmin"
+           routerLink="/req-stock" routerLinkActive="active" class="nav-link">Stock Requests</a>
+
+        <a *ngIf="account.role === Role.SuperAdmin || account.role === Role.StockroomAdmin || account.role === Role.Teacher"
+           routerLink="/req-item" routerLinkActive="active" class="nav-link">Item Request</a>
+
+        <a class="nav-link" routerLink="/transfers" routerLinkActive="active">
+          <i class="fa fa-exchange"></i> Transfers
+        </a>
+      </nav>
+
+      <!-- optional spacer to push any bottom content to the bottom -->
+      <div class="mt-auto"></div>
+    </aside>
+
+    <!-- RIGHT COLUMN: top-right logout (div3) + main content (div4) -->
+    <!-- <main class="col-12 col-md-10 d-flex flex-column p-0"> -->
+      <main
+        [class.col-12]="!account"
+        [class.col-md-10]="account"
+        class="d-flex flex-column p-0"
+      >
+
+      <!-- div3: top bar containing optional subnav + logout aligned to the right -->
+      <div *ngIf="account" class="d-flex align-items-center justify-content-between bg-dark text-white p-2 px-3">
+        <!-- left side of top bar: named subnav outlet (keeps your existing subnav usage) -->
+        <div class="d-flex align-items-center">
+          <router-outlet name="subnav"></router-outlet>
+        </div>
+
+        <!-- right side of top bar: logout button -->
+        <div>
+          <button (click)="logout()" class="btn btn-outline-light btn-sm">Logout</button>
+        </div>
+      </div>
+
+      <!-- div4: main content area -->
+      <div class="flex-grow-1 overflow-auto p-3">
+        <alert></alert>
+        <router-outlet></router-outlet>
+      </div>
+
+    </main>
+  </div>
 </div>
 
 ================================================================================
@@ -1755,8 +1836,19 @@ export class UpdateComponent implements OnInit {
 
 ================================================================================
 File: src\app\requests\item-request\item-request-create.component.html
-Size: 1.93 kB
+Size: 2.31 kB
 ================================================================================
+
+<div class="card mb-3">
+  <div class="card-body d-flex justify-content-between align-items-center">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb m-0 p-0">
+        <li class="breadcrumb-item"><a [routerLink]="['/req-item']">Request List</a></li>
+        <li class="breadcrumb-item active"><a>Request Form</a></li>
+      </ol>
+    </nav>
+  </div>
+</div>
 
 <div class="container p-3">
     <h4>New Item Request</h4>
@@ -1914,17 +2006,20 @@ export class ItemRequestCreateComponent {
 
 ================================================================================
 File: src\app\requests\item-request\item-request-list.component.html
-Size: 1.7 kB
+Size: 1.71 kB
 ================================================================================
 
-<div class="container p-3">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h3>Item Requests</h3>
-      <div>
-        <button class="btn btn-sm btn-success" (click)="create()" *ngIf="isTeacher() || isSuperAdmin()">New Request</button>
-      </div>
-    </div>
-  
+<div class="card mb-3">
+  <div class="card-body d-flex justify-content-between align-items-center">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb m-0 p-0">
+        <li class="breadcrumb-item active"><a>Request List</a></li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<div class="card p-3">
     <table class="table table-sm">
       <thead>
         <tr><th>ID</th><th>Room</th><th>Requester</th><th>Items</th><th>Date</th><th>Status</th><th></th></tr>
@@ -2061,20 +2156,25 @@ export class ItemRequestListComponent implements OnInit {
 
 ================================================================================
 File: src\app\requests\item-request\item-request-routing.module.ts
-Size: 689 B
+Size: 839 B
 ================================================================================
 
 import { NgModule             } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
+import { LayoutComponent            } from './layout.component';
 import { ItemRequestListComponent   } from './item-request-list.component';
 import { ItemRequestCreateComponent } from './item-request-create.component';
 import { ItemRequestViewComponent   } from './item-request-view.component';
 
 const routes: Routes = [
-  { path: '', component: ItemRequestListComponent },
-  { path: 'create', component: ItemRequestCreateComponent },
-  { path: 'view/:id', component: ItemRequestViewComponent }
+  { path: '', component: LayoutComponent,
+    children: [
+      { path: '', component: ItemRequestListComponent },
+      { path: 'create', component: ItemRequestCreateComponent },
+      { path: 'view/:id', component: ItemRequestViewComponent }
+    ]
+  }
 ];
 
 @NgModule({
@@ -2086,12 +2186,21 @@ export class ItemRequestRoutingModule {}
 
 ================================================================================
 File: src\app\requests\item-request\item-request-view.component.html
-Size: 1.82 kB
+Size: 2.12 kB
 ================================================================================
 
+<div class="card mb-3">
+  <div class="card-body d-flex justify-content-between align-items-center">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb m-0 p-0">
+        <li class="breadcrumb-item"><a [routerLink]="['/req-item']">Request List</a></li>
+        <li class="breadcrumb-item active"><a>Request Information</a></li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
 <div class="container p-3">
-    <button class="btn btn-link mb-2" (click)="goBack()">&larr; Back</button>
-  
     <div *ngIf="request">
       <h4>Item Request #{{ request.itemRequestId || request.id }}</h4>
       <dl class="row">
@@ -2230,13 +2339,14 @@ export class ItemRequestViewComponent implements OnInit {
 
 ================================================================================
 File: src\app\requests\item-request\item-request.module.ts
-Size: 747 B
+Size: 835 B
 ================================================================================
 
 import { NgModule             } from '@angular/core';
 import { CommonModule         } from '@angular/common';
 import { ReactiveFormsModule  } from '@angular/forms';
 
+import { LayoutComponent            } from './layout.component';
 import { ItemRequestRoutingModule   } from './item-request-routing.module';
 import { ItemRequestListComponent   } from './item-request-list.component';
 import { ItemRequestViewComponent   } from './item-request-view.component';
@@ -2249,6 +2359,7 @@ import { ItemRequestCreateComponent } from './item-request-create.component';
     ItemRequestRoutingModule
   ],
   declarations: [
+    LayoutComponent,
     ItemRequestListComponent,
     ItemRequestViewComponent,
     ItemRequestCreateComponent
@@ -2258,22 +2369,126 @@ export class ItemRequestModule {}
 
 
 ================================================================================
+File: src\app\requests\item-request\layout.component.html
+Size: 462 B
+================================================================================
+
+﻿<div class="p-4">
+    <div class="card mb-3">
+        <div class="card-body d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Item Requests</h5>
+          <div>
+            <button class="btn btn-primary btn-sm" *ngIf="isTeacher() || isSuperAdmin()" (click)="create()">
+              <i class="fa fa-plus"></i> New Request
+            </button>
+          </div>
+        </div>
+    </div>
+    <router-outlet></router-outlet>
+</div>
+
+================================================================================
+File: src\app\requests\item-request\layout.component.ts
+Size: 959 B
+================================================================================
+
+﻿import { Component } from '@angular/core';
+import { Router    } from '@angular/router';
+
+import { 
+    AlertService, 
+    AccountService, 
+    StockRequestService 
+  } from '@app/_services';
+
+@Component({ templateUrl: 'layout.component.html' })
+export class LayoutComponent { 
+    account: any;
+    constructor(
+        private router: Router,
+        private sr: StockRequestService,
+        private alert: AlertService,
+        private accountService: AccountService
+    ){
+        this.account = this.accountService.accountValue;
+    }
+
+    create() { this.router.navigate(['/req-item', 'create']); }
+
+    isStockroomAdmin() { return this.account?.role === 'stockroomAdmin' || this.account?.role === 'admin' || this.account?.role === 'superAdmin'; }
+    isTeacher() { return this.account?.role === 'teacher' || this.account?.role === 'roomInCharge' || this.account?.role === 'user'; }
+    isSuperAdmin() { return this.account?.role === 'superAdmin'; }
+}
+
+================================================================================
+File: src\app\requests\stock-request\layout.component.html
+Size: 425 B
+================================================================================
+
+﻿<div class="p-4">
+    <div class="card mb-3">
+        <div class="card-body d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Stock Requests</h5>
+          <div>
+            <button class="btn btn-primary btn-sm" (click)="create()">
+              <i class="fa fa-plus"></i> New Request
+            </button>
+          </div>
+        </div>
+    </div>
+    <router-outlet></router-outlet>
+</div>
+
+================================================================================
+File: src\app\requests\stock-request\layout.component.ts
+Size: 593 B
+================================================================================
+
+﻿import { Component } from '@angular/core';
+import { Router    } from '@angular/router';
+
+import { 
+    AlertService, 
+    AccountService, 
+    StockRequestService 
+  } from '@app/_services';
+
+@Component({ templateUrl: 'layout.component.html' })
+export class LayoutComponent { 
+    constructor(
+        private router: Router,
+        private sr: StockRequestService,
+        private alert: AlertService,
+        private accountService: AccountService
+    ){
+        //this.account = this.accountService.accountValue;
+    }
+
+    create() { this.router.navigate(['/req-stock', 'create']); }
+}
+
+================================================================================
 File: src\app\requests\stock-request\stock-request-routing.module.ts
-Size: 803 B
+Size: 959 B
 ================================================================================
 
 import { NgModule             } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
+import { LayoutComponent              } from './layout.component';
 import { StockRequestListComponent    } from './stock-request.list.component';
 import { StockRequestViewComponent    } from './stock-request.view.component';
 import { StockRequestCreateComponent  } from './stock-request.create.component';
 // ===============================================================================
 
 const routes: Routes = [
-    { path: '',         component: StockRequestListComponent },
-    { path: 'create',   component: StockRequestCreateComponent },
-    { path: 'view/:id', component: StockRequestViewComponent }
+  { path: '', component: LayoutComponent,
+      children: [
+        { path: '',         component: StockRequestListComponent },
+        { path: 'create',   component: StockRequestCreateComponent },
+        { path: 'view/:id', component: StockRequestViewComponent }
+      ]
+  }
 ];
 
 @NgModule({
@@ -2285,8 +2500,19 @@ export class StockRequestRoutingModule { }
 
 ================================================================================
 File: src\app\requests\stock-request\stock-request.create.component.html
-Size: 1.28 kB
+Size: 1.66 kB
 ================================================================================
+
+<div class="card mb-3">
+  <div class="card-body d-flex justify-content-between align-items-center">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb m-0 p-0">
+        <li class="breadcrumb-item"><a [routerLink]="['/req-stock']">Request List</a></li>
+        <li class="breadcrumb-item active"><a>Request Form</a></li>
+      </ol>
+    </nav>
+  </div>
+</div>
 
 <div class="container p-3">
     <h4>New Stock Request</h4>
@@ -2442,17 +2668,20 @@ submit() {
 
 ================================================================================
 File: src\app\requests\stock-request\stock-request.list.component.html
-Size: 1.62 kB
+Size: 1.64 kB
 ================================================================================
 
-<div class="p-3 container">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h3>Stock Requests</h3>
-    <div *ngIf="isStockroom()">
-      <button class="btn btn-sm btn-success" (click)="create()">New Request</button>
-    </div>
+<div class="card mb-3">
+  <div class="card-body d-flex justify-content-between align-items-center">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb m-0 p-0">
+        <li class="breadcrumb-item active"><a>Request List</a></li>
+      </ol>
+    </nav>
   </div>
+</div>
 
+<div class="card p-3">
   <table class="table table-sm">
     <thead>
       <tr>
@@ -2473,7 +2702,7 @@ Size: 1.62 kB
         <td>{{ r.acccountId || r.accountId }}</td>
         <td>{{ r.itemType }}</td>
         <td>{{ r.quantity }}</td>
-        <td>{{ r.createdAt || r.created_at || r.updatedAt }}</td>
+        <td>{{ r.createdAt | date:'short' }}</td>
         <td>{{ r.status }}</td>
         <td>
           <button class="btn btn-sm btn-outline-primary" (click)="view(r)">View</button>
@@ -2595,7 +2824,7 @@ export class StockRequestListComponent implements OnInit {
 
 ================================================================================
 File: src\app\requests\stock-request\stock-request.module.ts
-Size: 781 B
+Size: 871 B
 ================================================================================
 
 import { NgModule                   } from '@angular/core';
@@ -2603,6 +2832,7 @@ import { CommonModule               } from '@angular/common';
 import { ReactiveFormsModule        } from '@angular/forms';
 import { StockRequestRoutingModule  } from './stock-request-routing.module';
 
+import { LayoutComponent              } from './layout.component';
 import { StockRequestListComponent    } from './stock-request.list.component';
 import { StockRequestViewComponent    } from './stock-request.view.component';
 import { StockRequestCreateComponent  } from './stock-request.create.component';
@@ -2614,6 +2844,7 @@ import { StockRequestCreateComponent  } from './stock-request.create.component';
     StockRequestRoutingModule
   ],
   declarations: [
+    LayoutComponent,
     StockRequestListComponent,
     StockRequestViewComponent,
     StockRequestCreateComponent
@@ -2624,12 +2855,21 @@ export class StockRequestModule { }
 
 ================================================================================
 File: src\app\requests\stock-request\stock-request.view.component.html
-Size: 2.08 kB
+Size: 2.38 kB
 ================================================================================
 
+<div class="card mb-3">
+  <div class="card-body d-flex justify-content-between align-items-center">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb m-0 p-0">
+        <li class="breadcrumb-item"><a [routerLink]="['/req-stock']">Request List</a></li>
+        <li class="breadcrumb-item active"><a>Request Information</a></li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
 <div class="container p-3">
-    <button class="btn btn-link mb-2" (click)="goBack()">&larr; Back</button>
-  
     <div *ngIf="request">
       <h4>Request #{{ request.stockRequestId || request.id }}</h4>
   
@@ -2958,99 +3198,23 @@ export class AddEditModule { }
 
 ================================================================================
 File: src\app\room\add-edit\room.add-edit.component.html
-Size: 7.88 kB
+Size: 3.68 kB
 ================================================================================
 
-<!-- <h1>{{title}}</h1> -->
-<!-- <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="onSubmit()">
-    <div class="row">
-        <div class="mb-3 col-2">
-            <label class="form-label">Title</label>
-            <select formControlName="title" class="form-select" [ngClass]="{ 'is-invalid': submitted && f.title.errors }">
-                <option value=""></option>
-                <option value="Mr">Mr</option>
-                <option value="Mrs">Mrs</option>
-                <option value="Miss">Miss</option>
-                <option value="Ms">Ms</option>
-            </select>
-            <div *ngIf="submitted && f.title.errors" class="invalid-feedback">
-                <div *ngIf="f.title.errors.required">Title is required</div>
-            </div>
-        </div>
-        <div class="mb-3 col-5">
-            <label class="form-label">First Name</label>
-            <input type="text" formControlName="firstName" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.firstName.errors }" />
-            <div *ngIf="submitted && f.firstName.errors" class="invalid-feedback">
-                <div *ngIf="f.firstName.errors.required">First Name is required</div>
-            </div>
-        </div>
-        <div class="mb-3 col-5">
-            <label class="form-label">Last Name</label>
-            <input type="text" formControlName="lastName" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.lastName.errors }" />
-            <div *ngIf="submitted && f.lastName.errors" class="invalid-feedback">
-                <div *ngIf="f.lastName.errors.required">Last Name is required</div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="mb-3 col-7">
-            <label class="form-label">Email</label>
-            <input type="text" formControlName="email" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.email.errors }" />
-            <div *ngIf="submitted && f.email.errors" class="invalid-feedback">
-                <div *ngIf="f.email.errors.required">Email is required</div>
-                <div *ngIf="f.email.errors.email">Email must be a valid email address</div>
-            </div>
-        </div>
-        <div class="mb-3 col-5">
-            <label class="form-label">Role</label>
-            <select formControlName="role" class="form-select" [ngClass]="{ 'is-invalid': submitted && f.role.errors }">
-                <option value=""></option>
-                <option value="User">User</option>
-                <option value="Admin">Admin</option>
-            </select>
-            <div *ngIf="submitted && f.role.errors" class="invalid-feedback">
-                <div *ngIf="f.role.errors.required">Role is required</div>
-            </div>
-        </div>
-    </div>
-    <!-- <div *ngIf="AccountId">
-        <h3 class="pt-3">Change Password</h3>
-        <p>Leave blank to keep the same password</p>
-    </div> -->
-    <!-- <div class="row">
-        <div class="mb-3 col">
-            <label class="form-label">Password</label>
-            <input type="password" formControlName="password" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.password.errors }" />
-            <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
-                <div *ngIf="f.password.errors.required">Password is required</div>
-                <div *ngIf="f.password.errors.minlength">Password must be at least 6 characters</div>
-            </div>
-        </div>
-        <div class="mb-3 col">
-            <label class="form-label">Confirm Password</label>
-            <input type="password" formControlName="confirmPassword" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.confirmPassword.errors }" />
-            <div *ngIf="submitted && f.confirmPassword.errors" class="invalid-feedback">
-                <div *ngIf="f.confirmPassword.errors.required">Confirm Password is required</div>
-                <div *ngIf="f.confirmPassword.errors.mustMatch">Passwords must match</div>
-            </div>
-        </div>
-    </div>
-    <div class="mb-3">
-        <button [disabled]="submitting" class="btn btn-primary">
-            <span *ngIf="submitting" class="spinner-border spinner-border-sm me-1"></span>
-            Save
-        </button>
-        <a routerLink="/admin/accounts" class="btn btn-link">Cancel</a>
-    </div>
-</form>  -->
-<!-- <div *ngIf="loading" class="text-center m-5">
-    <span class="spinner-border spinner-border-lg align-center"></span>
-</div> -->
+<div class="card mb-3">
+  <div class="card-body d-flex justify-content-between align-items-center">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb m-0 p-0">
+        <li class="breadcrumb-item"><a [routerLink]="['/room']">Room List</a></li>
+        <li *ngIf="title === 'Create Room'" class="breadcrumb-item active"><a>Room Form</a></li>
+        <li *ngIf="title === 'Edit Room'" class="breadcrumb-item active"><a>Edit Room</a></li>
+      </ol>
+    </nav>
+  </div>
+</div>
 
-<!-- room.add-edit.component.html (full form skeleton) -->
 <h1>{{ title }}</h1>
 
-<!-- IMPORTANT: (ngSubmit) on the form + [formGroup] binding -->
 <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="onSubmit()">
   <div class="row">
     <div class="mb-3 col-6">
@@ -3127,7 +3291,7 @@ Size: 7.88 kB
 
 ================================================================================
 File: src\app\room\add-edit\room.add-edit.component.ts
-Size: 8.71 kB
+Size: 4.35 kB
 ================================================================================
 
 import { Component, OnInit, OnDestroy } from '@angular/core';
@@ -3261,7 +3425,7 @@ export class RoomAddEditComponent implements OnInit, OnDestroy {
 
 ================================================================================
 File: src\app\room\inventory\admin-supply-inventory-list.component.html
-Size: 1.02 kB
+Size: 969 B
 ================================================================================
 
 <div class="container py-2">
@@ -3272,7 +3436,7 @@ Size: 1.02 kB
   <table *ngIf="!loading && inventory?.length" class="table table-sm">
     <thead>
       <button class="btn btn-primary btn-sm me-2" (click)="generateAllQr()">
-        <i class="fa fa-qrcode"></i> Generate All (PDF)
+        Generate All (PDF)
       </button>
       <tr>
         <th>Name</th>
@@ -3288,7 +3452,7 @@ Size: 1.02 kB
         <td>{{ i.supplyMeasure || '-' }}</td>
         <td>{{ i.totalQuantity || '-' }}</td>
         <td>{{ i.status || '-' }}</td>
-        <td>{{ i.updatedAt ? (i.updatedAt | date:'short') : (i.createdAt | date:'short') }}</td>
+        <td>{{ i.updatedAt | date:'short' : i.createdAt | date:'short' }}</td>
       </tr>
     </tbody>
   </table>
@@ -3419,7 +3583,7 @@ export class AdminSupplyInventoryListComponent implements OnInit {
 
 ================================================================================
 File: src\app\room\inventory\apparel-inventory-list.component.html
-Size: 1.77 kB
+Size: 1.78 kB
 ================================================================================
 
 <!-- src/app/room/inventory/apparel-inventory-list.component.html -->
@@ -3429,7 +3593,7 @@ Size: 1.77 kB
   <table *ngIf="!loading && inventory?.length" class="table table-sm">
     <thead>
       <button class="btn btn-primary btn-sm me-2" (click)="generateAllQr()">
-        <i class="fa fa-qrcode"></i> Generate All (PDF)
+        Generate All (PDF)
       </button>
       <tr>
         <th>Name</th>
@@ -3452,7 +3616,7 @@ Size: 1.77 kB
         <td>{{ i.apparelSize || '-' }}</td>
         <td>{{ i.totalQuantity || i.quantity || '-' }}</td>
         <td>{{ i.status || '-' }}</td>
-        <td>{{ i.createdAt }}</td>
+        <td>{{ i.updatedAt | date:'short' : i.createdAt | date:'short' }}</td>
         <td *ngIf="i.qrStatus">generated</td>
         <td *ngIf="!i.qrStatus">-</td>
         <td>
@@ -3583,7 +3747,7 @@ export class ApparelInventoryListComponent implements OnInit {
 
 ================================================================================
 File: src\app\room\inventory\gen-item-inventory-list.component.html
-Size: 1.13 kB
+Size: 1.11 kB
 ================================================================================
 
 <div class="container py-2">
@@ -3594,7 +3758,7 @@ Size: 1.13 kB
     <table *ngIf="!loading && inventory?.length" class="table table-sm">
       <thead>
         <button class="btn btn-primary btn-sm me-2" (click)="generateAllQr()">
-          <i class="fa fa-qrcode"></i> Generate All (PDF)
+          Generate All (PDF)
         </button>
         <tr>
           <th>Name</th>
@@ -3612,7 +3776,7 @@ Size: 1.13 kB
           <td>{{ i.genItemSize || i.size || '-' }}</td>
           <td>{{ displayQty(i) }}</td>
           <td>{{ i.status || '-' }}</td>
-          <td>{{ i.createdAt ? (i.createdAt | date:'short') : '-' }}</td>
+          <td>{{ i.updatedAt | date:'short' : i.createdAt | date:'short' }}</td>
         </tr>
       </tbody>
     </table>
@@ -3737,7 +3901,7 @@ export class GenItemInventoryListComponent implements OnInit {
 
 ================================================================================
 File: src\app\room\inventory\inventory-routing.module.ts
-Size: 1.94 kB
+Size: 879 B
 ================================================================================
 
 import { NgModule } from '@angular/core';
@@ -3825,24 +3989,63 @@ export class LayoutComponent {}
 
 ================================================================================
 File: src\app\room\layout.component.html
-Size: 124 B
+Size: 651 B
 ================================================================================
 
 ﻿<div class="p-4">
-    <!-- <div class="container"> -->
-        <router-outlet></router-outlet>
-    <!-- </div> -->
+    <div class="card mb-3">
+        <div class="card-body d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Rooms</h5>
+          <div>
+            <button class="btn btn-sm btn-success" *ngIf="isSuperAdmin" routerLink="add">
+                Create Room
+            </button>
+          </div>
+        </div>
+    </div>
+    <!-- <div class="card mb-3">
+      <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+          <a [routerLink]="['/room']">
+              list
+          </a>
+        </div>
+      </div>
+  </div> -->
+    <router-outlet></router-outlet>
 </div>
 
 ================================================================================
 File: src\app\room\layout.component.ts
-Size: 132 B
+Size: 632 B
 ================================================================================
 
-﻿import { Component } from '@angular/core';
+﻿import { Component, OnInit }  from '@angular/core';
+import { Router }             from '@angular/router';
+import { first }              from 'rxjs/operators';
+
+import { 
+  RoomService, 
+  AccountService,
+  QrService, 
+  AlertService 
+} from '@app/_services';
 
 @Component({ templateUrl: 'layout.component.html' })
-export class LayoutComponent { }
+export class LayoutComponent { 
+    isSuperAdmin = false;
+
+    constructor(
+        private accountService: AccountService,
+    
+        private router:       Router
+      ) {}
+
+    ngOnInit() {
+        const user = this.accountService.accountValue;
+        this.isSuperAdmin = user?.role === 'superAdmin';
+      }
+}
 
 ================================================================================
 File: src\app\room\receive\admin-supply\receive.component.html
@@ -4140,7 +4343,7 @@ export class AdminSupplyReceivedListComponent implements OnInit {
 
 ================================================================================
 File: src\app\room\receive\apparel\receive.component.html
-Size: 3.01 kB
+Size: 3.05 kB
 ================================================================================
 
 <!-- src/app/room/receive/apparel-receive.component.html -->
@@ -4215,7 +4418,7 @@ Size: 3.01 kB
       <textarea class="form-control" formControlName="notes"></textarea>
     </div>
 
-    <button class="btn btn-primary" type="submit" [disabled]="submitting">Receive</button>
+    <button class="btn btn-primary" [routerLink]="['receive', 'list']" type="submit" [disabled]="submitting">Receive</button>
   </form>
 </div>
 
@@ -5878,12 +6081,22 @@ export class ReleaseModule {}
 
 ================================================================================
 File: src\app\room\room-list.component.html
-Size: 1.01 kB
+Size: 1.33 kB
 ================================================================================
 
+<div class="card mb-3">
+  <div class="card-body d-flex justify-content-between align-items-center">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb m-0 p-0">
+        <li class="breadcrumb-item active"><a>Room List</a></li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
 <div>
-  <h3>Rooms</h3>
-  <a class="btn btn-sm btn-success" routerLink="add">Create Room</a>
+  <!-- <h3>Rooms</h3>
+  <a class="btn btn-sm btn-success" routerLink="add">Create Room</a> -->
 
   <div class="row">
     <div class="col-md-3 mb-3" *ngFor="let r of rooms">
@@ -5901,7 +6114,7 @@ Size: 1.01 kB
         </div>
         <div class="card-footer d-flex justify-content-end">
           <button class="btn btn-primary btn-sm" [routerLink]="['/room', r.roomId]">View</button>
-          <button class="btn btn-secondary btn-sm" (click)="updateRoom(r)">Edit</button>
+          <button class="btn btn-secondary btn-sm" *ngIf="isSuperAdmin" (click)="updateRoom(r)">Edit</button>
         </div>
       </div>
     </div>
@@ -5910,26 +6123,30 @@ Size: 1.01 kB
 
 ================================================================================
 File: src\app\room\room-list.component.ts
-Size: 1.07 kB
+Size: 1.3 kB
 ================================================================================
 
-import { Component, OnInit,}  from '@angular/core';
+import { Component, OnInit }  from '@angular/core';
 import { Router }             from '@angular/router';
 import { first }              from 'rxjs/operators';
 
 import { 
   RoomService, 
+  AccountService,
   QrService, 
   AlertService 
 } from '@app/_services';
+import { Role } from '@app/_models';
 
 @Component({ templateUrl: 'room-list.component.html' })
 export class RoomListComponent implements OnInit {
   rooms: any[] = [];
   loading = false;
+  isSuperAdmin = false;
 
   constructor(
     private roomService:  RoomService,
+    private accountService: AccountService,
     private qrService:    QrService,
     private alert:        AlertService,
 
@@ -5937,6 +6154,9 @@ export class RoomListComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    const user = this.accountService.accountValue;
+    this.isSuperAdmin = user?.role === 'superAdmin';
+
     this.load();
   }
 
@@ -5961,7 +6181,7 @@ export class RoomListComponent implements OnInit {
 
 ================================================================================
 File: src\app\room\room-routing.module.ts
-Size: 2.49 kB
+Size: 1.46 kB
 ================================================================================
 
 import { NgModule } from '@angular/core';
@@ -6005,49 +6225,68 @@ export class RoomRoutingModule { }
 
 ================================================================================
 File: src\app\room\room-view.component.html
-Size: 1.26 kB
+Size: 1.84 kB
 ================================================================================
 
-<div class="p-1 container">
-  <h2>Room: {{ room?.roomName }}</h2>
-
-  <p class="mb-3">
-    Floor: {{ room?.roomFloor }} •
-    Type: {{ room?.roomType }} •
-    <span *ngIf="room?.stockroomType">Stock: {{ room?.stockroomType }} •</span>
-    In charge: {{ room?.roomInCharge }}
-  </p>
-
-  <div *ngIf="room?.roomType === 'stockroom' || room?.roomType === 'subStockroom'" class="mb-3">
-    <button class="btn btn-sm btn-outline-primary ms-3" [routerLink]="['units', stockPath]">
-      Unit List
-    </button>
-    <button class="btn btn-sm btn-outline-secondary ms-1" [routerLink]="['inventory', stockPath]">
-      Inventory List
-    </button>
-    <button class="btn btn-sm btn-outline-secondary ms-1"
-        [routerLink]="['receive', stockPath, 'list']">
-      Receive List
-    </button>
-    <button class="btn btn-sm btn-outline-secondary ms-1"
-        [routerLink]="['release', stockPath, 'list']">
-      Release List
-    </button>
+<div class="card mb-3">
+  <div class="card-body d-flex justify-content-between align-items-center">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb m-0 p-0">
+        <li class="breadcrumb-item"><a [routerLink]="['/room']">Room List</a></li>
+        <li class="breadcrumb-item active"><a>Room Information</a></li>
+      </ol>
+    </nav>
   </div>
-  <a class="btn btn-success me-2" [routerLink]="['receive', stockPath]">Receive</a>
-  <a class="btn btn-danger me-2" [routerLink]="['release', stockPath]">Release</a>
+</div>
 
-  <!-- children (inventory / receive / release / units) will render here -->
+<div class="p-1 container">
+  <div class="row">
+    <h2>Room: {{ room?.roomName }}</h2>
+  </div>
+  
+  <div class="row">
+    <div class="col-6">
+      <p class="mb-3">
+        Floor: {{ room?.roomFloor }} •
+        Type: {{ room?.roomType }} •
+        <span *ngIf="room?.stockroomType">Stock: {{ room?.stockroomType }} •</span>
+        In charge: {{ room?.roomInCharge }}
+      </p>
+    </div>
+    <div class="col-6 btn-sm d-grid gap-2 d-md-flex justify-content-md-end">
+      <a class="btn btn-success" [routerLink]="['receive', stockPath]">Receive</a>
+      <a class="btn btn-danger" [routerLink]="['release', stockPath]">Release</a>
+    </div>
+  </div>
+
+  <div class="row">
+    <div *ngIf="room?.roomType === 'stockroom' || room?.roomType === 'subStockroom'" class="mb-3">
+      <button class="btn btn-sm btn-outline-primary ms-3" [routerLink]="['units', stockPath]">
+        Unit List
+      </button>
+      <button class="btn btn-sm btn-outline-secondary ms-1" [routerLink]="['inventory', stockPath]">
+        Inventory List
+      </button>
+      <button class="btn btn-sm btn-outline-secondary ms-1"
+          [routerLink]="['receive', stockPath, 'list']">
+        Receive List
+      </button>
+      <button class="btn btn-sm btn-outline-secondary ms-1"
+          [routerLink]="['release', stockPath, 'list']">
+        Release List
+      </button>
+    </div>
+  </div>
+    
   <router-outlet></router-outlet>
 </div>
 
 
 ================================================================================
 File: src\app\room\room-view.component.ts
-Size: 38.99 kB
+Size: 1.45 kB
 ================================================================================
 
-// src/app/room/room-view.component.ts
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute }     from '@angular/router';
 import { first }              from 'rxjs/operators';
@@ -6955,9 +7194,69 @@ import { FormsModule } from '@angular/forms';
 export class ScanModule {}
 
 ================================================================================
-File: src\app\transfer\transfer-create.component.html
-Size: 1.56 kB
+File: src\app\transfer\layout.component.html
+Size: 422 B
 ================================================================================
+
+﻿<div class="p-4">
+    <div class="card mb-3">
+        <div class="card-body d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Transfer</h5>
+          <div>
+            <button class="btn btn-primary btn-sm" (click)="goCreate()">
+              <i class="fa fa-plus"></i> New Transfer
+            </button>
+          </div>
+        </div>
+    </div>
+    <router-outlet></router-outlet>
+</div>
+
+================================================================================
+File: src\app\transfer\layout.component.ts
+Size: 598 B
+================================================================================
+
+﻿import { Component } from '@angular/core';
+import { Router    } from '@angular/router';
+
+import { 
+    AlertService, 
+    AccountService, 
+    TransferService 
+  } from '@app/_services';
+
+@Component({ templateUrl: 'layout.component.html' })
+export class LayoutComponent { 
+    constructor(
+        private router: Router,
+        private sr: TransferService,
+        private alert: AlertService,
+        private accountService: AccountService
+    ){
+        //this.account = this.accountService.accountValue;
+    }
+
+    goCreate() {
+        this.router.navigate(['/transfers/create']);
+      }
+}
+
+================================================================================
+File: src\app\transfer\transfer-create.component.html
+Size: 1.94 kB
+================================================================================
+
+<div class="card mb-3">
+  <div class="card-body d-flex justify-content-between align-items-center">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb m-0 p-0">
+        <li class="breadcrumb-item"><a [routerLink]="['/req-item']">Request List</a></li>
+        <li class="breadcrumb-item active"><a>Request Form</a></li>
+      </ol>
+    </nav>
+  </div>
+</div>
 
 <form [formGroup]="form" (ngSubmit)="submit()">
     <div class="mb-2">
@@ -7068,19 +7367,20 @@ export class TransferCreateComponent implements OnInit {
 
 ================================================================================
 File: src\app\transfer\transfer-list.component.html
-Size: 2.39 kB
+Size: 2.38 kB
 ================================================================================
 
+<div class="card mb-3">
+  <div class="card-body d-flex justify-content-between align-items-center">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb m-0 p-0">
+        <li class="breadcrumb-item active"><a>Request List</a></li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
 <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <h5 class="mb-0">Transfers</h5>
-      <div>
-        <button class="btn btn-primary btn-sm" (click)="goCreate()">
-          <i class="fa fa-plus"></i> Create Transfer
-        </button>
-      </div>
-    </div>
-  
     <div class="card-body">
       <div class="mb-3 d-flex gap-2 align-items-center">
         <select (change)="load()" class="form-select form-select-sm w-auto">
@@ -7220,17 +7520,23 @@ export class TransferListComponent implements OnInit {
 
 ================================================================================
 File: src\app\transfer\transfer-routing.module.ts
-Size: 550 B
+Size: 700 B
 ================================================================================
 
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { TransferListComponent } from './transfer-list.component';
-import { TransferCreateComponent } from './transfer-create.component';
+
+import { LayoutComponent          } from './layout.component';
+import { TransferListComponent    } from './transfer-list.component';
+import { TransferCreateComponent  } from './transfer-create.component';
 
 const routes: Routes = [
-  { path: '', component: TransferListComponent },       // /transfers
-  { path: 'create', component: TransferCreateComponent } // /transfers/create
+  { path: '', component: LayoutComponent,
+    children: [
+      { path: '', component: TransferListComponent },       // /transfers
+      { path: 'create', component: TransferCreateComponent } // /transfers/create
+    ]
+  }
 ];
 
 @NgModule({
@@ -7241,16 +7547,17 @@ export class TransferRoutingModule {}
 
 ================================================================================
 File: src\app\transfer\transfer.module.ts
-Size: 610 B
+Size: 703 B
 ================================================================================
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { TransferRoutingModule } from './transfer-routing.module';
 
-import { TransferListComponent } from './transfer-list.component';
-import { TransferCreateComponent } from './transfer-create.component';
+import { LayoutComponent          } from './layout.component';
+import { TransferRoutingModule    } from './transfer-routing.module';
+import { TransferListComponent    } from './transfer-list.component';
+import { TransferCreateComponent  } from './transfer-create.component';
 
 @NgModule({
   imports: [
@@ -7260,6 +7567,7 @@ import { TransferCreateComponent } from './transfer-create.component';
     TransferRoutingModule
   ],
   declarations: [
+    LayoutComponent,
     TransferListComponent,
     TransferCreateComponent
   ]
@@ -8852,7 +9160,7 @@ export const environment = {
 
 ================================================================================
 File: src\index.html
-Size: 486 B
+Size: 495 B
 ================================================================================
 
 <!DOCTYPE html>
@@ -8863,7 +9171,7 @@ Size: 486 B
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- bootstrap css -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"> -->
 </head>
 <body>
     <app-root></app-root>
@@ -8955,7 +9263,7 @@ import 'zone.js';  // Included with Angular CLI.
 
 ================================================================================
 File: src\styles.less
-Size: 341 B
+Size: 593 B
 ================================================================================
 
 /* You can add global styles to this file, and also import other style files */
@@ -8975,6 +9283,20 @@ Size: 341 B
     text-align: center;
     box-sizing: content-box;
 }
+
+
+
+
+
+.container-fluid {
+    min-height: 100vh;
+  }
+  
+  /* let the .main-content flex area actually shrink so overflow works */
+  .main-content {
+    /* flex behavior already provided by Bootstrap classes; ensure scroll works */
+    min-height: 0;
+  }
 
 ================================================================================
 File: src\test.ts

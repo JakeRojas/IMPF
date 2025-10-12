@@ -1,20 +1,24 @@
-import { Component, OnInit,}  from '@angular/core';
+import { Component, OnInit }  from '@angular/core';
 import { Router }             from '@angular/router';
 import { first }              from 'rxjs/operators';
 
 import { 
   RoomService, 
+  AccountService,
   QrService, 
   AlertService 
 } from '@app/_services';
+import { Role } from '@app/_models';
 
 @Component({ templateUrl: 'room-list.component.html' })
 export class RoomListComponent implements OnInit {
   rooms: any[] = [];
   loading = false;
+  isSuperAdmin = false;
 
   constructor(
     private roomService:  RoomService,
+    private accountService: AccountService,
     private qrService:    QrService,
     private alert:        AlertService,
 
@@ -22,6 +26,9 @@ export class RoomListComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    const user = this.accountService.accountValue;
+    this.isSuperAdmin = user?.role === 'superAdmin';
+
     this.load();
   }
 

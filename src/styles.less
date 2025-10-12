@@ -15,3 +15,17 @@
     text-align: center;
     box-sizing: content-box;
 }
+
+
+
+
+
+.container-fluid {
+    min-height: 100vh;
+  }
+  
+  /* let the .main-content flex area actually shrink so overflow works */
+  .main-content {
+    /* flex behavior already provided by Bootstrap classes; ensure scroll works */
+    min-height: 0;
+  }

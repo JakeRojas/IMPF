@@ -70,6 +70,6 @@
       <textarea class="form-control" formControlName="notes"></textarea>
     </div>
 
-    <button class="btn btn-primary" type="submit" [disabled]="submitting">Receive</button>
+    <button class="btn btn-primary" [routerLink]="['receive', 'list']" type="submit" [disabled]="submitting">Receive</button>
   </form>
 </div>

@@ -1,11 +1,17 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { TransferListComponent } from './transfer-list.component';
-import { TransferCreateComponent } from './transfer-create.component';
+
+import { LayoutComponent          } from './layout.component';
+import { TransferListComponent    } from './transfer-list.component';
+import { TransferCreateComponent  } from './transfer-create.component';
 
 const routes: Routes = [
-  { path: '', component: TransferListComponent },       // /transfers
-  { path: 'create', component: TransferCreateComponent } // /transfers/create
+  { path: '', component: LayoutComponent,
+    children: [
+      { path: '', component: TransferListComponent },       // /transfers
+      { path: 'create', component: TransferCreateComponent } // /transfers/create
+    ]
+  }
 ];
 
 @NgModule({

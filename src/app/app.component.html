@@ -1,5 +1,5 @@
-﻿<div class="app-container" [ngClass]="{ 'bg-light': account }">
-    <!-- main nav -->
+﻿<!-- <div class="app-container" [ngClass]="{ 'bg-light': account }">
+    
     <nav class="navbar navbar-expand navbar-dark bg-dark px-3" *ngIf="account">
         <div class="navbar-nav">
             <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item nav-link">Home</a>
@@ -24,12 +24,84 @@
         </div>
     </nav>
 
-    <!-- subnav router outlet -->
     <router-outlet name="subnav"></router-outlet>
 
-    <!-- global alert -->
     <alert></alert>
 
-    <!-- main router outlet -->
     <router-outlet></router-outlet>
+</div> -->
+
+<div class="container-fluid">
+  <div class="row min-vh-100 gx-0">
+
+    <!-- LEFT COLUMN: logo (div1) + links (div2) -->
+    <aside *ngIf="account" class="col-12 col-md-2 bg-light border-end d-flex flex-column p-3">
+      <!-- div1: logo (top of sidebar) -->
+      <div class="mb-4 text-center">
+        <!-- replace src with your logo path -->
+        <a routerLink="/" class="d-inline-block">
+          <img src="assets/gsc-gsu-logo-header.png" alt="Logo" class="img-fluid" style="max-height: 65px;">
+        </a>
+      </div>
+
+      <!-- div2: vertical nav links (fills the rest of the sidebar) -->
+      <nav *ngIf="account" class="nav nav-pills flex-column">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+           class="nav-link">Home</a>
+
+        <a routerLink="/profile" routerLinkActive="active" class="nav-link">Profile</a>
+
+        <a *ngIf="account.role" routerLink="/room" routerLinkActive="active"
+           class="nav-link">Room</a>
+
+        <a *ngIf="account.role === Role.SuperAdmin" routerLink="/scan" routerLinkActive="active"
+           class="nav-link">Scan</a>
+
+        <a *ngIf="account.role === Role.SuperAdmin" routerLink="/admin" routerLinkActive="active"
+           class="nav-link">Admin</a>
+
+        <a *ngIf="account.role === Role.SuperAdmin || account.role === Role.Admin || account.role === Role.StockroomAdmin"
+           routerLink="/req-stock" routerLinkActive="active" class="nav-link">Stock Requests</a>
+
+        <a *ngIf="account.role === Role.SuperAdmin || account.role === Role.StockroomAdmin || account.role === Role.Teacher"
+           routerLink="/req-item" routerLinkActive="active" class="nav-link">Item Request</a>
+
+        <a class="nav-link" routerLink="/transfers" routerLinkActive="active">
+          <i class="fa fa-exchange"></i> Transfers
+        </a>
+      </nav>
+
+      <!-- optional spacer to push any bottom content to the bottom -->
+      <div class="mt-auto"></div>
+    </aside>
+
+    <!-- RIGHT COLUMN: top-right logout (div3) + main content (div4) -->
+    <!-- <main class="col-12 col-md-10 d-flex flex-column p-0"> -->
+      <main
+        [class.col-12]="!account"
+        [class.col-md-10]="account"
+        class="d-flex flex-column p-0"
+      >
+
+      <!-- div3: top bar containing optional subnav + logout aligned to the right -->
+      <div *ngIf="account" class="d-flex align-items-center justify-content-between bg-dark text-white p-2 px-3">
+        <!-- left side of top bar: named subnav outlet (keeps your existing subnav usage) -->
+        <div class="d-flex align-items-center">
+          <router-outlet name="subnav"></router-outlet>
+        </div>
+
+        <!-- right side of top bar: logout button -->
+        <div>
+          <button (click)="logout()" class="btn btn-outline-light btn-sm">Logout</button>
+        </div>
+      </div>
+
+      <!-- div4: main content area -->
+      <div class="flex-grow-1 overflow-auto p-3">
+        <alert></alert>
+        <router-outlet></router-outlet>
+      </div>
+
+    </main>
+  </div>
 </div>

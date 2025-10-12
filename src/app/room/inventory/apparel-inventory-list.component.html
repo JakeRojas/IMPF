@@ -5,7 +5,7 @@
   <table *ngIf="!loading && inventory?.length" class="table table-sm">
     <thead>
       <button class="btn btn-primary btn-sm me-2" (click)="generateAllQr()">
-        <i class="fa fa-qrcode"></i> Generate All (PDF)
+        Generate All (PDF)
       </button>
       <tr>
         <th>Name</th>
@@ -28,7 +28,7 @@
         <td>{{ i.apparelSize || '-' }}</td>
         <td>{{ i.totalQuantity || i.quantity || '-' }}</td>
         <td>{{ i.status || '-' }}</td>
-        <td>{{ i.createdAt }}</td>
+        <td>{{ i.updatedAt | date:'short' : i.createdAt | date:'short' }}</td>
         <td *ngIf="i.qrStatus">generated</td>
         <td *ngIf="!i.qrStatus">-</td>
         <td>

@@ -3,6 +3,7 @@ import { CommonModule               } from '@angular/common';
 import { ReactiveFormsModule        } from '@angular/forms';
 import { StockRequestRoutingModule  } from './stock-request-routing.module';
 
+import { LayoutComponent              } from './layout.component';
 import { StockRequestListComponent    } from './stock-request.list.component';
 import { StockRequestViewComponent    } from './stock-request.view.component';
 import { StockRequestCreateComponent  } from './stock-request.create.component';
@@ -14,6 +15,7 @@ import { StockRequestCreateComponent  } from './stock-request.create.component';
     StockRequestRoutingModule
   ],
   declarations: [
+    LayoutComponent,
     StockRequestListComponent,
     StockRequestViewComponent,
     StockRequestCreateComponent

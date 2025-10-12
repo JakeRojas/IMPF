@@ -1,10 +1,11 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { TransferRoutingModule } from './transfer-routing.module';
 
-import { TransferListComponent } from './transfer-list.component';
-import { TransferCreateComponent } from './transfer-create.component';
+import { LayoutComponent          } from './layout.component';
+import { TransferRoutingModule    } from './transfer-routing.module';
+import { TransferListComponent    } from './transfer-list.component';
+import { TransferCreateComponent  } from './transfer-create.component';
 
 @NgModule({
   imports: [
@@ -14,6 +15,7 @@ import { TransferCreateComponent } from './transfer-create.component';
     TransferRoutingModule
   ],
   declarations: [
+    LayoutComponent,
     TransferListComponent,
     TransferCreateComponent
   ]

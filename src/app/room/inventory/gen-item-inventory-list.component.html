@@ -6,7 +6,7 @@
     <table *ngIf="!loading && inventory?.length" class="table table-sm">
       <thead>
         <button class="btn btn-primary btn-sm me-2" (click)="generateAllQr()">
-          <i class="fa fa-qrcode"></i> Generate All (PDF)
+          Generate All (PDF)
         </button>
         <tr>
           <th>Name</th>
@@ -24,7 +24,7 @@
           <td>{{ i.genItemSize || i.size || '-' }}</td>
           <td>{{ displayQty(i) }}</td>
           <td>{{ i.status || '-' }}</td>
-          <td>{{ i.createdAt ? (i.createdAt | date:'short') : '-' }}</td>
+          <td>{{ i.updatedAt | date:'short' : i.createdAt | date:'short' }}</td>
         </tr>
       </tbody>
     </table>
