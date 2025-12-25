@@ -3,14 +3,17 @@
 
   <div *ngIf="loading">Loading...</div>
 
-  <table *ngIf="!loading && units?.length" class="table table-sm">
+  <table *ngIf="!loading && units.length" class="table table-sm">
     <thead>
+      <button class="btn btn-primary btn-sm me-2" (click)="generateAllUnitsQr()">
+        Generate All Units (PDF)
+      </button>
       <tr>
         <th>Unit ID</th>
         <th>Unit Name</th>
+        <th>Description</th>
         <th>Status</th>
         <th>Assigned To</th>
-        <th>Qty</th>
         <th>Last Updated</th>
       </tr>
     </thead>
@@ -20,7 +23,6 @@
         <td>{{ u.receiveApparelId}}</td>
         <td>{{ u.status }}</td>
         <td>{{ u.assignedToName || u.assignedTo || '-' }}</td>
-        <td>{{ u.quantity ?? u.totalQuantity ?? 0 }}</td>
         <td>{{ u.updatedAt ? (u.updatedAt | date:'short') : (u.createdAt ? (u.createdAt | date:'short') : '-') }}</td>
       </tr>
     </tbody>

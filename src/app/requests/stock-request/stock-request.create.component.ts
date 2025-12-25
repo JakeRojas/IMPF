@@ -1,108 +1,100 @@
-import { Component  } from '@angular/core';
-import { Router     } from '@angular/router';
-import { first      } from 'rxjs/operators';
-import { 
-  FormBuilder, 
-  FormGroup, 
-  Validators 
-} from '@angular/forms';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { first, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
-import { 
-  AlertService, 
-  AccountService, 
-  StockRequestService 
-} from '@app/_services';
-// =========================================================================
+import { RoomService, StockRequestService, AlertService } from '@app/_services';
 
 @Component({ 
   templateUrl: './stock-request.create.component.html' 
 })
-export class StockRequestCreateComponent {
-  form: FormGroup;
-  submitting = false;
-  account: any;
+export class StockRequestCreateComponent implements OnInit, OnDestroy {
+  form!: FormGroup;
+  rooms: any[] = [];
+  items: any[] = [];
+  loading = false;
+  loadingItems = false;
 
-  private readonly VALID_ITEM_TYPES = ['apparel', 'supply', 'genItem'];
+  private destroy$ = new Subject<void>();
 
   constructor(
-    private fb: FormBuilder,
-    private sr: StockRequestService,
-    private alert: AlertService,
-    private router: Router,
-    private accountService: AccountService
-  ) {
-    this.account = this.accountService.accountValue;
+  private fb: FormBuilder,
+  private roomService: RoomService,
+  private sr: StockRequestService,
+  private alert: AlertService,
+  private router: Router
+  ) {}
+
+  ngOnInit(): void {
     this.form = this.fb.group({
-      requesterRoomId: [null],
-      itemType: ['apparel', Validators.required],
-      itemId: [null],
-      quantity: [1, [Validators.required, Validators.min(1)]],
-      note: ['']
+    requesterRoomId: [null, Validators.required],
+    itemId: [null, Validators.required],
+    quantity: [1, [Validators.required, Validators.min(1)]],
+    note: ['']
+  });
+  
+  this.loadRooms();
+  
+  // when requesterRoomId changes, load the items for that room
+  this.form.get('requesterRoomId')!.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(id => {
+  this.items = [];
+  this.form.get('itemId')!.setValue(null);
+  if (!id) return;
+  this.loadItemsForRoom(Number(id));
+  });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+    
+  private loadRooms() {
+    this.loading = true;
+    this.roomService.getRooms().pipe(first()).subscribe({
+      next: (res: any[]) => { this.rooms = res || []; this.loading = false; },
+      error: e => { this.loading = false; this.alert.error(this._errToString(e)); }
+    });
+  }
+    
+  private loadItemsForRoom(roomId: number) {
+    this.loadingItems = true;
+    this.roomService.getItemsByRoom(roomId).pipe(first()).subscribe({
+      next: (res: any[]) => { this.items = res || []; this.loadingItems = false; },
+      error: e => { this.loadingItems = false; this.alert.error(this._errToString(e)); }
     });
   }
 
+  submit() {
+    if (!this.form.valid) { this.form.markAllAsTouched(); return; }
+    
+    const v = this.form.value;
+    
+    // try to find the selected item to read its itemType (if backend still expects it)
+    const selected = this.items.find(i => Number(i.inventoryId ?? i.id ?? i.inventoryId) === Number(v.itemId)) || null;
+    
+    const payload: any = {
+      requesterRoomId: Number(v.requesterRoomId),
+      itemId: Number(v.itemId),
+      quantity: Number(v.quantity),
+      note: v.note || null
+    };
+    
+    // keep this optional: if the server still expects itemType include it from the item list
+    if (selected && selected.itemType) payload.itemType = selected.itemType;
+    
+    // we do NOT send accountId here — the backend should set it from the authenticated user.
+    this.sr.create(payload).pipe(first()).subscribe({
+      next: () => { this.alert.success('Stock request created'); this.router.navigate(['/req-stock']); },
+      error: e => this.alert.error(this._errToString(e))
+    });
+  }
+    
   private _errToString(err: any): string {
-    if (!err && err !== 0) return 'Unknown error';
+    if (!err) return 'Unknown error';
     if (typeof err === 'string') return err;
-    if (err?.error?.message) return String(err.error.message);
     if (err?.message) return String(err.message);
     try { return JSON.stringify(err); } catch { return String(err); }
   }
-
-submit() {
-  if (this.form.invalid) {
-    this.alert.error('Please complete the required fields (item type and quantity).');
-    return;
-  }
-
-  const raw = this.form.value;
-  const itemType = String(raw.itemType || '').trim();
-  if (!this.VALID_ITEM_TYPES.includes(itemType)) {
-    this.alert.error(`Invalid item type. Allowed: ${this.VALID_ITEM_TYPES.join(', ')}`);
-    return;
-  }
-
-  const quantity = Number(raw.quantity);
-  if (!Number.isInteger(quantity) || quantity <= 0) {
-    this.alert.error('Quantity must be a positive integer.');
-    return;
-  }
-
-  const accountId = this.account?.accountId ?? this.account?.id ?? null;
-  if (!accountId) {
-    this.alert.error('Unable to determine your account id. Re-login or check session.');
-    return;
-  }
-
-  const itemId = raw.itemId ? Number(raw.itemId) : null;
-  const requesterRoomId = raw.requesterRoomId ? Number(raw.requesterRoomId) : null;
-
-  const note = raw.note && String(raw.note).trim() !== '' ? String(raw.note).trim() : null;
-
-  const payload: any = {
-    accountId,
-    requesterRoomId,
-    itemId,
-    itemType,
-    quantity,
-    note
-  };
-
-  console.log('Creating stock request payload:', payload);
-
-  this.submitting = true;
-  this.sr.create(payload).pipe(first()).subscribe({
-    next: () => {
-      this.alert.success('Request created', { keepAfterRouteChange: true });
-      this.router.navigate(['/req-stock']);
-    },
-    error: err => {
-      let msg = 'Server error';
-      try { msg = err?.error?.message ?? err?.message ?? JSON.stringify(err?.error) ?? String(err); } catch (e) { msg = String(err); }
-      console.error('Create stock request failed (full error):', err);
-      this.alert.error(msg);
-      this.submitting = false;
-    }
-  });
-}
 }

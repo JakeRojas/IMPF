@@ -17,7 +17,7 @@ export interface ItemRequestedEntry {
   export interface ItemRequest {
     itemRequestId?:       number;
     id?:                  number;
-    acccountId?:          number;
+    accountId?:          number;
     requesterRoomId?:     number | null;
     items?:               ItemRequestedEntry[];
     status?:              string; 

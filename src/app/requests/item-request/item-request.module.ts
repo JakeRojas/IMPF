@@ -6,7 +6,7 @@ import { LayoutComponent            } from './layout.component';
 import { ItemRequestRoutingModule   } from './item-request-routing.module';
 import { ItemRequestListComponent   } from './item-request-list.component';
 import { ItemRequestViewComponent   } from './item-request-view.component';
-import { ItemRequestCreateComponent } from './item-request-create.component';
+import { ItemRequestCreateComponent } from './item-request.create.component';
 
 @NgModule({
   imports: [

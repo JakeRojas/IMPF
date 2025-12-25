@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { TransferService } from '@app/_services';
-import { AlertService } from '@app/_services';
+import { AlertService, AccountService } from '@app/_services';
 import { first } from 'rxjs/operators';
 import { Transfer } from '@app/_models/transfer.model';
 
@@ -13,18 +13,18 @@ export class TransferListComponent implements OnInit {
   transfers: Transfer[] = [];
   loading = false;
   filterStatus = '';
-  roomId: number | null = null; // optionally filter by current room
+  roomId: number | null = null;
   account: any;
 
   constructor(
     private transferService: TransferService,
+    private accountService: AccountService,
     private alert: AlertService,
     private router: Router
   ) {}
 
   ngOnInit() {
-    // optional: if you have account service, get current account
-    // this.account = this.accountService.accountValue;
+    this.account = this.accountService.accountValue; // or subscribe if it's an observable
     this.load();
   }
 
@@ -32,7 +32,6 @@ export class TransferListComponent implements OnInit {
     this.loading = true;
     const params: any = {};
     if (this.filterStatus) params.status = this.filterStatus;
-    // if you want to limit to this room (received or sent) add to params like toRoomId or fromRoomId
     this.transferService.list(params).pipe(first()).subscribe({
       next: (rows: any) => { this.transfers = rows; this.loading = false; },
       error: err => { this.alert.error(err); this.loading = false; }
@@ -43,10 +42,20 @@ export class TransferListComponent implements OnInit {
     this.router.navigate(['/transfers/create']);
   }
 
-  view(transfer: Transfer) {
-    // navigate to view page if you make one, or show modal
-    // example: this.router.navigate(['/transfers', transfer.transferId]);
-    this.alert.info(JSON.stringify(transfer, null, 2));
+  view(t: any) {
+    // Accept either the transfer object or an id passed directly.
+    const id = (typeof t === 'object') 
+      ? (t?.transferId) 
+      : t;
+  
+    if (!id) {
+      console.warn('transfer view called without valid id or transfer object:', t);
+      // optionally show a user-friendly message
+      return this.alert?.error?.('Unable to open transfer: invalid id'); // keep UI consistent if you have alert service
+    }
+  
+    // navigate safely (segment must not be undefined)
+    this.router.navigate(['/transfers', String(id)]);
   }
 
   accept(transfer: Transfer) {
@@ -57,24 +66,35 @@ export class TransferListComponent implements OnInit {
     });
   }
 
-  initiateReturn(transfer: Transfer) {
-    if (!confirm('Start return to sender?')) return;
-    this.transferService.return(transfer.transferId).pipe(first()).subscribe({
-      next: () => { this.alert.success('Return initiated'); this.load(); },
-      error: e => this.alert.error(e)
-    });
+  //canAccept(t: Transfer): boolean { return t.status === 'in_transfer'; }
+  // canAccept(t: Transfer): boolean {
+  //   if (!t || t.status !== 'in_transfer') return false;
+  //   const acct = this.account || {};
+  //   // admins can accept any transfer; room-in-charge (for toRoom) can accept
+  //   const adminRoles = ['superAdmin', 'admin', 'stockroomAdmin'];
+  //   if (adminRoles.includes(acct.role)) return true;
+  //   // t.toRoom may be included by backend; fallback: allow only if acct.accountId equals toRoom.roomInCharge
+  //   const roomInCharge = t.toRoom?.roomInCharge ?? t.toRoomId;
+  //   return String(acct.accountId) === String(roomInCharge);
+  // }
+  canAccept(t: Transfer): boolean {
+    if (!t) return false;
+    const status = String(t.status || '').toLowerCase();
+    if (!['pending', 'in_transfer'].includes(status)) return false;
+  
+    const acct = this.account || {};
+    const rawRole = acct.role ?? acct.roles ?? acct.roleName ?? '';
+    const adminRoles = ['superadmin', 'admin', 'stockroomadmin', 'super_admin'];
+  
+    let isAdmin = false;
+    if (Array.isArray(rawRole)) {
+      isAdmin = rawRole.map((r: any) => String(r).toLowerCase()).some((r: string) => adminRoles.includes(r));
+    } else {
+      isAdmin = adminRoles.includes(String(rawRole).toLowerCase());
+    }
+    if (isAdmin) return true;
+  
+    const roomInCharge = t.toRoom?.roomInCharge ?? t.toRoomId;
+    return String(acct.accountId) === String(roomInCharge);
   }
-
-  acceptReturned(transfer: Transfer) {
-    if (!confirm('Accept returned items?')) return;
-    this.transferService.acceptReturn(transfer.transferId).pipe(first()).subscribe({
-      next: () => { this.alert.success('Return accepted'); this.load(); },
-      error: e => this.alert.error(e)
-    });
-  }
-
-  // simple helper to show which actions are visible depending on status + role
-  canAccept(t: Transfer): boolean { return t.status === 'in_transfer'; }
-  canReturn(t: Transfer): boolean { return t.status === 'transfer_accepted'; }
-  canAcceptReturned(t: Transfer): boolean { return t.status === 'returning'; }
 }

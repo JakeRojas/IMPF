@@ -3,6 +3,7 @@ import { HttpClient }   from '@angular/common/http';
 import { environment }  from '@environments/environment';
 import { Observable }   from 'rxjs';
 
+
 @Injectable({ providedIn: 'root' })
 export class RoomService {
   private baseUrl = `${environment.apiUrl}/rooms`;
@@ -12,6 +13,12 @@ export class RoomService {
   // Rooms CRUD
   getRooms() { 
     return this.http.get<any[]>(this.baseUrl); 
+  }
+  listRooms() { 
+    return this.http.get<any[]>(`${this.baseUrl}/list`); 
+  }
+  getItemsByRoom(roomId: number) {
+    return this.http.get<any[]>(`${this.baseUrl}/${roomId}/room-items`);
   }
   getRoomById(roomId: number) { 
     return this.http.get<any>(`${this.baseUrl}/${roomId}`); 
@@ -115,22 +122,35 @@ export class RoomService {
     // NOTE: backend route for apparel release is /rooms/:roomId/release/apparel
     return this.http.post<any>(`${this.baseUrl}/${roomId}/release/supply`, body);
   }
-  releaseGenItem(roomId: number, payload: any): Observable<any> {
-    // make a shallow copy so we don't mutate callers' objects
-    const body: any = { ...payload };
+  // releaseGenItem(roomId: number, payload: any): Observable<any> {
+  //   // make a shallow copy so we don't mutate callers' objects
+  //   const body: any = { ...payload };
   
-    // backend (server) expects releaseApparelQuantity — support both shortcut field names
-    if (body.releaseQuantity != null && body.releaseItemQuantity == null) {
-      body.releaseItemQuantity = Number(body.releaseQuantity);
-      // delete(body.releaseQuantity); // optional
-    }
+  //   // backend (server) expects releaseApparelQuantity — support both shortcut field names
+  //   if (body.releaseQuantity != null && body.releaseItemQuantity == null) {
+  //     body.releaseItemQuantity = Number(body.releaseQuantity);
+  //     // delete(body.releaseQuantity); // optional
+  //   }
   
-    // ensure numeric fields are numbers (server normalizes but it's good to be explicit)
-    if (body.releaseItemQuantity != null) body.releaseItemQuantity = Number(body.releaseItemQuantity);
-    if (body.genItemInventoryId != null) body.genItemInventoryId = Number(body.genItemInventoryId);
+  //   // ensure numeric fields are numbers (server normalizes but it's good to be explicit)
+  //   if (body.releaseItemQuantity != null) body.releaseItemQuantity = Number(body.releaseItemQuantity);
+  //   if (body.genItemInventoryId != null) body.genItemInventoryId = Number(body.genItemInventoryId);
   
-    // NOTE: backend route for apparel release is /rooms/:roomId/release/apparel
-    return this.http.post<any>(`${this.baseUrl}/${roomId}/release/item`, body);
+  //   // NOTE: backend route for apparel release is /rooms/:roomId/release/apparel
+  //   return this.http.post<any>(`${this.baseUrl}/${roomId}/release/item`, body);
+  // }
+  releaseGenItem(roomId: number, payload: any) {
+    // normalize fields the backend expects
+    const body: any = { ...payload };          // spread payload
+    // ensure numeric
+    body.releaseItemQuantity = Number(body.releaseQuantity ?? body.releaseItemQuantity ?? 0);
+    // map UI remarks -> backend notes
+    if (body.remarks && !body.notes) body.notes = body.remarks;
+    // remove redundant fields if you like
+    delete body.releaseQuantity;
+    delete body.remarks;
+  
+    return this.http.post(`${this.baseUrl}/${roomId}/release/item`, body);
   }
 
   updateApparelStatus(roomId: number, apparelId: number, newStatus: string) {

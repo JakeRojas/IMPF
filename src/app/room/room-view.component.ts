@@ -10,7 +10,7 @@ import { RoomService, AlertService } from '@app/_services';
 export class RoomViewComponent implements OnInit {
   roomId!: number;
   room: any = {};
-  stockPath: string = 'general';
+  stockPath = 'apparel';
   isStockroom = false;
 
   constructor(
@@ -29,12 +29,12 @@ export class RoomViewComponent implements OnInit {
     this.loadRoom();
   }
 
-  private loadRoom() {
+  loadRoom() {
     this.roomService.getRoomById(this.roomId).pipe(first()).subscribe({
       next: (r: any) => {
         this.room = r || {};
-        this.stockPath = this.computeStockPath(this.room);
-        this.isStockroom = this.room.roomType === 'stockroom' || this.room.roomType === 'subStockroom';
+        // this.stockPath = this.computeStockPath(this.room);
+        // this.isStockroom = this.room.roomType === 'stockroom' || this.room.roomType === 'subStockroom';
       },
       error: (e) => this.alert.error(e)
     });
@@ -48,4 +48,3 @@ export class RoomViewComponent implements OnInit {
     return 'general';
   }
 }
-

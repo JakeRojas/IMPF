@@ -25,7 +25,7 @@ const routes: Routes = [
           { path: 'inventory', loadChildren: inventoryModule },
           { path: 'receive',   loadChildren: receiveModule },
           { path: 'release',   loadChildren: releaseModule },
-        ]
+        ],
       },
     ]
   },

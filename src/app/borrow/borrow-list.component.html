@@ -1,0 +1,83 @@
+<div class="card mb-3">
+  <div class="card-body d-flex justify-content-between align-items-center">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb m-0 p-0">
+        <li class="breadcrumb-item active"><a>Borrow List</a></li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="d-flex mb-2 align-items-center">
+      <select [(ngModel)]="filterStatus" (change)="load()" class="form-select w-auto">
+        <option value="">All statuses</option>
+        <option value="waiting_for_approval">Waiting for approval</option>
+        <option value="approved">Approved</option>
+        <option value="acquired">Acquired</option>
+        <option value="in_return">In return</option>
+        <option value="return_accepted">Return accepted</option>
+        <option value="declined">Declined</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+
+      <button class="btn btn-outline-secondary btn-sm ms-2" (click)="load()" [disabled]="loading">Refresh</button>
+    </div>
+
+    <table *ngIf="!loading && borrows.length" class="table table-sm table-hover">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Room</th>
+          <th>Item</th>
+          <th>Qty</th>
+          <th>Note</th>
+          <th>Requester</th>
+          <th>Status</th>
+          <th>Requested</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let b of borrows">
+          <td>{{ b.borrowId }}</td>
+          <td>{{ b.room?.roomName }}</td>
+          <td>
+            {{ b.item?.name ?? b.itemName ?? b.itemType }}
+          </td>
+          <td>{{ b.quantity ?? '-' }}</td>
+          <td>
+            <!-- <div *ngIf="b.note"> -->
+              <small class="text-muted">
+                — {{ b.note }}
+              </small>
+            <!-- </div> -->
+          </td>
+          <td>{{ b.requester?.firstName}} {{b.requester?.lastName }}</td>
+          <td>{{ b.status }}</td>
+          <td>
+            <small>
+              {{ b.createdAt | date:'short' }}
+            </small>
+          </td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-primary me-1" (click)="view(b)">View</button>
+          
+            <button *ngIf="showApproveDecline(b)" class="btn btn-sm btn-success me-1" (click)="approve(b)">Approve</button>
+            <button *ngIf="showApproveDecline(b)" class="btn btn-sm btn-danger me-1" (click)="decline(b)">Decline</button>
+          
+            <button *ngIf="showAcquireCancel(b)" class="btn btn-sm btn-primary me-1" (click)="acquire(b)">Acquire</button>
+            <button *ngIf="showAcquireCancel(b)" class="btn btn-sm btn-outline-danger me-1" (click)="cancel(b)">Cancel</button>
+          
+            <button *ngIf="showReturnButton(b)" class="btn btn-sm btn-warning me-1" (click)="markReturn(b)">Mark Return</button>
+          
+            <button *ngIf="showAcceptReturn(b)" class="btn btn-sm btn-dark me-1" (click)="acceptReturned(b)">Accept Return</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="!loading && (!borrows || borrows.length === 0)" class="text-muted">No borrow requests found.</div>
+  </div>
+</div>

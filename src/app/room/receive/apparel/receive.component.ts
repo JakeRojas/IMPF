@@ -18,8 +18,6 @@ export class ApparelReceiveComponent implements OnInit {
   currentUserName: string | null = null;
   currentUserId: number | null = null;
 
-  // ENUM-like option lists — replace values with the exact enum values backend expects
-
   apparelLevels: Option[] = [
     { value: 'pre',       label: 'Pre-School' },
     { value: 'elem',      label: 'Elementary' },
@@ -92,30 +90,23 @@ export class ApparelReceiveComponent implements OnInit {
   private tryFillCurrentUser() {
     let user: any = null;
 
-    // 1) Try to get user from injected accountService (if provided)
     if (this.accountService) {
       const svc: any = this.accountService as any;
-      // try several common property names used by different templates
       user = svc?.currentUserValue || svc?.userValue || svc?.value || svc?.getValue?.();
-      // also support an observable getter (less likely in this simple snippet)
       if (!user && typeof svc?.getCurrentUser === 'function') {
         user = svc.getCurrentUser();
       }
     }
 
-    // 2) Fallback: try localStorage (older/simple auth implementations)
     if (!user) {
       try {
         const raw = localStorage.getItem('user') || localStorage.getItem('currentUser') || localStorage.getItem('account');
         if (raw) user = JSON.parse(raw);
       } catch (err) {
-        // silent fallback
       }
     }
 
-    // If we found a user, normalize id & name
     if (user) {
-      // customize these property names if your user object uses different keys
       const id = user?.id ?? user?.accountId ?? user?.userId ?? user?.uid;
       const name =
         user?.fullName ??
@@ -127,7 +118,6 @@ export class ApparelReceiveComponent implements OnInit {
 
       if (id) {
         this.currentUserId = +id;
-        // patch the numeric id into the form control so backend gets it
         this.receiveForm.patchValue({ receivedBy: this.currentUserId });
       }
       if (name) {
@@ -137,13 +127,12 @@ export class ApparelReceiveComponent implements OnInit {
   }
 
   private buildForm() {
-    //const currentUserId = this.getCurrentUserId;
     this.receiveForm = this.fb.group({
       apparelName:      ['', Validators.required],
-      apparelLevel:     [this.apparelLevels[0].value, Validators.required], // default to first
+      apparelLevel:     [this.apparelLevels[0].value, Validators.required],
       apparelType:      [this.apparelTypes[0].value, Validators.required],
-      apparelFor:       [this.apparelForOptions[0].value, Validators.required], // default 'unisex'
-      apparelSize:      [this.apparelSizes[0].value, Validators.required], // default 'M'
+      apparelFor:       [this.apparelForOptions[0].value, Validators.required],
+      apparelSize:      [this.apparelSizes[0].value, Validators.required],
       apparelQuantity:  [1, [Validators.required, Validators.min(1)]],
       receivedFrom:     ['', Validators.required],
       receivedBy:       [null, Validators.required],
@@ -152,7 +141,10 @@ export class ApparelReceiveComponent implements OnInit {
   }
 
   submit() {
-    if (this.receiveForm.invalid) { this.alert.error('Please fill required fields'); return; }
+    if (this.receiveForm.invalid) { 
+      this.alert.error('Please fill required fields'); 
+      return; 
+    }
     this.submitting = true;
     const payload = this.receiveForm.value;
 
@@ -160,7 +152,7 @@ export class ApparelReceiveComponent implements OnInit {
       next: () => {
         this.alert.success('Received apparel successfully');
         this.submitting = false;
-        this.router.navigate(['../', '..', 'inventory', 'apparel'], { relativeTo: this.route });
+        this.router.navigate(['receive','list'], { relativeTo: this.route });
       },
       error: (e) => { this.alert.error(e); this.submitting = false; }
     });

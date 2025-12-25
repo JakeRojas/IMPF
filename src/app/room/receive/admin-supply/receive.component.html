@@ -1,4 +1,3 @@
-<!-- src/app/room/receive/apparel-receive.component.html -->
 <div class="container py-2">
   <h4>Receive Admin Supply (Room #{{ roomId }})</h4>
 
@@ -28,16 +27,10 @@
         <input class="form-control" formControlName="receivedFrom" />
       </div>
 
-      <!-- <div class="col-md-4">
-        <label class="form-label">Received By (accountId)</label>
-        <input type="number" class="form-control" formControlName="receivedBy" />
-      </div> -->
       <div class="mb-2">
         <label class="form-label">Received By</label>
-        <!-- <input type="number" formControlName="receivedBy" class="form-control" readonly /> -->
         <ng-container *ngIf="currentUserName">
           <input class="form-control" [value]="currentUserName" readonly />
-          <!-- Hidden field: still binds numeric id into the form -->
           <input type="hidden" formControlName="receivedBy" />
         </ng-container>
       </div>

@@ -18,8 +18,6 @@ export class AdminSupplyReceiveComponent implements OnInit {
   currentUserName: string | null = null;
   currentUserId: number | null = null;
 
-  // ENUM-like option lists — replace values with the exact enum values backend expects
-
   supplyMeasures: Option[] = [
     { value: 'pc',      label: 'pc/s' },
     { value: 'box',     label: 'box/s' },
@@ -60,30 +58,23 @@ export class AdminSupplyReceiveComponent implements OnInit {
   private tryFillCurrentUser() {
     let user: any = null;
 
-    // 1) Try to get user from injected accountService (if provided)
     if (this.accountService) {
       const svc: any = this.accountService as any;
-      // try several common property names used by different templates
       user = svc?.currentUserValue || svc?.userValue || svc?.value || svc?.getValue?.();
-      // also support an observable getter (less likely in this simple snippet)
       if (!user && typeof svc?.getCurrentUser === 'function') {
         user = svc.getCurrentUser();
       }
     }
 
-    // 2) Fallback: try localStorage (older/simple auth implementations)
     if (!user) {
       try {
         const raw = localStorage.getItem('user') || localStorage.getItem('currentUser') || localStorage.getItem('account');
         if (raw) user = JSON.parse(raw);
       } catch (err) {
-        // silent fallback
       }
     }
 
-    // If we found a user, normalize id & name
     if (user) {
-      // customize these property names if your user object uses different keys
       const id = user?.id ?? user?.accountId ?? user?.userId ?? user?.uid;
       const name =
         user?.fullName ??
@@ -95,7 +86,6 @@ export class AdminSupplyReceiveComponent implements OnInit {
 
       if (id) {
         this.currentUserId = +id;
-        // patch the numeric id into the form control so backend gets it
         this.receiveForm.patchValue({ receivedBy: this.currentUserId });
       }
       if (name) {
@@ -105,7 +95,6 @@ export class AdminSupplyReceiveComponent implements OnInit {
   }
 
   private buildForm() {
-    //const currentUserId = this.getCurrentUserId;
     this.receiveForm = this.fb.group({
       supplyName:       ['', Validators.required],
       supplyQuantity:   [1, [Validators.required, Validators.min(1)]],

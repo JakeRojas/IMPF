@@ -28,7 +28,6 @@
       <h5 class="card-title">Scanned item</h5>
   
       <div *ngIf="lastScannedItem; else rawView">
-        <!-- Friendly table for common fields returned by backend -->
         <table class="table table-sm">
           <tr><th>Kind</th><td>{{ lastScannedItem.kind || (lastScannedItem.payload?.unitId ? 'unit' : 'batch') || '-' }}</td></tr>
           <tr><th>Item type</th><td>{{ lastScannedItem.payload?.itemType || lastScannedItem.type || '-' }}</td></tr>
@@ -39,12 +38,10 @@
           </td></tr>
           <tr><th>Qty (live)</th><td>{{ getDisplayedQuantity() }}</td></tr>
           <tr><th>Status</th><td>{{ lastScannedItem.unit?.status || lastScannedItem.inventory?.status || lastScannedItem.payload?.status || '-' }}</td></tr>
-          <tr><th>Raw payload</th><td style="word-break:break-all;font-size:12px">{{ lastResult }}</td></tr>
         </table>
       </div>
   
       <ng-template #rawView>
-        <!-- fallback: show raw text + parsed JSON if any -->
         <p><strong>Scanned text</strong></p>
         <pre style="max-height:120px;overflow:auto">{{ lastResult }}</pre>
         <div *ngIf="lastParsed">
@@ -53,41 +50,50 @@
         </div>
       </ng-template>
   
-      <div class="mt-2">
+      <!-- <div class="mt-2">
         <button class="btn btn-danger me-2" (click)="onReleaseClicked()">Release</button>
+        <button class="btn btn-outline-success me-2" (click)="onReceiveClicked()">Receive</button>
         <button class="btn btn-secondary me-2" (click)="scanAgain()">Scan again</button>
-  
+      </div> -->
+      <div class="mt-2">
+        <ng-container *ngIf="isUnit(); else batchBtns">
+          <button class="btn btn-danger me-2" (click)="onReleaseClicked()">Release</button>
+          <button class="btn btn-outline-warning me-2" (click)="onWorkingClicked()">Working</button>
+          <button class="btn btn-outline-danger me-2" (click)="onDamageClicked()">Damage</button>
+          <button class="btn btn-secondary me-2" (click)="scanAgain()">Scan again</button>
+        </ng-container>
+      
+        <ng-template #batchBtns>
+          <button class="btn btn-danger me-2" (click)="onReleaseClicked()">Release</button>
+          <button class="btn btn-outline-success me-2" (click)="onReceiveClicked()">Receive</button>
+          <button class="btn btn-secondary me-2" (click)="scanAgain()">Scan again</button>
+        </ng-template>
       </div>
     </div>
   </div>
-  
-
   <div *ngIf="showBatchQtyInput" class="card">
     <div class="card-body">
-      <h5 class="card-title">Batch release</h5>
+      <h5 class="card-title">{{ batchActionType === 'receive' ? 'Batch receive' : 'Batch ' + batchActionType }}</h5>
       <p *ngIf="lastParsed?.name"><strong>{{ lastParsed?.name }}</strong></p>
-
+  
       <div class="mb-2">
-        <label>Quantity to release</label>
+        <label>Quantity to {{ batchActionType === 'receive' ? 'receive' : 'release' }}</label>
         <input type="number" class="form-control" [(ngModel)]="batchQty" min="1" />
       </div>
-
+  
       <div class="mb-2" *ngIf="!lastParsed?.roomId">
         <label>Room ID (required)</label>
         <input type="number" class="form-control" [(ngModel)]="batchRoomIdInput" />
       </div>
-
+  
       <div class="d-flex">
-        <button type="button" class="btn btn-danger me-2" (click)="confirmBatchRelease()">Confirm release</button>
-        <button type="button" class="btn btn-secondary" (click)="cancelBatchRelease()">Cancel</button>
+        <button type="button" class="btn"
+                [ngClass]="batchActionType === 'receive' ? 'btn-success me-2' : 'btn-danger me-2'"
+                (click)="confirmBatchAction()">
+          {{ batchActionType === 'receive' ? 'Confirm receive' : 'Confirm release' }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="cancelBatchAction()">Cancel</button>
       </div>
     </div>
   </div>
 </div>
-
-
-
-
-
-
-

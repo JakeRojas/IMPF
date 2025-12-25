@@ -9,8 +9,8 @@ export class QrService {
 
   constructor(private http: HttpClient) {}
 
-  releaseUnit(stockroomType: string, apparelId: number, body: { actorId?: number } = {}): Observable<any> {
-    return this.http.post<any>(`${this.base}/${stockroomType}/unit/${apparelId}/release`, body);
+  releaseUnit(stockroomType: string, unitId: number, body: any): Observable<any> {
+    return this.http.post<any>(`${this.base}/${stockroomType}/unit/${unitId}/release`, body);
   }
   verifyQr(payload: any): Observable<any> {
     return this.http.post<any>(`${this.base}/scan`, payload);
@@ -29,5 +29,8 @@ export class QrService {
 
   downloadAllPdf(stockroomType: string, roomId: number): Observable<Blob> {
     return this.http.get(`${this.base}/${stockroomType}/room/${roomId}/pdf-all`, { responseType: 'blob' });
+  }
+  downloadAllUnitsPdf(stockroomType: string, roomId: number): Observable<Blob> {
+    return this.http.get(`${this.base}/${stockroomType}/room/${roomId}/pdf-units`, { responseType: 'blob' });
   }
 }

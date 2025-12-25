@@ -1,0 +1,52 @@
+<div class="card p-4">
+    <div *ngIf="loading">Loading...</div>
+  
+    <ng-container *ngIf="!loading && transfer; else notFound">
+      <h2>Transfer #{{ transfer.transferId ?? transfer.id }}</h2>
+  
+      <div class="mb-3">
+        <strong>Item:</strong> {{ transfer.itemName || transfer.itemLabel || transfer.itemType }}
+      </div>
+  
+      <div class="mb-3">
+        <strong>Quantity:</strong> {{ transfer.quantity }}
+      </div>
+  
+      <div class="mb-3">
+        <strong>From Room:</strong>
+        <span>{{ transfer.fromRoom?.roomName ?? transfer.fromRoomName ?? transfer.fromRoomId }}</span>
+      </div>
+  
+      <div class="mb-3">
+        <strong>To Room:</strong>
+        <span>{{ transfer.toRoom?.roomName ?? transfer.toRoomName ?? transfer.toRoomId }}</span>
+        <span *ngIf="transfer.toRoom?.roomInCharge"> — In-charge: {{ transfer.toRoom.roomInCharge }}</span>
+      </div>
+  
+      <div class="mb-3">
+        <strong>Status:</strong> {{ transfer.status }}
+      </div>
+  
+      <div *ngIf="transfer.acceptedBy || transfer.acceptedAt" class="mb-3">
+        <strong>Accepted By:</strong> {{ transfer.acceptedBy }}<br />
+        <strong>Accepted At:</strong> {{ transfer.acceptedAt | date:'medium' }}
+      </div>
+  
+      <div *ngIf="transfer.notes" class="mb-3">
+        <strong>Notes:</strong> {{ transfer.notes }}
+      </div>
+  
+      <div class="btn-group">
+        <button class="btn btn-secondary" (click)="back()">Back</button>
+        <button class="btn btn-success" [disabled]="!canAccept() || loading" (click)="accept()">Accept</button>
+      </div>
+    </ng-container>
+  
+    <ng-template #notFound>
+      <div>Transfer not found.</div>
+      <div class="mt-2">
+        <button class="btn btn-secondary" (click)="back()">Back</button>
+      </div>
+    </ng-template>
+  </div>
+  

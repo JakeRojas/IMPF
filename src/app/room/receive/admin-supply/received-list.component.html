@@ -1,5 +1,5 @@
 <div class="container py-2">
-    <h4>Received Apparel Batches (Room #{{ roomId }})</h4>
+    <h4>Received Admin Supply Batches (Room #{{ roomId }})</h4>
   
     <div *ngIf="loading">Loading...</div>
   
@@ -24,7 +24,6 @@
           <td>{{ b.supplyMeasure ?? '-' }}/s</td>
           <td>{{ b.receivedFrom || '-' }}</td>
           <td>
-            <!-- show name when available, otherwise id -->
             {{ b.receivedBy }}
           </td>
           <td>{{ b.createdAt ? (b.createdAt | date:'short') : (b.receivedAt ? (b.receivedAt | date:'short') : '-') }}</td>

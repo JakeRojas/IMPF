@@ -48,8 +48,8 @@
         <option [ngValue]="null">-- Select stockroom type --</option>
         <option value="apparel">Apparel</option>
         <option value="supply">Supply</option>
-        <option value="it">IT</option>
-        <option value="maintenance">Maintenance</option>
+        <option value="general">IT</option>
+        <option value="general">Maintenance</option>
       </select>
       <div *ngIf="submitted && f.stockroomType.errors" class="invalid-feedback d-block">
         <div *ngIf="f.stockroomType.errors.required">Stockroom type is required when room is a stockroom</div>
@@ -71,8 +71,6 @@
   </div>
 
   <div class="mb-3">
-    <!-- type="submit" is required for ngSubmit to trigger.
-         We also add a (click) call as a fallback for debugging -->
     <button type="submit" (click)="onSubmit()" [disabled]="submitting" class="btn btn-primary">
       <span *ngIf="submitting" class="spinner-border spinner-border-sm me-1"></span>
       Save

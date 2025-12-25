@@ -23,28 +23,31 @@
         In charge: {{ room?.roomInCharge }}
       </p>
     </div>
-    <div class="col-6 btn-sm d-grid gap-2 d-md-flex justify-content-md-end">
+    <div *ngIf="room?.roomType === 'stockroom' || room?.roomType === 'subStockroom'" class="col-6 btn-sm d-grid gap-2 d-md-flex justify-content-md-end">
       <a class="btn btn-success" [routerLink]="['receive', stockPath]">Receive</a>
       <a class="btn btn-danger" [routerLink]="['release', stockPath]">Release</a>
     </div>
   </div>
 
   <div class="row">
-    <div *ngIf="room?.roomType === 'stockroom' || room?.roomType === 'subStockroom'" class="mb-3">
-      <button class="btn btn-sm btn-outline-primary ms-3" [routerLink]="['units', stockPath]">
+    <div class="mb-3">
+      <!-- Unit list visible for any room -->
+      <button class="btn btn-sm btn-outline-primary ms-3" [routerLink]="['units', stockPath]"> 
         Unit List
       </button>
-      <button class="btn btn-sm btn-outline-secondary ms-1" [routerLink]="['inventory', stockPath]">
-        Inventory List
-      </button>
-      <button class="btn btn-sm btn-outline-secondary ms-1"
-          [routerLink]="['receive', stockPath, 'list']">
-        Receive List
-      </button>
-      <button class="btn btn-sm btn-outline-secondary ms-1"
-          [routerLink]="['release', stockPath, 'list']">
-        Release List
-      </button>
+  
+      <!-- Inventory / Receive / Release visible only if stockroom -->
+      <ng-container *ngIf="room?.roomType === 'stockroom' || room?.roomType === 'subStockroom'">
+        <button class="btn btn-sm btn-outline-secondary ms-1" [routerLink]="['inventory', stockPath]">
+          Inventory List
+        </button>
+        <button class="btn btn-sm btn-outline-secondary ms-1" [routerLink]="['receive', stockPath, 'list']">
+          Receive List
+        </button>
+        <button class="btn btn-sm btn-outline-secondary ms-1" [routerLink]="['release', stockPath, 'list']">
+          Release List
+        </button>
+      </ng-container>
     </div>
   </div>
     

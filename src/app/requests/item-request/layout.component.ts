@@ -4,7 +4,7 @@ import { Router    } from '@angular/router';
 import { 
     AlertService, 
     AccountService, 
-    StockRequestService 
+    ItemRequestService 
   } from '@app/_services';
 
 @Component({ templateUrl: 'layout.component.html' })
@@ -12,7 +12,7 @@ export class LayoutComponent {
     account: any;
     constructor(
         private router: Router,
-        private sr: StockRequestService,
+        private sr: ItemRequestService,
         private alert: AlertService,
         private accountService: AccountService
     ){

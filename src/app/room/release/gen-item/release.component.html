@@ -6,10 +6,13 @@
       <label class="form-label">Item</label>
       <select class="form-select" formControlName="genItemInventoryId">
         <option value="" disabled>Select item to release</option>
-        <option *ngFor="let it of inventory" [value]="(it.genItemInventoryId ?? it.id)">
+        <!-- <option *ngFor="let it of inventory" [value]="(it.genItemInventoryId ?? it.id)">
           {{ it.supplyName }} 
           <span *ngIf="it.itemSize"> ({{ it.itemSize }})</span>
           - Qty: {{ it.totalQuantity ?? 0 }}
+        </option> -->
+        <option *ngFor="let it of inventory" [value]="(it.genItemInventoryId ?? it.id)">
+          {{ it.genItemName }} <span *ngIf="it.genItemSize">({{ it.genItemSize }})</span> - Qty: {{ it.totalQuantity ?? 0 }}
         </option>
       </select>
       <div *ngIf="releaseForm.get('genItemInventoryId')?.touched && releaseForm.get('genItemInventoryId')?.invalid" class="text-danger small">
@@ -61,7 +64,7 @@
   </form>
 
   <!-- Quick inventory view (kept per your request) -->
-  <div *ngIf="inventory?.length" class="mt-4">
+  <div *ngIf="inventory.length" class="mt-4">
     <h6>Inventory (quick view)</h6>
     <table class="table table-sm">
       <thead>

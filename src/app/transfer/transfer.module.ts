@@ -6,6 +6,7 @@ import { LayoutComponent          } from './layout.component';
 import { TransferRoutingModule    } from './transfer-routing.module';
 import { TransferListComponent    } from './transfer-list.component';
 import { TransferCreateComponent  } from './transfer-create.component';
+import { TransferViewComponent    } from './transfer-view.component';
 
 @NgModule({
   imports: [
@@ -17,7 +18,8 @@ import { TransferCreateComponent  } from './transfer-create.component';
   declarations: [
     LayoutComponent,
     TransferListComponent,
-    TransferCreateComponent
+    TransferCreateComponent,
+    TransferViewComponent
   ]
 })
 export class TransferModule {}

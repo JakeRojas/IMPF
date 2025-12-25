@@ -2,7 +2,7 @@
   <div class="card-body d-flex justify-content-between align-items-center">
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb m-0 p-0">
-        <li class="breadcrumb-item active"><a>Request List</a></li>
+        <li class="breadcrumb-item active"><a>Transfer List</a></li>
       </ol>
     </nav>
   </div>
@@ -36,7 +36,7 @@
         <tbody>
           <tr *ngFor="let t of transfers">
             <td>{{ t.transferId }}</td>
-            <td>{{ t.fromRoomId }} → {{ t.toRoomId }}</td>
+            <td>{{ t.fromRoom.roomName }} → {{ t.toRoom.roomName }}</td>
             <td>
               {{ t.itemType }}<span *ngIf="t.itemId"> #{{ t.itemId }}</span>
             </td>
@@ -44,13 +44,8 @@
             <td><span class="badge bg-secondary text-light">{{ t.status }}</span></td>
             <td>{{ t.createdAt | date:'short' }}</td>
             <td>
-              <button class="btn btn-sm btn-light" (click)="view(t)">View</button>
-  
-              <button *ngIf="canAccept(t)" class="btn btn-sm btn-success" (click)="accept(t)">Accept</button>
-  
-              <button *ngIf="canReturn(t)" class="btn btn-sm btn-warning" (click)="initiateReturn(t)">Return</button>
-  
-              <button *ngIf="canAcceptReturned(t)" class="btn btn-sm btn-primary" (click)="acceptReturned(t)">Accept Returned</button>
+              <button (click)="view(t)">View</button>
+              <button *ngIf="canAccept(t)" (click)="accept(t)">Accept</button>
             </td>
           </tr>
         </tbody>

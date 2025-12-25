@@ -1,9 +1,9 @@
 <div class="container py-2">
-  <h4>Apparel Units (Room #{{ roomId }})</h4>
+  <h4>General Items Units (Room #{{ roomId }})</h4>
 
   <div *ngIf="loading">Loading...</div>
 
-  <table *ngIf="!loading && units?.length" class="table table-sm">
+  <table *ngIf="!loading && units.length" class="table table-sm">
     <thead>
       <tr>
         <th>Unit ID</th>
@@ -27,6 +27,6 @@
   </table>
 
   <div *ngIf="!loading && (!units || units.length === 0)">
-    No apparel units found.
+    No general items units found.
   </div>
 </div>

@@ -27,21 +27,16 @@ export class TransferService {
     return this.http.post<any>(this.base, payload);
   }
 
+  getById(id: string | number) {
+    return this.http.get(`${this.base}/${id}`).pipe(
+      // if your API wraps in { data: ... } remove the map or adjust
+      map((res: any) => res)
+    );
+  }
+
   accept(id: any): Observable<any> {
     const n = Number(id);
     if (!Number.isFinite(n) || n <= 0) return throwError(() => new Error('Invalid id'));
     return this.http.post<any>(`${this.base}/${n}/accept`, {});
-  }
-
-  return(id: any): Observable<any> {
-    const n = Number(id);
-    if (!Number.isFinite(n) || n <= 0) return throwError(() => new Error('Invalid id'));
-    return this.http.post<any>(`${this.base}/${n}/return`, {});
-  }
-
-  acceptReturn(id: any): Observable<any> {
-    const n = Number(id);
-    if (!Number.isFinite(n) || n <= 0) return throwError(() => new Error('Invalid id'));
-    return this.http.post<any>(`${this.base}/${n}/accept-return`, {});
   }
 }

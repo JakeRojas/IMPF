@@ -1,37 +1,4 @@
-﻿<!-- <div class="app-container" [ngClass]="{ 'bg-light': account }">
-    
-    <nav class="navbar navbar-expand navbar-dark bg-dark px-3" *ngIf="account">
-        <div class="navbar-nav">
-            <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item nav-link">Home</a>
-            <a routerLink="/profile" routerLinkActive="active" class="nav-item nav-link">Profile</a>
-            <a *ngIf="account.role === Role.SuperAdmin" routerLink="/room" routerLinkActive="active" class="nav-item nav-link">Room</a>
-            <a *ngIf="account.role === Role.SuperAdmin" routerLink="/scan" routerLinkActive="active" class="nav-item nav-link">Scan</a>
-            <a *ngIf="account.role === Role.SuperAdmin" routerLink="/admin" routerLinkActive="active" class="nav-item nav-link">Admin</a>
-
-            <a *ngIf="account.role === Role.SuperAdmin || account.role === Role.Admin || account.role === Role.StockroomAdmin"
-             routerLink="/req-stock"
-             routerLinkActive="active"
-             class="nav-item nav-link">Stock Requests</a>
-
-             <a *ngIf="account.role === Role.SuperAdmin || account.role === Role.StockroomAdmin || account.role === Role.Teacher"
-             routerLink="/req-item" routerLinkActive="active" class="nav-item nav-link">Item Request</a>
-
-             <a class="nav-link" routerLink="/transfers" routerLinkActive="active">
-                <i class="fa fa-exchange"></i> Transfers
-              </a>
-
-            <button (click)="logout()" class="btn btn-link nav-item nav-link">Logout</button>
-        </div>
-    </nav>
-
-    <router-outlet name="subnav"></router-outlet>
-
-    <alert></alert>
-
-    <router-outlet></router-outlet>
-</div> -->
-
-<div class="container-fluid">
+﻿<div class="container-fluid">
   <div class="row min-vh-100 gx-0">
 
     <!-- LEFT COLUMN: logo (div1) + links (div2) -->
@@ -54,7 +21,7 @@
         <a *ngIf="account.role" routerLink="/room" routerLinkActive="active"
            class="nav-link">Room</a>
 
-        <a *ngIf="account.role === Role.SuperAdmin" routerLink="/scan" routerLinkActive="active"
+        <a *ngIf="account.role === Role.SuperAdmin || account.role === Role.Admin || account.role === Role.StockroomAdmin" routerLink="/scan" routerLinkActive="active"
            class="nav-link">Scan</a>
 
         <a *ngIf="account.role === Role.SuperAdmin" routerLink="/admin" routerLinkActive="active"
@@ -68,6 +35,10 @@
 
         <a class="nav-link" routerLink="/transfers" routerLinkActive="active">
           <i class="fa fa-exchange"></i> Transfers
+        </a>
+
+        <a class="nav-link" routerLink="/borrow" routerLinkActive="active">
+          <i class="fa fa-exchange"></i> Borrow
         </a>
       </nav>
 

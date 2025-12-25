@@ -50,7 +50,20 @@ export class ItemRequestViewComponent implements OnInit {
   load() {
     this.loading = true;
     this.ir.get(this.id).pipe(first()).subscribe({
-      next: (r) => { this.request = r; this.loading = false; },
+      next: (r) => {
+        if (r && !Array.isArray(r.items)) {
+          r.items = (r.itemId || r.itemType || r.quantity)
+            ? [{
+                itemId: r.itemId ?? null,
+                quantity: Number(r.quantity) || 0,
+                note: r.note ?? null
+              }]
+            : [];
+        }
+    
+        this.request = r;
+        this.loading = false;
+      },
       error: e => { this.alert.error(this._errToString(e)); this.loading = false; this.router.navigate(['/req-item']); }
     });
   }
@@ -74,15 +87,43 @@ export class ItemRequestViewComponent implements OnInit {
         this.load(); 
       }, e => this.alert.error(this._errToString(e))); 
   }
-  fulfill() { 
-    if (!confirm('Fulfill?')) 
-    return; 
-      this.ir.fulfill(this.id)
-        .pipe(first())
-        .subscribe(() => { 
-      this.alert.success('Fulfilled'); 
-      this.load(); 
-    }, e => this.alert.error(this._errToString(e))); 
+  // fulfill() { 
+  //   if (!confirm('Fulfill?')) 
+  //   return; 
+  //     this.ir.fulfill(this.id)
+  //       .pipe(first())
+  //       .subscribe(() => { 
+  //     this.alert.success('Fulfilled'); 
+  //     this.load(); 
+  //   }, e => this.alert.error(this._errToString(e))); 
+  // }
+  fulfill() {
+    if (!confirm('Fulfill?')) return;
+  
+    this.ir.fulfill(this.id)
+      .pipe(first())
+      .subscribe({
+        next: () => {
+          this.alert.success('Fulfilled');
+  
+          // If we have a requester room id, navigate to its unit list so the user can see the units
+          const roomId = Number(this.request?.requesterRoomId ?? this.request?.requesterRoom ?? NaN);
+          const itemType = (this.request?.itemType || '').toString().toLowerCase();
+  
+          let stockPath = 'general';
+          if (itemType.indexOf('apparel') !== -1) stockPath = 'apparel';
+          else if (itemType.indexOf('supply') !== -1 || itemType.indexOf('admin') !== -1) stockPath = 'supply';
+  
+          if (Number.isFinite(roomId) && roomId > 0) {
+            // navigate to e.g. /room/123/units/apparel
+            this.router.navigate(['/room', roomId, 'units', stockPath]);
+          } else {
+            // fallback: reload this view (so request status updates)
+            this.load();
+          }
+        },
+        error: e => this.alert.error(this._errToString(e))
+      });
   }
 
   isStockroomAdmin() { return this.account?.role === 'stockroom' || this.account?.role === 'admin' || this.account?.role === 'superAdmin'; }

@@ -33,7 +33,7 @@ export interface RequestedItem {
 export interface StockRequest {
   stockRequestId?:  number;
   id?:              number;
-  acccountId?:      number;
+  accountId?:      number;
   requesterRoomId?: number | string;
   itemId?:          number | null;
   itemType?:        string | null;

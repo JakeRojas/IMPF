@@ -35,16 +35,14 @@ export class RoomAddEditComponent implements OnInit, OnDestroy {
       roomName:       ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
       roomFloor:      ['', [Validators.required]],
       roomType:       ['', Validators.required],
-      stockroomType:  [null], // will become required conditionally
+      stockroomType:  [null],
       roomInCharge:   [null, [Validators.required]]
     });
 
-    // Ensure ngSubmit fires: formGroup exists and controls are set
     this.form.get('roomType')!.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe((val: string) => this.toggleStockroomTypeControl(val));
 
-    // Load in-charge options (optional)
     this.accountService.getAll().pipe(first()).subscribe({
       next: (accounts: any[]) => this.inChargeOptions = accounts || [],
       error: () => this.inChargeOptions = []
@@ -70,7 +68,6 @@ export class RoomAddEditComponent implements OnInit, OnDestroy {
           error: () => this.loading = false
         });
     } else {
-      // initial toggle for default roomType
       this.toggleStockroomTypeControl(this.form.get('roomType')!.value);
     }
   }
@@ -96,7 +93,6 @@ export class RoomAddEditComponent implements OnInit, OnDestroy {
     this.submitted = true;
     this.alertService.clear();
 
-    // if invalid, show errors but don't proceed
     if (this.form.invalid) {
       console.log('[RoomAddEdit] form invalid -> abort submit', this.form.errors, this.form);
       return;

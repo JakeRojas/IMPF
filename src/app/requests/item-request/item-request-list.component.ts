@@ -72,18 +72,24 @@ export class ItemRequestListComponent implements OnInit {
   release(r: ItemRequest) {
     const id = Number(r?.itemRequestId ?? r?.id);
     if (!Number.isFinite(id)) return this.alert.error('Invalid id');
-    if (!confirm('Release this accepted item request?')) return;
-
-    this.ir.release(id).pipe(first()).subscribe({
-      next: () => {
-        this.alert.success('Released');
-        this.load();
+  
+    this.ir.get(id).pipe(first()).subscribe({
+      next: (fresh) => {
+        if (!fresh) return this.alert.error('Request not found on server');
+        if (fresh.status !== 'accepted') {
+          return this.alert.error(`Cannot release — request status is '${fresh.status}'. Only 'accepted' requests can be released.`);
+        }
+  
+        if (!confirm('Release this accepted item request?')) return;
+        this.ir.release(id).pipe(first()).subscribe({
+          next: () => { this.alert.success('Released'); this.load(); },
+          error: e => this.alert.error(this._errToString(e))
+        });
       },
       error: e => this.alert.error(this._errToString(e))
     });
   }
 
-  // Teacher/room-in-charge action: fulfill when accepted
   fulfill(r: ItemRequest) {
     const id = Number(r?.itemRequestId ?? r?.id);
     if (!Number.isFinite(id)) return this.alert.error('Invalid id');
@@ -91,7 +97,6 @@ export class ItemRequestListComponent implements OnInit {
     this.ir.fulfill(id).pipe(first()).subscribe({ next: () => { this.alert.success('Fulfilled'); this.load(); }, error: e => this.alert.error(this._errToString(e)) });
   }
 
-  // role helpers
   isStockroomAdmin() { return this.account?.role === 'stockroomAdmin' || this.account?.role === 'admin' || this.account?.role === 'superAdmin'; }
   isTeacher() { return this.account?.role === 'teacher' || this.account?.role === 'roomInCharge' || this.account?.role === 'user'; }
   isSuperAdmin() { return this.account?.role === 'superAdmin'; }

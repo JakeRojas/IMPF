@@ -42,7 +42,7 @@ export class StockRequestListComponent implements OnInit {
   load() {
     this.loading = true;
     this.sr.list().pipe(first()).subscribe({
-      next: (res: StockRequest[]) => { this.requests = res || []; this.loading = false; },
+      next: (res) => { this.requests = res || []; this.loading = false; },
       error: err => { this.alert.error(this._errToString(err)); this.loading = false; }
     });
   }

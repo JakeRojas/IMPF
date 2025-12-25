@@ -3,7 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { LayoutComponent            } from './layout.component';
 import { ItemRequestListComponent   } from './item-request-list.component';
-import { ItemRequestCreateComponent } from './item-request-create.component';
+import { ItemRequestCreateComponent } from './item-request.create.component';
 import { ItemRequestViewComponent   } from './item-request-view.component';
 
 const routes: Routes = [

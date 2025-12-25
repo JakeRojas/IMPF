@@ -6,3 +6,4 @@ export * from './stock-request.model';
 export * from './item-request.model';
 export * from './transfer.model';
 export * from './inventory.model';
+export * from './borrow.model';

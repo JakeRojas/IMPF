@@ -2,7 +2,7 @@
 <div class="container py-2">
   <h4>Apparel Inventory (Room #{{ roomId }})</h4>
   <div *ngIf="loading">Loading...</div>
-  <table *ngIf="!loading && inventory?.length" class="table table-sm">
+  <table *ngIf="!loading && inventory.length" class="table table-sm">
     <thead>
       <button class="btn btn-primary btn-sm me-2" (click)="generateAllQr()">
         Generate All (PDF)
