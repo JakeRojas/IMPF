@@ -6,3 +6,4 @@ export * from './stock-request.service';
 export * from './item-request.service';
 export * from './transfer.service';
 export * from './borrow.service';
+export * from './stats.service';

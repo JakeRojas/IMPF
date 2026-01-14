@@ -8,18 +8,25 @@ import { environment } from '@environments/environment';
 export class BorrowService {
   private base = `${environment.apiUrl}/borrows`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   private mapData<T>(res: any): T { return (res?.data ?? res) as T; }
 
-  list(query?: Record<string, any>): Observable<any[]> {
+  list(query?: Record<string, any>, page: number = 1, limit: number = 10): Observable<{ data: any[], meta: any }> {
     let params = new HttpParams();
     if (query) {
       Object.entries(query).forEach(([k, v]) => {
         if (v !== undefined && v !== null && v !== '') params = params.set(k, String(v));
       });
     }
-    return this.http.get<any>(this.base, { params }).pipe(map(res => this.mapData<any[]>(res)));
+    params = params.set('page', page.toString()).set('limit', limit.toString());
+
+    return this.http.get<any>(this.base, { params }).pipe(map(res => {
+      return {
+        data: this.mapData<any[]>(res),
+        meta: res?.meta
+      };
+    }));
   }
 
   getById(id: number): Observable<any> {
@@ -28,7 +35,7 @@ export class BorrowService {
 
   create(payload: {
     roomId: number;
-    itemId?: number|null;
+    itemId?: number | null;
     quantity?: number;
     note?: string;
   }): Observable<any> {
@@ -36,7 +43,7 @@ export class BorrowService {
   }
 
   // Generic post action method: keeps the class small and consistent
-  postAction(id: number, action: 'approve'|'decline'|'acquire'|'cancel'|'return'|'accept-return', body?: any): Observable<any> {
+  postAction(id: number, action: 'approve' | 'decline' | 'acquire' | 'cancel' | 'return' | 'accept-return', body?: any): Observable<any> {
     return this.http.post<any>(`${this.base}/${id}/${action}`, body || {}).pipe(map(res => this.mapData<any>(res)));
   }
 

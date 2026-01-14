@@ -9,11 +9,17 @@ import { Transfer } from '@app/_models/transfer.model';
 export class TransferService {
   private base = `${environment.apiUrl}/transfers`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-  list(params: any = {}): Observable<Transfer[]> {
-    return this.http.get<any>(this.base, { params }).pipe(
-      map(res => (res?.data || res) as Transfer[])
+  list(params: any = {}, page: number = 1, limit: number = 10): Observable<{ data: Transfer[], meta: any }> {
+    const qParams = { ...params, page: page.toString(), limit: limit.toString() };
+    return this.http.get<any>(this.base, { params: qParams }).pipe(
+      map(res => {
+        return {
+          data: (res?.data || res) as Transfer[],
+          meta: res?.meta
+        };
+      })
     );
   }
 

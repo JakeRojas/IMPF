@@ -348,22 +348,70 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
     return !!(this.lastScannedItem?.unit || payload?.unitId);
   }
   
+  // onWorkingClicked() {
+  //   const unitId = this.extractUnitId();
+  //   if (!unitId) { this.alert.error('Unit id not found in QR payload.'); return; }
+  //   const stockroomType = (this.extractItemType() || this.lastScannedItem?._detectedItemType || 'apparel').toString().toLowerCase();
+  
+  //   this.qrService.updateUnitStatus(stockroomType, Number(unitId), { status: 'working' }).pipe(first()).subscribe({
+  //     next: () => { this.alert.success('Unit marked as working'); this.resetAfterAction(); setTimeout(()=>this.startScanner(),300); },
+  //     error: (err: any) => { this.alert.error(err?.error?.message || err?.message || 'Failed to update status'); }
+  //   });
+  // }
+  
+  // onDamageClicked() {
+  //   const unitId = this.extractUnitId();
+  //   if (!unitId) { this.alert.error('Unit id not found in QR payload.'); return; }
+  //   const stockroomType = (this.extractItemType() || this.lastScannedItem?._detectedItemType || 'apparel').toString().toLowerCase();
+  
+  //   this.qrService.updateUnitStatus(stockroomType, Number(unitId), { status: 'damaged' }).pipe(first()).subscribe({
+  //     next: () => { this.alert.success('Unit marked as damaged'); this.resetAfterAction(); setTimeout(()=>this.startScanner(),300); },
+  //     error: (err: any) => { this.alert.error(err?.error?.message || err?.message || 'Failed to update status'); }
+  //   });
+  // }
+
   onWorkingClicked() {
     const unitId = this.extractUnitId();
     if (!unitId) { this.alert.error('Unit id not found in QR payload.'); return; }
-    const stockroomType = (this.extractItemType() || this.lastScannedItem?._detectedItemType || 'apparel').toString().toLowerCase();
   
+    const stockroomType = (this.extractItemType() || this.lastScannedItem?._detectedItemType || 'apparel').toString().toLowerCase();
+    const roomId = this.extractRoomId() || this.batchRoomIdInput || null;
+  
+    // If we're scanning an apparel unit and we have a room context, use roomService
+    if (stockroomType === 'apparel' && roomId) {
+      this.roomService.updateApparelUnit(Number(roomId), Number(unitId), { status: 'working' }).pipe(first()).subscribe({
+        next: (updated: any) => { this.alert.success('Unit marked as working'); this.resetAfterAction(); setTimeout(()=>this.startScanner(), 300); },
+        error: (err: any) => { this.alert.error(err?.error?.message || err?.message || 'Failed to update status'); }
+      });
+      return;
+    }
+  
+    // fallback: use generic QR endpoint for other types or when no roomId
     this.qrService.updateUnitStatus(stockroomType, Number(unitId), { status: 'working' }).pipe(first()).subscribe({
       next: () => { this.alert.success('Unit marked as working'); this.resetAfterAction(); setTimeout(()=>this.startScanner(),300); },
       error: (err: any) => { this.alert.error(err?.error?.message || err?.message || 'Failed to update status'); }
     });
   }
   
+  // replace the existing onDamageClicked() in src/app/scan/scan.component.ts with this:
   onDamageClicked() {
     const unitId = this.extractUnitId();
     if (!unitId) { this.alert.error('Unit id not found in QR payload.'); return; }
-    const stockroomType = (this.extractItemType() || this.lastScannedItem?._detectedItemType || 'apparel').toString().toLowerCase();
   
+    const stockroomType = (this.extractItemType() || this.lastScannedItem?._detectedItemType || 'apparel').toString().toLowerCase();
+    const roomId = this.extractRoomId() || this.batchRoomIdInput || null;
+  
+    // NOTE: apparel model uses 'damage' as the enum value (not 'damaged'), so map it when using roomService.
+    // Use the room-scoped update when roomId exists.
+    if (stockroomType === 'apparel' && roomId) {
+      this.roomService.updateApparelUnit(Number(roomId), Number(unitId), { status: 'damage' }).pipe(first()).subscribe({
+        next: (updated: any) => { this.alert.success('Unit marked as damaged'); this.resetAfterAction(); setTimeout(()=>this.startScanner(), 300); },
+        error: (err: any) => { this.alert.error(err?.error?.message || err?.message || 'Failed to update status'); }
+      });
+      return;
+    }
+  
+    // fallback: use generic QR endpoint (keeps existing behavior)
     this.qrService.updateUnitStatus(stockroomType, Number(unitId), { status: 'damaged' }).pipe(first()).subscribe({
       next: () => { this.alert.success('Unit marked as damaged'); this.resetAfterAction(); setTimeout(()=>this.startScanner(),300); },
       error: (err: any) => { this.alert.error(err?.error?.message || err?.message || 'Failed to update status'); }

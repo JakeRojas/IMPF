@@ -9,10 +9,16 @@ import { ItemRequest } from '@app/_models';
 export class ItemRequestService {
   private base = `${environment.apiUrl}/req-item`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-  list(params: any = {}): Observable<ItemRequest[]> {
-    return this.http.get<any>(this.base, { params }).pipe(map(res => (res?.data || res) as ItemRequest[]));
+  list(params: any = {}, page: number = 1, limit: number = 10): Observable<{ data: ItemRequest[], meta: any }> {
+    const qParams = { ...params, page: page.toString(), limit: limit.toString() };
+    return this.http.get<any>(this.base, { params: qParams }).pipe(map(res => {
+      return {
+        data: (res?.data || res) as ItemRequest[],
+        meta: res?.meta
+      };
+    }));
   }
 
   get(id: any): Observable<ItemRequest> {

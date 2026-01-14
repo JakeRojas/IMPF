@@ -2,10 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { first } from 'rxjs/operators';
 
-import { 
-  AlertService, 
-  AccountService, 
-  ItemRequestService 
+import {
+  AlertService,
+  AccountService,
+  ItemRequestService
 } from '@app/_services';
 import { ItemRequest } from '@app/_models/item-request.model';
 // ==============================================================
@@ -18,6 +18,12 @@ export class ItemRequestListComponent implements OnInit {
   loading = false;
   account: any;
 
+  // Pagination
+  page = 1;
+  limit = 10;
+  total = 0;
+  totalPages = 0;
+
   constructor(
     private router: Router,
     private ir: ItemRequestService,
@@ -27,8 +33,8 @@ export class ItemRequestListComponent implements OnInit {
     this.account = this.accountService.accountValue;
   }
 
-  ngOnInit() { 
-    this.load(); 
+  ngOnInit() {
+    this.load();
   }
 
   private _errToString(err: any) {
@@ -41,10 +47,27 @@ export class ItemRequestListComponent implements OnInit {
 
   load() {
     this.loading = true;
-    this.ir.list().pipe(first()).subscribe({
-      next: (res) => { this.requests = res || []; this.loading = false; },
+    this.ir.list({}, this.page, this.limit).pipe(first()).subscribe({
+      next: (res) => {
+        this.requests = res.data || [];
+        if (res.meta) {
+          this.total = res.meta.total;
+          this.totalPages = res.meta.totalPages;
+          this.page = res.meta.page;
+        }
+        this.loading = false;
+      },
       error: e => { this.alert.error(this._errToString(e)); this.loading = false; }
     });
+  }
+
+  onPageChange(page: number) {
+    this.page = page;
+    this.load();
+  }
+
+  range(start: number, end: number): number[] {
+    return [...Array(end - start + 1).keys()].map(i => i + start);
   }
 
   view(r: ItemRequest) {
@@ -53,7 +76,7 @@ export class ItemRequestListComponent implements OnInit {
     this.router.navigate(['/req-item', 'view', rid]);
   }
 
-  create() { this.router.navigate(['/req-item','create']); }
+  create() { this.router.navigate(['/req-item', 'create']); }
 
   accept(r: ItemRequest) {
     const id = Number(r?.itemRequestId ?? r?.id);
@@ -72,14 +95,14 @@ export class ItemRequestListComponent implements OnInit {
   release(r: ItemRequest) {
     const id = Number(r?.itemRequestId ?? r?.id);
     if (!Number.isFinite(id)) return this.alert.error('Invalid id');
-  
+
     this.ir.get(id).pipe(first()).subscribe({
       next: (fresh) => {
         if (!fresh) return this.alert.error('Request not found on server');
         if (fresh.status !== 'accepted') {
           return this.alert.error(`Cannot release — request status is '${fresh.status}'. Only 'accepted' requests can be released.`);
         }
-  
+
         if (!confirm('Release this accepted item request?')) return;
         this.ir.release(id).pipe(first()).subscribe({
           next: () => { this.alert.success('Released'); this.load(); },

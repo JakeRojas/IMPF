@@ -1,11 +1,11 @@
-import { Component, OnInit  } from '@angular/core';
-import { Router             } from '@angular/router';
-import { first              } from 'rxjs/operators';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { first } from 'rxjs/operators';
 
-import { 
-  AlertService, 
-  AccountService, 
-  StockRequestService 
+import {
+  AlertService,
+  AccountService,
+  StockRequestService
 } from '@app/_services';
 import { StockRequest } from '@app/_models';
 // ============================================================
@@ -18,6 +18,12 @@ export class StockRequestListComponent implements OnInit {
   requests: StockRequest[] = [];
   loading = false;
   account: any = null;
+
+  // Pagination
+  page = 1;
+  limit = 10;
+  total = 0;
+  totalPages = 0;
 
   constructor(
     private router: Router,
@@ -41,10 +47,27 @@ export class StockRequestListComponent implements OnInit {
 
   load() {
     this.loading = true;
-    this.sr.list().pipe(first()).subscribe({
-      next: (res) => { this.requests = res || []; this.loading = false; },
+    this.sr.list({}, this.page, this.limit).pipe(first()).subscribe({
+      next: (res) => {
+        this.requests = res.data || [];
+        if (res.meta) {
+          this.total = res.meta.total;
+          this.totalPages = res.meta.totalPages;
+          this.page = res.meta.page;
+        }
+        this.loading = false;
+      },
       error: err => { this.alert.error(this._errToString(err)); this.loading = false; }
     });
+  }
+
+  onPageChange(page: number) {
+    this.page = page;
+    this.load();
+  }
+
+  range(start: number, end: number): number[] {
+    return [...Array(end - start + 1).keys()].map(i => i + start);
   }
 
   view(r: StockRequest) {

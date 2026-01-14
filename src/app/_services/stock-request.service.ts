@@ -9,11 +9,17 @@ import { StockRequest } from '@app/_models/stock-request.model';
 export class StockRequestService {
   private base = `${environment.apiUrl}/req-stock`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-  list(params: any = {}): Observable<StockRequest[]> {
-    return this.http.get<any>(this.base, { params }).pipe(
-      map(res => (res?.data || res) as StockRequest[])
+  list(params: any = {}, page: number = 1, limit: number = 10): Observable<{ data: StockRequest[], meta: any }> {
+    const qParams = { ...params, page: page.toString(), limit: limit.toString() };
+    return this.http.get<any>(this.base, { params: qParams }).pipe(
+      map(res => {
+        return {
+          data: (res?.data || res) as StockRequest[],
+          meta: res?.meta
+        };
+      })
     );
   }
 
@@ -29,10 +35,16 @@ export class StockRequestService {
     return this.http.post<any>(`${this.base}`, payload);
   }
 
-  approve(id: any): Observable<any> {
+  // approve(id: any): Observable<any> {
+  //   const numeric = Number(id);
+  //   if (!Number.isFinite(numeric) || numeric <= 0) return throwError(() => new Error('Invalid id'));
+  //   return this.http.post<any>(`${this.base}/${numeric}/approve`, {});
+  // }
+  approve(id: any, quantity?: number): Observable<any> {
     const numeric = Number(id);
     if (!Number.isFinite(numeric) || numeric <= 0) return throwError(() => new Error('Invalid id'));
-    return this.http.post<any>(`${this.base}/${numeric}/approve`, {});
+    // [MODIFIED] Send quantity in body
+    return this.http.post<any>(`${this.base}/${numeric}/approve`, { quantity });
   }
 
   disapprove(id: any, reason?: string): Observable<any> {

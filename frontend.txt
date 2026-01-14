@@ -4881,7 +4881,7 @@ export class AdminSupplyReceiveComponent implements OnInit {
 
 ================================================================================
 File: src\app\room\receive\admin-supply\received-list.component.html
-Size: 1.21 kB
+Size: 1.2 kB
 ================================================================================
 
 <div class="container py-2">
@@ -4889,7 +4889,7 @@ Size: 1.21 kB
   
     <div *ngIf="loading">Loading...</div>
   
-    <table *ngIf="!loading && batches?.length" class="table table-sm">
+    <table *ngIf="!loading && batches.length" class="table table-sm">
       <thead>
         <tr>
           <th>Batch ID</th>
@@ -5224,7 +5224,7 @@ Size: 1.53 kB
   
     <div *ngIf="loading">Loading...</div>
   
-    <table *ngIf="!loading && batches?.length" class="table table-sm">
+    <table *ngIf="!loading && batches.length" class="table table-sm">
       <thead>
         <tr>
           <th>Batch ID</th>
@@ -6931,11 +6931,11 @@ Size: 2.08 kB
 
 ================================================================================
 File: src\app\room\room-view.component.ts
-Size: 1.44 kB
+Size: 1.5 kB
 ================================================================================
 
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute }     from '@angular/router';
+import { ActivatedRoute, Router }     from '@angular/router';
 import { first }              from 'rxjs/operators';
 
 import { RoomService, AlertService } from '@app/_services';
@@ -6946,13 +6946,14 @@ import { RoomService, AlertService } from '@app/_services';
 export class RoomViewComponent implements OnInit {
   roomId!: number;
   room: any = {};
-  stockPath = 'apparel';
+  stockPath = 'apparel' && 'supply' && 'general';
   isStockroom = false;
 
   constructor(
     private route: ActivatedRoute,
     private roomService: RoomService,
-    private alert: AlertService
+    private alert: AlertService,
+    private router:       Router
   ) {}
 
   ngOnInit(): void {
@@ -6969,8 +6970,8 @@ export class RoomViewComponent implements OnInit {
     this.roomService.getRoomById(this.roomId).pipe(first()).subscribe({
       next: (r: any) => {
         this.room = r || {};
-        // this.stockPath = this.computeStockPath(this.room);
-        // this.isStockroom = this.room.roomType === 'stockroom' || this.room.roomType === 'subStockroom';
+        this.stockPath = this.computeStockPath(this.room);
+        this.isStockroom = this.room.roomType === 'stockroom' || this.room.roomType === 'subStockroom';
       },
       error: (e) => this.alert.error(e)
     });
@@ -7020,7 +7021,7 @@ export class RoomModule { }
 
 ================================================================================
 File: src\app\room\units\admin-supply.list.component.html
-Size: 965 B
+Size: 964 B
 ================================================================================
 
 <div class="container py-2">
@@ -7028,7 +7029,7 @@ Size: 965 B
 
   <div *ngIf="loading">Loading...</div>
 
-  <table *ngIf="!loading && units?.length" class="table table-sm">
+  <table *ngIf="!loading && units.length" class="table table-sm">
     <thead>
       <tr>
         <th>Unit ID</th>
@@ -7107,22 +7108,25 @@ export class AdminSupplyUnitListComponent implements OnInit {
 
 ================================================================================
 File: src\app\room\units\apparel.list.component.html
-Size: 951 B
+Size: 3.09 kB
 ================================================================================
 
-<div class="container py-2">
+<!-- <div class="container py-2">
   <h4>Apparel Units (Room #{{ roomId }})</h4>
 
   <div *ngIf="loading">Loading...</div>
 
   <table *ngIf="!loading && units.length" class="table table-sm">
     <thead>
+      <button class="btn btn-primary btn-sm me-2" (click)="generateAllUnitsQr()">
+        Generate All Units (PDF)
+      </button>
       <tr>
         <th>Unit ID</th>
         <th>Unit Name</th>
+        <th>Description</th>
         <th>Status</th>
         <th>Assigned To</th>
-        <th>Qty</th>
         <th>Last Updated</th>
       </tr>
     </thead>
@@ -7132,8 +7136,65 @@ Size: 951 B
         <td>{{ u.receiveApparelId}}</td>
         <td>{{ u.status }}</td>
         <td>{{ u.assignedToName || u.assignedTo || '-' }}</td>
-        <td>{{ u.quantity ?? u.totalQuantity ?? 0 }}</td>
         <td>{{ u.updatedAt ? (u.updatedAt | date:'short') : (u.createdAt ? (u.createdAt | date:'short') : '-') }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && (!units || units.length === 0)">
+    No apparel units found.
+  </div>
+</div> -->
+
+
+<div class="container py-2">
+  <h4>Apparel Units (Room #{{ roomId }})</h4>
+
+  <div *ngIf="loading">Loading.</div>
+
+  <table *ngIf="!loading && units.length" class="table table-sm">
+    <thead>
+      <button class="btn btn-primary btn-sm me-2" (click)="generateAllUnitsQr()">
+        Generate All Units (PDF)
+      </button>
+      <tr>
+        <th>Unit ID</th>
+        <th>Unit Name</th>
+        <th>Description</th>
+        <th>Status</th>
+        <th>Assigned To</th>
+        <th>Last Updated</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let u of units">
+        <td>{{ u.apparelId }}</td>
+        <td>{{ u.receiveApparelId }}</td>
+
+        <!-- inline editing: show inputs if editing -->
+        <td *ngIf="!u.editing">{{ u.description || '-' }}</td>
+        <td *ngIf="u.editing">
+          <input class="form-control form-control-sm" [(ngModel)]="u.description" />
+        </td>
+
+        <td *ngIf="!u.editing">{{ u.status }}</td>
+        <td *ngIf="u.editing">
+          <select class="form-select form-select-sm" [(ngModel)]="u.status">
+            <option value="good">good</option>
+            <option value="working">working</option>
+            <option value="damage">damage</option>
+          </select>
+        </td>
+
+        <td>{{ u.assignedToName || u.assignedTo || '-' }}</td>
+        <td>{{ u.updatedAt ? (u.updatedAt | date:'short') : (u.createdAt ? (u.createdAt | date:'short') : '-') }}</td>
+
+        <td style="white-space:nowrap">
+          <button *ngIf="!u.editing" class="btn btn-sm btn-outline-primary me-1" (click)="startEdit(u)">Edit</button>
+          <button *ngIf="u.editing" class="btn btn-sm btn-success me-1" (click)="saveUnit(u)">Save</button>
+          <button *ngIf="u.editing" class="btn btn-sm btn-secondary" (click)="cancelEdit(u)">Cancel</button>
+        </td>
       </tr>
     </tbody>
   </table>
@@ -7143,15 +7204,16 @@ Size: 951 B
   </div>
 </div>
 
+
 ================================================================================
 File: src\app\room\units\apparel.list.component.ts
-Size: 1.26 kB
+Size: 3.26 kB
 ================================================================================
 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { first } from 'rxjs/operators';
-import { RoomService, AlertService } from '@app/_services';
+import { RoomService, AlertService, QrService } from '@app/_services';
 
 @Component({
   templateUrl: './apparel.list.component.html'
@@ -7164,7 +7226,8 @@ export class ApparelUnitListComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private roomService: RoomService,
-    private alert: AlertService
+    private alert: AlertService,
+    private qrService: QrService
   ) {}
 
   ngOnInit(): void {
@@ -7188,6 +7251,61 @@ export class ApparelUnitListComponent implements OnInit {
     this.roomService.getApparelUnits(this.roomId).pipe(first()).subscribe({
       next: (res: any[]) => { this.units = res || []; this.loading = false; },
       error: (err) => { this.loading = false; this.alert.error(err); }
+    });
+  }
+
+  generateAllUnitsQr() {
+    if (!Number.isFinite(this.roomId)) { this.alert.error('Invalid room'); return; }
+    const stockroomType = 'apparel'; // change to 'apparel' | 'supply' | 'genitem' depending on this view
+  
+    this.qrService.downloadAllUnitsPdf(stockroomType, this.roomId).pipe(first()).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `qrcodes-${stockroomType}-room-${this.roomId}-units.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        this.alert.success('Units PDF downloaded');
+      },
+      error: (err) => {
+        console.error('generateAllUnitsQr error', err);
+        const msg = err?.error?.message || err?.message || 'Failed to generate units PDF';
+        this.alert.error(msg);
+      }
+    });
+  }
+
+  startEdit(u: any) {
+    // mark editing state and make a shallow copy of original values for cancel
+    u._orig = { description: u.description, status: u.status };
+    u.editing = true;
+  }
+  
+  cancelEdit(u: any) {
+    if (u._orig) {
+      u.description = u._orig.description;
+      u.status = u._orig.status;
+      delete u._orig;
+    }
+    u.editing = false;
+  }
+  
+  saveUnit(u: any) {
+    // simple validation: only send description & status
+    const payload: any = { description: u.description, status: u.status };
+    this.roomService.updateApparelUnit(this.roomId, u.apparelId, payload).pipe(first()).subscribe({
+      next: (updated: any) => {
+        // update local row from server response (optional)
+        Object.assign(u, updated);
+        u.editing = false;
+        this.alert.success('Unit updated');
+      },
+      error: (err) => {
+        this.alert.error(err?.error?.message || err?.message || 'Update failed');
+      }
     });
   }
 }
@@ -7232,7 +7350,7 @@ Size: 963 B
 
 ================================================================================
 File: src\app\room\units\gen-item.list.component.ts
-Size: 1.26 kB
+Size: 1.65 kB
 ================================================================================
 
 import { Component, OnInit } from '@angular/core';
@@ -7270,9 +7388,18 @@ export class GenItemUnitListComponent implements OnInit {
     return NaN;
   }
 
+  // loadUnits() {
+  //   this.loading = true;
+  //   this.roomService.getGenItemUnits(this.roomId).pipe(first()).subscribe({
+  //     next: (res: any[]) => { this.units = res || []; this.loading = false; },
+  //     error: (err) => { this.loading = false; this.alert.error(err); }
+  //   });
+  // }
+
   loadUnits() {
     this.loading = true;
-    this.roomService.getGenItemUnits(this.roomId).pipe(first()).subscribe({
+    // call combined endpoint so "general" view shows everything in any room
+    this.roomService.getAllUnits(this.roomId).pipe(first()).subscribe({
       next: (res: any[]) => { this.units = res || []; this.loading = false; },
       error: (err) => { this.loading = false; this.alert.error(err); }
     });
@@ -7388,7 +7515,7 @@ export class ScanRoutingModule {}
 
 ================================================================================
 File: src\app\scan\scan.component.html
-Size: 4.14 kB
+Size: 5.01 kB
 ================================================================================
 
 <div class="scan-modal container-fluid p-0">
@@ -7443,10 +7570,24 @@ Size: 4.14 kB
         </div>
       </ng-template>
   
-      <div class="mt-2">
+      <!-- <div class="mt-2">
         <button class="btn btn-danger me-2" (click)="onReleaseClicked()">Release</button>
         <button class="btn btn-outline-success me-2" (click)="onReceiveClicked()">Receive</button>
         <button class="btn btn-secondary me-2" (click)="scanAgain()">Scan again</button>
+      </div> -->
+      <div class="mt-2">
+        <ng-container *ngIf="isUnit(); else batchBtns">
+          <button class="btn btn-danger me-2" (click)="onReleaseClicked()">Release</button>
+          <button class="btn btn-outline-warning me-2" (click)="onWorkingClicked()">Working</button>
+          <button class="btn btn-outline-danger me-2" (click)="onDamageClicked()">Damage</button>
+          <button class="btn btn-secondary me-2" (click)="scanAgain()">Scan again</button>
+        </ng-container>
+      
+        <ng-template #batchBtns>
+          <button class="btn btn-danger me-2" (click)="onReleaseClicked()">Release</button>
+          <button class="btn btn-outline-success me-2" (click)="onReceiveClicked()">Receive</button>
+          <button class="btn btn-secondary me-2" (click)="scanAgain()">Scan again</button>
+        </ng-template>
       </div>
     </div>
   </div>
@@ -7552,7 +7693,7 @@ Size: 1.6 kB
 
 ================================================================================
 File: src\app\scan\scan.component.ts
-Size: 15.49 kB
+Size: 20.1 kB
 ================================================================================
 
 import { Component, OnDestroy, AfterViewInit, ViewChild, ElementRef, ChangeDetectorRef  } from '@angular/core';
@@ -7897,6 +8038,82 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
   extractRoomId() {
     const p = this.lastScannedItem?.payload || this.lastParsed || tryParseJson(this.lastResult);
     return p?.roomId || null;
+  }
+
+  isUnit(): boolean {
+    // lastScannedItem.unit exists or parsed payload has unitId
+    const payload = this.lastScannedItem?.payload || this.lastParsed || tryParseJson(this.lastResult);
+    return !!(this.lastScannedItem?.unit || payload?.unitId);
+  }
+  
+  // onWorkingClicked() {
+  //   const unitId = this.extractUnitId();
+  //   if (!unitId) { this.alert.error('Unit id not found in QR payload.'); return; }
+  //   const stockroomType = (this.extractItemType() || this.lastScannedItem?._detectedItemType || 'apparel').toString().toLowerCase();
+  
+  //   this.qrService.updateUnitStatus(stockroomType, Number(unitId), { status: 'working' }).pipe(first()).subscribe({
+  //     next: () => { this.alert.success('Unit marked as working'); this.resetAfterAction(); setTimeout(()=>this.startScanner(),300); },
+  //     error: (err: any) => { this.alert.error(err?.error?.message || err?.message || 'Failed to update status'); }
+  //   });
+  // }
+  
+  // onDamageClicked() {
+  //   const unitId = this.extractUnitId();
+  //   if (!unitId) { this.alert.error('Unit id not found in QR payload.'); return; }
+  //   const stockroomType = (this.extractItemType() || this.lastScannedItem?._detectedItemType || 'apparel').toString().toLowerCase();
+  
+  //   this.qrService.updateUnitStatus(stockroomType, Number(unitId), { status: 'damaged' }).pipe(first()).subscribe({
+  //     next: () => { this.alert.success('Unit marked as damaged'); this.resetAfterAction(); setTimeout(()=>this.startScanner(),300); },
+  //     error: (err: any) => { this.alert.error(err?.error?.message || err?.message || 'Failed to update status'); }
+  //   });
+  // }
+
+  onWorkingClicked() {
+    const unitId = this.extractUnitId();
+    if (!unitId) { this.alert.error('Unit id not found in QR payload.'); return; }
+  
+    const stockroomType = (this.extractItemType() || this.lastScannedItem?._detectedItemType || 'apparel').toString().toLowerCase();
+    const roomId = this.extractRoomId() || this.batchRoomIdInput || null;
+  
+    // If we're scanning an apparel unit and we have a room context, use roomService
+    if (stockroomType === 'apparel' && roomId) {
+      this.roomService.updateApparelUnit(Number(roomId), Number(unitId), { status: 'working' }).pipe(first()).subscribe({
+        next: (updated: any) => { this.alert.success('Unit marked as working'); this.resetAfterAction(); setTimeout(()=>this.startScanner(), 300); },
+        error: (err: any) => { this.alert.error(err?.error?.message || err?.message || 'Failed to update status'); }
+      });
+      return;
+    }
+  
+    // fallback: use generic QR endpoint for other types or when no roomId
+    this.qrService.updateUnitStatus(stockroomType, Number(unitId), { status: 'working' }).pipe(first()).subscribe({
+      next: () => { this.alert.success('Unit marked as working'); this.resetAfterAction(); setTimeout(()=>this.startScanner(),300); },
+      error: (err: any) => { this.alert.error(err?.error?.message || err?.message || 'Failed to update status'); }
+    });
+  }
+  
+  // replace the existing onDamageClicked() in src/app/scan/scan.component.ts with this:
+  onDamageClicked() {
+    const unitId = this.extractUnitId();
+    if (!unitId) { this.alert.error('Unit id not found in QR payload.'); return; }
+  
+    const stockroomType = (this.extractItemType() || this.lastScannedItem?._detectedItemType || 'apparel').toString().toLowerCase();
+    const roomId = this.extractRoomId() || this.batchRoomIdInput || null;
+  
+    // NOTE: apparel model uses 'damage' as the enum value (not 'damaged'), so map it when using roomService.
+    // Use the room-scoped update when roomId exists.
+    if (stockroomType === 'apparel' && roomId) {
+      this.roomService.updateApparelUnit(Number(roomId), Number(unitId), { status: 'damage' }).pipe(first()).subscribe({
+        next: (updated: any) => { this.alert.success('Unit marked as damaged'); this.resetAfterAction(); setTimeout(()=>this.startScanner(), 300); },
+        error: (err: any) => { this.alert.error(err?.error?.message || err?.message || 'Failed to update status'); }
+      });
+      return;
+    }
+  
+    // fallback: use generic QR endpoint (keeps existing behavior)
+    this.qrService.updateUnitStatus(stockroomType, Number(unitId), { status: 'damaged' }).pipe(first()).subscribe({
+      next: () => { this.alert.success('Unit marked as damaged'); this.resetAfterAction(); setTimeout(()=>this.startScanner(),300); },
+      error: (err: any) => { this.alert.error(err?.error?.message || err?.message || 'Failed to update status'); }
+    });
   }
 }
 
@@ -9927,7 +10144,7 @@ export class ItemRequestService {
 
 ================================================================================
 File: src\app\_services\qr.service.ts
-Size: 1.51 kB
+Size: 1.71 kB
 ================================================================================
 
 import { Injectable }                 from '@angular/core';
@@ -9962,12 +10179,15 @@ export class QrService {
   downloadAllPdf(stockroomType: string, roomId: number): Observable<Blob> {
     return this.http.get(`${this.base}/${stockroomType}/room/${roomId}/pdf-all`, { responseType: 'blob' });
   }
+  downloadAllUnitsPdf(stockroomType: string, roomId: number): Observable<Blob> {
+    return this.http.get(`${this.base}/${stockroomType}/room/${roomId}/pdf-units`, { responseType: 'blob' });
+  }
 }
 
 
 ================================================================================
 File: src\app\_services\room.service.ts
-Size: 8.64 kB
+Size: 8.96 kB
 ================================================================================
 
 import { Injectable }   from '@angular/core';
@@ -10031,6 +10251,10 @@ export class RoomService {
   getReceivedBatchGenItem(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/receive-items`); }
   getReleasedBatchGenItem(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/release-items`); }
   getGenItemUnits(roomId: number)         { return this.http.get<any>(`${this.baseUrl}/${roomId}/items`); }
+
+  getAllUnits(roomId: number) {
+    return this.http.get<any>(`${this.baseUrl}/${roomId}/all-units`);
+  }
 
   // ------------- Room-scoped QR endpoints (return PNG blobs) -------------
   // Apparel
@@ -10135,6 +10359,10 @@ export class RoomService {
   
   updateGenItemStatus(roomId: number, genItemId: number, newStatus: string) {
     return this.http.put(`${this.baseUrl}/${roomId}/gen-items/${genItemId}/status`, { status: newStatus });
+  }
+
+  updateApparelUnit(roomId: number, unitId: number, payload: { description?: string, status?: string }) {
+    return this.http.put<any>(`${this.baseUrl}/${roomId}/apparel/unit/${unitId}`, payload);
   }
 }
 

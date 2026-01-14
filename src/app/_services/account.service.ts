@@ -1,11 +1,11 @@
-﻿import { Injectable }                       from '@angular/core';
-import { Router }                           from '@angular/router';
-import { HttpClient }                       from '@angular/common/http';
-import { BehaviorSubject, Observable, of }  from 'rxjs';
-import { map, finalize, catchError  }       from 'rxjs/operators';
+﻿import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { map, finalize, catchError } from 'rxjs/operators';
 
-import { environment }  from '@environments/environment';
-import { Account }      from '@app/_models';
+import { environment } from '@environments/environment';
+import { Account } from '@app/_models';
 
 const baseUrl = `${environment.apiUrl}/accounts`;
 
@@ -60,17 +60,17 @@ export class AccountService {
     revokeToken() {
         const refreshToken = localStorage.getItem('refreshToken');
         if (!refreshToken) {
-          return of(null);
+            return of(null);
         }
-    
+
         return this.http.post(`${environment.apiUrl}/accounts/revoke-token`, { token: refreshToken })
-          .pipe(
-            // If revoke fails (401, 404, ...), swallow the error and return null so caller doesn't loop
-            catchError(err => {
-              console.warn('revokeToken failed (ignored)', err);
-              return of(null);
-            })
-          );
+            .pipe(
+                // If revoke fails (401, 404, ...), swallow the error and return null so caller doesn't loop
+                catchError(err => {
+                    console.warn('revokeToken failed (ignored)', err);
+                    return of(null);
+                })
+            );
     }
     register(account: Account) {
         return this.http.post(`${baseUrl}/register`, account);
@@ -115,6 +115,11 @@ export class AccountService {
             }));
     }
 
+    getAllActivityLogs(filters: any = {}, page: number = 1, limit: number = 10) {
+        const params = { ...filters, page: page.toString(), limit: limit.toString() };
+        return this.http.get<{ success: boolean, data: any[], meta: any }>(`${baseUrl}/activity-logs`, { params, withCredentials: true });
+    }
+
     // helper methods
     private refreshTokenTimeout?: any;
     private startRefreshTokenTimer() {
@@ -131,10 +136,10 @@ export class AccountService {
 
     hasAnyAccount() {
         return this.http.get<{ exists: boolean }>(`${baseUrl}/exists`);
-      }
-      hasAnyAccountFlag() {
+    }
+    hasAnyAccountFlag() {
         return this.hasAnyAccount().pipe(
-          map(resp => !!(resp && resp.exists))
+            map(resp => !!(resp && resp.exists))
         );
-      }
+    }
 }

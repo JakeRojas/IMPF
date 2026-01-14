@@ -1,6 +1,174 @@
 ﻿<div class="p-4">
-    <div class="container">
-        <h1>Hi {{account?.firstName}}!</h1>
-        <p>You're logged in with Angular 15 & JWT!!</p>
+    <div class="container-fluid">
+        <!-- Welcome Hero -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="p-5 text-white rounded-4 shadow-lg position-relative overflow-hidden"
+                    style="background: linear-gradient(135deg, #0d6efd 0%, #0a4da0 100%);">
+                    <div class="position-relative z-index-1">
+                        <h1 class="display-3 fw-bold mb-2">Welcome back, {{account?.firstName}}!</h1>
+                        <p class="lead opacity-75 fs-4">Monitor your inventory operations and system performance at a
+                            glance.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Stats -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-2">
+                <div class="card shadow-sm border-0 border-top border-4 border-primary h-100 transition-hover">
+                    <div class="card-body text-center">
+                        <div class="text-muted fw-bold text-uppercase small">Stock Requests</div>
+                        <div class="h2 mb-0 mt-2 text-primary">{{stockCount}}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card shadow-sm border-0 border-top border-4 border-success h-100 transition-hover">
+                    <div class="card-body text-center">
+                        <div class="text-muted fw-bold text-uppercase small">Item Requests</div>
+                        <div class="h2 mb-0 mt-2 text-success">{{itemCount}}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card shadow-sm border-0 border-top border-4 border-warning h-100 transition-hover">
+                    <div class="card-body text-center">
+                        <div class="text-muted fw-bold text-uppercase small">Transfers</div>
+                        <div class="h2 mb-0 mt-2 text-warning">{{transferCount}}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card shadow-sm border-0 border-top border-4 border-info h-100 transition-hover">
+                    <div class="card-body text-center">
+                        <div class="text-muted fw-bold text-uppercase small">Borrows</div>
+                        <div class="h2 mb-0 mt-2 text-info">{{borrowCount}}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div
+                    class="card shadow-sm border-0 bg-dark text-white h-100 transition-hover overflow-hidden position-relative">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <div class="opacity-75 fw-bold text-uppercase small">Online Users (Today)</div>
+                        <div class="h1 mb-0 mt-2 fw-bold text-info">{{onlineUsers}}</div>
+                        <div class="position-absolute end-0 bottom-0 p-3 opacity-25">
+                            <span class="display-1">👥</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Statistics Chart -->
+        <div class="row mb-5" *ngIf="isAdmin">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title fw-bold m-0">Weekly Statistics Report</h5>
+                            <span class="badge bg-light text-muted border px-3 py-2">Last 7 Days</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <div style="height: 350px;">
+                            <canvas id="statsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Shortcuts -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-white border-0 pt-4">
+                        <h5 class="card-title fw-bold">Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-3">
+                            <a routerLink="/requests/stock-request/create"
+                                class="btn btn-outline-primary text-start p-3 d-flex align-items-center">
+                                <span class="me-auto">New Stock Request</span>
+                                <span class="h5 mb-0">→</span>
+                            </a>
+                            <a routerLink="/requests/item-request/create"
+                                class="btn btn-outline-success text-start p-3 d-flex align-items-center">
+                                <span class="me-auto">New Item Request</span>
+                                <span class="h5 mb-0">→</span>
+                            </a>
+                            <a routerLink="/borrows/create"
+                                class="btn btn-outline-info text-start p-3 d-flex align-items-center">
+                                <span class="me-auto">New Borrow Request</span>
+                                <span class="h5 mb-0">→</span>
+                            </a>
+                            <a *ngIf="isAdmin" routerLink="/admin/accounts"
+                                class="btn btn-outline-dark text-start p-3 d-flex align-items-center">
+                                <span class="me-auto">Manage Users</span>
+                                <span class="h5 mb-0">→</span>
+                            </a>
+                            <a routerLink="/profile"
+                                class="btn btn-light text-start p-3 d-flex align-items-center text-muted">
+                                <span class="me-auto">Update Profile</span>
+                                <span class="h5 mb-0">⚙️</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-white border-0 pt-4 d-flex justify-content-between align-items-center">
+                        <h5 class="card-title fw-bold m-0">Recent Activity</h5>
+                        <a routerLink="/admin/manage-logs" class="text-decoration-none small" *ngIf="isAdmin">View
+                            All</a>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4">User</th>
+                                        <th>Action</th>
+                                        <th>Details</th>
+                                        <th class="text-end pe-4">Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let log of recentLogs">
+                                        <td class="ps-4">
+                                            <div class="fw-bold">{{log.account?.firstName}} {{log.account?.lastName}}
+                                            </div>
+                                            <div class="small text-muted">{{log.account?.email}}</div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border">{{log.actionType}}</span>
+                                        </td>
+                                        <td class="text-muted small text-truncate" style="max-width: 200px;"
+                                            title="{{log.actionDetails}}">
+                                            {{log.actionDetails}}
+                                        </td>
+                                        <td class="text-end pe-4 text-muted small">
+                                            {{log.timestamp | date:'shortTime'}} <br>
+                                            {{log.timestamp | date:'MMM d'}}
+                                        </td>
+                                    </tr>
+                                    <tr *ngIf="!loadingLogs && recentLogs.length === 0">
+                                        <td colspan="4" class="text-center py-5 text-muted">
+                                            No recent activity found.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

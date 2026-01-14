@@ -16,12 +16,18 @@ export class TransferListComponent implements OnInit {
   roomId: number | null = null;
   account: any;
 
+  // Pagination
+  page = 1;
+  limit = 10;
+  total = 0;
+  totalPages = 0;
+
   constructor(
     private transferService: TransferService,
     private accountService: AccountService,
     private alert: AlertService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.account = this.accountService.accountValue; // or subscribe if it's an observable
@@ -32,10 +38,28 @@ export class TransferListComponent implements OnInit {
     this.loading = true;
     const params: any = {};
     if (this.filterStatus) params.status = this.filterStatus;
-    this.transferService.list(params).pipe(first()).subscribe({
-      next: (rows: any) => { this.transfers = rows; this.loading = false; },
+
+    this.transferService.list(params, this.page, this.limit).pipe(first()).subscribe({
+      next: (res: any) => {
+        this.transfers = res.data || [];
+        if (res.meta) {
+          this.total = res.meta.total;
+          this.totalPages = res.meta.totalPages;
+          this.page = res.meta.page;
+        }
+        this.loading = false;
+      },
       error: err => { this.alert.error(err); this.loading = false; }
     });
+  }
+
+  onPageChange(page: number) {
+    this.page = page;
+    this.load();
+  }
+
+  range(start: number, end: number): number[] {
+    return [...Array(end - start + 1).keys()].map(i => i + start);
   }
 
   goCreate() {
@@ -44,16 +68,16 @@ export class TransferListComponent implements OnInit {
 
   view(t: any) {
     // Accept either the transfer object or an id passed directly.
-    const id = (typeof t === 'object') 
-      ? (t?.transferId) 
+    const id = (typeof t === 'object')
+      ? (t?.transferId)
       : t;
-  
+
     if (!id) {
       console.warn('transfer view called without valid id or transfer object:', t);
       // optionally show a user-friendly message
       return this.alert?.error?.('Unable to open transfer: invalid id'); // keep UI consistent if you have alert service
     }
-  
+
     // navigate safely (segment must not be undefined)
     this.router.navigate(['/transfers', String(id)]);
   }
@@ -81,11 +105,11 @@ export class TransferListComponent implements OnInit {
     if (!t) return false;
     const status = String(t.status || '').toLowerCase();
     if (!['pending', 'in_transfer'].includes(status)) return false;
-  
+
     const acct = this.account || {};
     const rawRole = acct.role ?? acct.roles ?? acct.roleName ?? '';
     const adminRoles = ['superadmin', 'admin', 'stockroomadmin', 'super_admin'];
-  
+
     let isAdmin = false;
     if (Array.isArray(rawRole)) {
       isAdmin = rawRole.map((r: any) => String(r).toLowerCase()).some((r: string) => adminRoles.includes(r));
@@ -93,7 +117,7 @@ export class TransferListComponent implements OnInit {
       isAdmin = adminRoles.includes(String(rawRole).toLowerCase());
     }
     if (isAdmin) return true;
-  
+
     const roomInCharge = t.toRoom?.roomInCharge ?? t.toRoomId;
     return String(acct.accountId) === String(roomInCharge);
   }

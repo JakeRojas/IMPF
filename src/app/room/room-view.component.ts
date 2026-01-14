@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute }     from '@angular/router';
-import { first }              from 'rxjs/operators';
+import { ActivatedRoute, Router } from '@angular/router';
+import { first } from 'rxjs/operators';
 
 import { RoomService, AlertService } from '@app/_services';
 
@@ -10,14 +10,15 @@ import { RoomService, AlertService } from '@app/_services';
 export class RoomViewComponent implements OnInit {
   roomId!: number;
   room: any = {};
-  stockPath = 'apparel';
+  stockPath = /* 'apparel' && 'supply' && */ 'general';
   isStockroom = false;
 
   constructor(
     private route: ActivatedRoute,
     private roomService: RoomService,
-    private alert: AlertService
-  ) {}
+    private alert: AlertService,
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
     this.roomId = +this.route.snapshot.params['id'];
@@ -33,8 +34,8 @@ export class RoomViewComponent implements OnInit {
     this.roomService.getRoomById(this.roomId).pipe(first()).subscribe({
       next: (r: any) => {
         this.room = r || {};
-        // this.stockPath = this.computeStockPath(this.room);
-        // this.isStockroom = this.room.roomType === 'stockroom' || this.room.roomType === 'subStockroom';
+        this.stockPath = this.computeStockPath(this.room);
+        this.isStockroom = this.room.roomType === 'stockroom' || this.room.roomType === 'subStockroom';
       },
       error: (e) => this.alert.error(e)
     });

@@ -49,9 +49,9 @@
           <td>{{ b.quantity ?? '-' }}</td>
           <td>
             <!-- <div *ngIf="b.note"> -->
-              <small class="text-muted">
-                — {{ b.note }}
-              </small>
+            <small class="text-muted">
+              — {{ b.note }}
+            </small>
             <!-- </div> -->
           </td>
           <td>{{ b.requester?.firstName}} {{b.requester?.lastName }}</td>
@@ -63,21 +63,47 @@
           </td>
           <td class="text-end">
             <button class="btn btn-sm btn-outline-primary me-1" (click)="view(b)">View</button>
-          
-            <button *ngIf="showApproveDecline(b)" class="btn btn-sm btn-success me-1" (click)="approve(b)">Approve</button>
-            <button *ngIf="showApproveDecline(b)" class="btn btn-sm btn-danger me-1" (click)="decline(b)">Decline</button>
-          
-            <button *ngIf="showAcquireCancel(b)" class="btn btn-sm btn-primary me-1" (click)="acquire(b)">Acquire</button>
-            <button *ngIf="showAcquireCancel(b)" class="btn btn-sm btn-outline-danger me-1" (click)="cancel(b)">Cancel</button>
-          
-            <button *ngIf="showReturnButton(b)" class="btn btn-sm btn-warning me-1" (click)="markReturn(b)">Mark Return</button>
-          
-            <button *ngIf="showAcceptReturn(b)" class="btn btn-sm btn-dark me-1" (click)="acceptReturned(b)">Accept Return</button>
+
+            <button *ngIf="showApproveDecline(b)" class="btn btn-sm btn-success me-1"
+              (click)="approve(b)">Approve</button>
+            <button *ngIf="showApproveDecline(b)" class="btn btn-sm btn-danger me-1"
+              (click)="decline(b)">Decline</button>
+
+            <button *ngIf="showAcquireCancel(b)" class="btn btn-sm btn-primary me-1"
+              (click)="acquire(b)">Acquire</button>
+            <button *ngIf="showAcquireCancel(b)" class="btn btn-sm btn-outline-danger me-1"
+              (click)="cancel(b)">Cancel</button>
+
+            <button *ngIf="showReturnButton(b)" class="btn btn-sm btn-warning me-1" (click)="markReturn(b)">Mark
+              Return</button>
+
+            <button *ngIf="showAcceptReturn(b)" class="btn btn-sm btn-dark me-1" (click)="acceptReturned(b)">Accept
+              Return</button>
           </td>
         </tr>
       </tbody>
     </table>
 
     <div *ngIf="!loading && (!borrows || borrows.length === 0)" class="text-muted">No borrow requests found.</div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3" *ngIf="totalPages > 1 && !loading">
+      <div class="text-muted">
+        Showing {{ (page - 1) * limit + 1 }} to {{ (page * limit) > total ? total : (page * limit) }} of {{ total }}
+        borrows
+      </div>
+      <nav aria-label="Page navigation">
+        <ul class="pagination mb-0">
+          <li class="page-item" [class.disabled]="page === 1">
+            <button class="page-link" (click)="onPageChange(page - 1)">Previous</button>
+          </li>
+          <li class="page-item" *ngFor="let p of range(1, totalPages)" [class.active]="page === p">
+            <button class="page-link" (click)="onPageChange(p)">{{ p }}</button>
+          </li>
+          <li class="page-item" [class.disabled]="page === totalPages">
+            <button class="page-link" (click)="onPageChange(page + 1)">Next</button>
+          </li>
+        </ul>
+      </nav>
+    </div>
   </div>
 </div>

@@ -1,13 +1,13 @@
-import { Injectable }                 from '@angular/core';
-import { HttpClient, HttpResponse }   from '@angular/common/http';
-import { environment }                from '@environments/environment';
-import { Observable }                 from 'rxjs';
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpResponse } from '@angular/common/http';
+import { environment } from '@environments/environment';
+import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class QrService {
   private base = `${environment.apiUrl}/qr`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   releaseUnit(stockroomType: string, unitId: number, body: any): Observable<any> {
     return this.http.post<any>(`${this.base}/${stockroomType}/unit/${unitId}/release`, body);
@@ -25,6 +25,10 @@ export class QrService {
   }
   getBatchQr(stockroomType: string, inventoryId: number): Observable<Blob> {
     return this.http.get(`${this.base}/${stockroomType}/${inventoryId}/qrcode`, { responseType: 'blob' });
+  }
+
+  downloadSelectedUnitsPdf(stockroomType: string, unitIds: number[]): Observable<Blob> {
+    return this.http.post(`${this.base}/${stockroomType}/units/pdf-selected`, { unitIds }, { responseType: 'blob' });
   }
 
   downloadAllPdf(stockroomType: string, roomId: number): Observable<Blob> {

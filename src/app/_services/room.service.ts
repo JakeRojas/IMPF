@@ -1,33 +1,33 @@
-import { Injectable }   from '@angular/core';
-import { HttpClient }   from '@angular/common/http';
-import { environment }  from '@environments/environment';
-import { Observable }   from 'rxjs';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '@environments/environment';
+import { Observable } from 'rxjs';
 
 
 @Injectable({ providedIn: 'root' })
 export class RoomService {
   private baseUrl = `${environment.apiUrl}/rooms`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // Rooms CRUD
-  getRooms() { 
-    return this.http.get<any[]>(this.baseUrl); 
+  getRooms() {
+    return this.http.get<any[]>(this.baseUrl);
   }
-  listRooms() { 
-    return this.http.get<any[]>(`${this.baseUrl}/list`); 
+  listRooms() {
+    return this.http.get<any[]>(`${this.baseUrl}/list`);
   }
   getItemsByRoom(roomId: number) {
     return this.http.get<any[]>(`${this.baseUrl}/${roomId}/room-items`);
   }
-  getRoomById(roomId: number) { 
-    return this.http.get<any>(`${this.baseUrl}/${roomId}`); 
+  getRoomById(roomId: number) {
+    return this.http.get<any>(`${this.baseUrl}/${roomId}`);
   }
-  createRoom(room: any) { 
-    return this.http.post(`${this.baseUrl}/create-room`, room); 
+  createRoom(room: any) {
+    return this.http.post(`${this.baseUrl}/create-room`, room);
   }
-  updateRoom(roomId: number, room: any) { 
-    return this.http.put(`${this.baseUrl}/${roomId}`, room); 
+  updateRoom(roomId: number, room: any) {
+    return this.http.put(`${this.baseUrl}/${roomId}`, room);
   }
 
   // ------------- Receive Any types of item -------------
@@ -43,22 +43,26 @@ export class RoomService {
   }
 
   // APPAREL
-  getApparelInventory(roomId: number)       { return this.http.get<any>(`${this.baseUrl}/${roomId}/apparel-inventory`); }
-  getReceivedBatchApparels(roomId: number)  { return this.http.get<any>(`${this.baseUrl}/${roomId}/receive-apparels`); }
-  getReleasedBatchApparels(roomId: number)  { return this.http.get<any>(`${this.baseUrl}/${roomId}/release-apparels`); }
-  getApparelUnits(roomId: number)           { return this.http.get<any>(`${this.baseUrl}/${roomId}/apparels`); }
+  getApparelInventory(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/apparel-inventory`); }
+  getReceivedBatchApparels(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/receive-apparels`); }
+  getReleasedBatchApparels(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/release-apparels`); }
+  getApparelUnits(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/apparels`); }
 
   // ADMIN / SUPPLY
-  getAdminSupplyInventory(roomId: number)     { return this.http.get<any>(`${this.baseUrl}/${roomId}/supply-inventory`); }
+  getAdminSupplyInventory(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/supply-inventory`); }
   getReceivedBatchAdminSupply(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/receive-supply`); }
   getReleasedBatchAdminSupply(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/release-supply`); }
-  getAdminSupplyUnits(roomId: number)         { return this.http.get<any>(`${this.baseUrl}/${roomId}/supply`); }
+  getAdminSupplyUnits(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/supply`); }
 
   // GENERAL / ITEMS
-  getGenItemInventory(roomId: number)     { return this.http.get<any>(`${this.baseUrl}/${roomId}/items-inventory`); }
+  getGenItemInventory(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/items-inventory`); }
   getReceivedBatchGenItem(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/receive-items`); }
   getReleasedBatchGenItem(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/release-items`); }
-  getGenItemUnits(roomId: number)         { return this.http.get<any>(`${this.baseUrl}/${roomId}/items`); }
+  getGenItemUnits(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/items`); }
+
+  getAllUnits(roomId: number) {
+    return this.http.get<any>(`${this.baseUrl}/${roomId}/all-units`);
+  }
 
   // ------------- Room-scoped QR endpoints (return PNG blobs) -------------
   // Apparel
@@ -91,51 +95,51 @@ export class RoomService {
   releaseApparel(roomId: number, payload: any): Observable<any> {
     // make a shallow copy so we don't mutate callers' objects
     const body: any = { ...payload };
-  
+
     // backend (server) expects releaseApparelQuantity — support both shortcut field names
     if (body.releaseQuantity != null && body.releaseApparelQuantity == null) {
       body.releaseApparelQuantity = Number(body.releaseQuantity);
       // delete(body.releaseQuantity); // optional
     }
-  
+
     // ensure numeric fields are numbers (server normalizes but it's good to be explicit)
     if (body.releaseApparelQuantity != null) body.releaseApparelQuantity = Number(body.releaseApparelQuantity);
     if (body.apparelInventoryId != null) body.apparelInventoryId = Number(body.apparelInventoryId);
-  
+
     // NOTE: backend route for apparel release is /rooms/:roomId/release/apparel
     return this.http.post<any>(`${this.baseUrl}/${roomId}/release/apparel`, body);
   }
   releaseAdminSupply(roomId: number, payload: any): Observable<any> {
     // make a shallow copy so we don't mutate callers' objects
     const body: any = { ...payload };
-  
+
     // backend (server) expects releaseApparelQuantity — support both shortcut field names
     if (body.releaseQuantity != null && body.releaseAdminSupplyQuantity == null) {
       body.releaseAdminSupplyQuantity = Number(body.releaseQuantity);
       // delete(body.releaseQuantity); // optional
     }
-  
+
     // ensure numeric fields are numbers (server normalizes but it's good to be explicit)
     if (body.releaseAdminSupplyQuantity != null) body.releaseAdminSupplyQuantity = Number(body.releaseAdminSupplyQuantity);
     if (body.adminSupplyInventoryId != null) body.adminSupplyInventoryId = Number(body.adminSupplyInventoryId);
-  
+
     // NOTE: backend route for apparel release is /rooms/:roomId/release/apparel
     return this.http.post<any>(`${this.baseUrl}/${roomId}/release/supply`, body);
   }
   // releaseGenItem(roomId: number, payload: any): Observable<any> {
   //   // make a shallow copy so we don't mutate callers' objects
   //   const body: any = { ...payload };
-  
+
   //   // backend (server) expects releaseApparelQuantity — support both shortcut field names
   //   if (body.releaseQuantity != null && body.releaseItemQuantity == null) {
   //     body.releaseItemQuantity = Number(body.releaseQuantity);
   //     // delete(body.releaseQuantity); // optional
   //   }
-  
+
   //   // ensure numeric fields are numbers (server normalizes but it's good to be explicit)
   //   if (body.releaseItemQuantity != null) body.releaseItemQuantity = Number(body.releaseItemQuantity);
   //   if (body.genItemInventoryId != null) body.genItemInventoryId = Number(body.genItemInventoryId);
-  
+
   //   // NOTE: backend route for apparel release is /rooms/:roomId/release/apparel
   //   return this.http.post<any>(`${this.baseUrl}/${roomId}/release/item`, body);
   // }
@@ -149,19 +153,31 @@ export class RoomService {
     // remove redundant fields if you like
     delete body.releaseQuantity;
     delete body.remarks;
-  
+
     return this.http.post(`${this.baseUrl}/${roomId}/release/item`, body);
   }
 
   updateApparelStatus(roomId: number, apparelId: number, newStatus: string) {
     return this.http.put(`${this.baseUrl}/${roomId}/apparels/${apparelId}/status`, { status: newStatus });
   }
-  
+
   updateAdminSupplyStatus(roomId: number, supplyId: number, newStatus: string) {
     return this.http.put(`${this.baseUrl}/${roomId}/admin-supplies/${supplyId}/status`, { status: newStatus });
   }
-  
+
   updateGenItemStatus(roomId: number, genItemId: number, newStatus: string) {
     return this.http.put(`${this.baseUrl}/${roomId}/gen-items/${genItemId}/status`, { status: newStatus });
+  }
+
+  updateApparelUnit(roomId: number, unitId: number, payload: { description?: string, status?: string }) {
+    return this.http.put<any>(`${this.baseUrl}/${roomId}/apparel/unit/${unitId}`, payload);
+  }
+
+  updateAdminSupplyUnit(roomId: number, unitId: number, payload: { description?: string, status?: string }) {
+    return this.http.put<any>(`${this.baseUrl}/${roomId}/supply/unit/${unitId}`, payload);
+  }
+
+  updateGenItemUnit(roomId: number, unitId: number, payload: { description?: string, status?: string }) {
+    return this.http.put<any>(`${this.baseUrl}/${roomId}/genitem/unit/${unitId}`, payload);
   }
 }

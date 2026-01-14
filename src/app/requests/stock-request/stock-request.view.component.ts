@@ -1,20 +1,20 @@
-import { Component, OnInit      } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { first } from 'rxjs/operators';
 
-import { 
-  AlertService, 
-  AccountService, 
-  StockRequestService 
+import {
+  AlertService,
+  AccountService,
+  StockRequestService
 } from '@app/_services';
-import { 
-  StockRequest, 
-  RequestedItem 
+import {
+  StockRequest,
+  RequestedItem
 } from '@app/_models/stock-request.model';
 // ================================================================
 
-@Component({ 
-  templateUrl: './stock-request.view.component.html' 
+@Component({
+  templateUrl: './stock-request.view.component.html'
 })
 export class StockRequestViewComponent implements OnInit {
   id!: number;
@@ -73,33 +73,45 @@ export class StockRequestViewComponent implements OnInit {
     });
   }
 
-  approve() { 
-    if (!confirm('Approve?')) return; 
-        this.sr.approve(this.id)
-        .pipe(first())
-        .subscribe(() => { 
-            this.alert.success('Approved'); 
-            this.load(); 
-        }, e => this.alert.error(this._errToString(e))); 
-    }
+  // approve() { 
+  //   if (!confirm('Approve?')) return; 
+  //       this.sr.approve(this.id)
+  //       .pipe(first())
+  //       .subscribe(() => { 
+  //           this.alert.success('Approved'); 
+  //           this.load(); 
+  //       }, e => this.alert.error(this._errToString(e))); 
+  //   }
+  approve() {
+    // [MODIFIED] Show quantity in confirmation
+    if (!confirm(`Approve this request for ${this.request?.quantity} items?`)) return;
 
-  disapprove() { 
-    const r = prompt('Reason?') ?? undefined; 
-        this.sr.disapprove(this.id, r)
-        .pipe(first())
-        .subscribe(() => { 
-            this.alert.success('Disapproved'); this.load(); 
-        }, e => this.alert.error(this._errToString(e))); 
+    // [MODIFIED] Pass this.request?.quantity
+    this.sr.approve(this.id, this.request?.quantity)
+      .pipe(first())
+      .subscribe(() => {
+        this.alert.success('Approved');
+        this.load();
+      }, e => this.alert.error(this._errToString(e)));
   }
-  
-  fulfill() { 
-    if (!confirm('Fulfill?')) return; 
-        this.sr.fulfill(this.id)
-        .pipe(first())
-        .subscribe(() => { 
-            this.alert.success('Fulfilled'); 
-            this.load(); 
-        }, e => this.alert.error(this._errToString(e))); 
+
+  disapprove() {
+    const r = prompt('Reason?') ?? undefined;
+    this.sr.disapprove(this.id, r)
+      .pipe(first())
+      .subscribe(() => {
+        this.alert.success('Disapproved'); this.load();
+      }, e => this.alert.error(this._errToString(e)));
+  }
+
+  fulfill() {
+    if (!confirm('Fulfill?')) return;
+    this.sr.fulfill(this.id)
+      .pipe(first())
+      .subscribe(() => {
+        this.alert.success('Fulfilled');
+        this.load();
+      }, e => this.alert.error(this._errToString(e)));
   }
 
   isAdmin() { return this.account?.role === 'superAdmin' || this.account?.role === 'admin'; }
@@ -174,8 +186,10 @@ export class StockRequestViewComponent implements OnInit {
       rows.push({ label: 'Unit ID', value: unit.id ?? unit.apparelId ?? '—' });
       rows.push({ label: 'Status', value: unit.status ?? '—' });
       rows.push({ label: 'Room ID', value: unit.roomId ?? '—' });
-      rows.push({ label: 'Parent Inventory FK', value:
-        unit.apparelInventoryId ?? unit.adminSupplyInventoryId ?? unit.genItemInventoryId ?? '—' });
+      rows.push({
+        label: 'Parent Inventory FK', value:
+          unit.apparelInventoryId ?? unit.adminSupplyInventoryId ?? unit.genItemInventoryId ?? '—'
+      });
 
       // parent inventory summary (if available)
       if (ri.inventory) {
@@ -187,7 +201,7 @@ export class StockRequestViewComponent implements OnInit {
       }
 
       // show other unit keys
-      const shownU = new Set(['unit id','status','room id','parent inventory fk']);
+      const shownU = new Set(['unit id', 'status', 'room id', 'parent inventory fk']);
       Object.keys(unit || {}).forEach(k => {
         const keyLabel = this._niceLabel(k);
         if (!shownU.has(this._normalizeLabelKey(keyLabel))) {

@@ -3,30 +3,65 @@
 
   <div *ngIf="loading">Loading...</div>
 
-  <table *ngIf="!loading && units?.length" class="table table-sm">
+  <table *ngIf="!loading && units.length" class="table table-sm">
     <thead>
+      <button class="btn btn-primary btn-sm me-2" (click)="generateAllUnitsQr()">
+        Generate All Units (PDF)
+      </button>
+      <button class="btn btn-outline-primary btn-sm" (click)="generateSelectedQr()" [disabled]="selection.size === 0">
+        Generate Selected ({{ selection.size }})
+      </button>
       <tr>
+        <th style="width: 40px;">
+          <input type="checkbox" [checked]="allSelected" (change)="toggleSelectAll()" />
+        </th>
         <th>Unit ID</th>
         <th>Unit Name</th>
+        <th>Description</th>
         <th>Status</th>
         <th>Assigned To</th>
         <th>Qty</th>
         <th>Last Updated</th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let u of units">
+        <td>
+          <input type="checkbox" [checked]="isSelected(u.adminSupplyId)" (change)="toggleSelection(u.adminSupplyId)" />
+        </td>
         <td>{{ u.adminSupplyId}}</td>
         <td>{{ u.receiveAdminSupplyId}}</td>
-        <td>{{ u.status }}</td>
+
+        <!-- inline editing: show inputs if editing -->
+        <td *ngIf="!u.editing">{{ u.description || '-' }}</td>
+        <td *ngIf="u.editing">
+          <input class="form-control form-control-sm" [(ngModel)]="u.description" />
+        </td>
+
+        <td *ngIf="!u.editing">{{ u.status }}</td>
+        <td *ngIf="u.editing">
+          <select class="form-select form-select-sm" [(ngModel)]="u.status">
+            <option value="good">good</option>
+            <option value="working">working</option>
+            <option value="damage">damage</option>
+          </select>
+        </td>
+
         <td>{{ u.assignedToName || u.assignedTo || '-' }}</td>
         <td>{{ u.quantity ?? u.totalQuantity ?? 0 }}</td>
         <td>{{ u.updatedAt ? (u.updatedAt | date:'short') : (u.createdAt ? (u.createdAt | date:'short') : '-') }}</td>
+
+        <td style="white-space:nowrap">
+          <button *ngIf="!u.editing" class="btn btn-sm btn-outline-primary me-1" (click)="startEdit(u)">Edit</button>
+          <button *ngIf="u.editing" class="btn btn-sm btn-success me-1" (click)="saveUnit(u)">Save</button>
+          <button *ngIf="u.editing" class="btn btn-sm btn-secondary" (click)="cancelEdit(u)">Cancel</button>
+        </td>
       </tr>
     </tbody>
   </table>
 
   <div *ngIf="!loading && (!units || units.length === 0)">
-    No apparel units found.
+    No admin supply units found.
   </div>
 </div>

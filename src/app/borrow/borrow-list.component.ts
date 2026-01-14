@@ -13,12 +13,18 @@ export class BorrowListComponent implements OnInit {
   filterStatus = '';
   account: any = null;
 
+  // Pagination
+  page = 1;
+  limit = 10;
+  total = 0;
+  totalPages = 0;
+
   constructor(
     private borrowService: BorrowService,
     private alert: AlertService,
     private router: Router,
     private accountService: AccountService
-  ) {}
+  ) { }
 
   ngOnInit() {
     const acct = this.accountService.accountValue;
@@ -32,10 +38,28 @@ export class BorrowListComponent implements OnInit {
     this.loading = true;
     const params: any = {};
     if (this.filterStatus) params.status = this.filterStatus;
-    this.borrowService.list(params).pipe(first()).subscribe({
-      next: rows => { this.borrows = rows ?? []; this.loading = false; },
+
+    this.borrowService.list(params, this.page, this.limit).pipe(first()).subscribe({
+      next: (res: any) => {
+        this.borrows = res.data ?? [];
+        if (res.meta) {
+          this.total = res.meta.total;
+          this.totalPages = res.meta.totalPages;
+          this.page = res.meta.page;
+        }
+        this.loading = false;
+      },
       error: err => { this.alert.error(err?.message ?? err); this.loading = false; }
     });
+  }
+
+  onPageChange(page: number) {
+    this.page = page;
+    this.load();
+  }
+
+  range(start: number, end: number): number[] {
+    return [...Array(end - start + 1).keys()].map(i => i + start);
   }
 
   goCreate() { this.router.navigate(['/borrows/create']); }

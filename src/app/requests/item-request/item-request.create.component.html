@@ -17,9 +17,11 @@
       <label class="form-label">Requester Room (you must be in charge)</label>
       <select class="form-select" formControlName="requesterRoomId">
         <option [ngValue]="null">-- select requester room --</option>
-        <option *ngFor="let r of requesterRooms" [ngValue]="r.roomId">{{ r.roomName }} {{ r.roomFloor ? '— ' + r.roomFloor : '' }}</option>
+        <option *ngFor="let r of requesterRooms" [ngValue]="r.roomId">{{ r.roomName }} {{ r.roomFloor ? '— ' +
+          r.roomFloor : '' }}</option>
       </select>
-      <div *ngIf="form.get('requesterRoomId')?.touched && form.get('requesterRoomId')?.invalid" class="text-danger small">
+      <div *ngIf="form.get('requesterRoomId')?.touched && form.get('requesterRoomId')?.invalid"
+        class="text-danger small">
         Select a requester room you are in charge of
       </div>
     </div>
@@ -30,7 +32,8 @@
         <option [ngValue]="null">-- select room to request from --</option>
         <option *ngFor="let r of stockRooms" [ngValue]="r.roomId">{{ r.roomName }} — {{ r.roomType }}</option>
       </select>
-      <div *ngIf="form.get('requestToRoomId')?.touched && form.get('requestToRoomId')?.invalid" class="text-danger small">
+      <div *ngIf="form.get('requestToRoomId')?.touched && form.get('requestToRoomId')?.invalid"
+        class="text-danger small">
         Select a room with type stockroom or substockroom
       </div>
     </div>
@@ -42,9 +45,19 @@
       <label class="form-label">Item</label>
       <select class="form-select" formControlName="itemId">
         <option [ngValue]="null">-- select item --</option>
-        <option *ngFor="let it of items" [value]="it.inventoryId ?? it.id">{{ it.name }} {{ it.totalQuantity ? '(' + it.totalQuantity + ')' : '' }}</option>
+        <option *ngFor="let it of items" [value]="it.inventoryId ?? it.id">{{ it.name }} {{ it.totalQuantity ? '(' +
+          it.totalQuantity + ')' : '' }}</option>
+        <option value="other">Others</option>
       </select>
-      <div *ngIf="form.get('itemId')?.touched && form.get('itemId')?.invalid" class="text-danger small">Item is required</div>
+      <div *ngIf="form.get('itemId')?.touched && form.get('itemId')?.invalid" class="text-danger small">Item is required
+      </div>
+
+      <div *ngIf="form.get('itemId')?.value === 'other'" class="mt-2">
+        <label class="form-label">Specify Item Name</label>
+        <input type="text" class="form-control" formControlName="otherItemName" placeholder="Enter item name..." />
+        <div *ngIf="form.get('otherItemName')?.touched && form.get('otherItemName')?.invalid" class="text-danger small">
+          Item name is required</div>
+      </div>
     </div>
 
     <div class="mb-3 col-6">

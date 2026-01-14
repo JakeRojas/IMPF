@@ -30,15 +30,27 @@ export class ItemRequestCreateComponent implements OnInit, OnDestroy {
     private itReqService: ItemRequestService,
     private alert: AlertService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.form = this.fb.group({
       requesterRoomId: [null, Validators.required],
       requestToRoomId: [null, Validators.required],
       itemId: [null, Validators.required],
+      otherItemName: [''],
       quantity: [1, [Validators.required, Validators.min(1)]],
       note: ['']
+    });
+
+    this.form.get('itemId')!.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(val => {
+      const otherCtrl = this.form.get('otherItemName')!;
+      if (val === 'other') {
+        otherCtrl.setValidators([Validators.required]);
+      } else {
+        otherCtrl.clearValidators();
+        otherCtrl.setValue('');
+      }
+      otherCtrl.updateValueAndValidity();
     });
 
     this.loadRequesterRooms();
@@ -116,10 +128,16 @@ export class ItemRequestCreateComponent implements OnInit, OnDestroy {
     const payload: any = {
       requesterRoomId: Number(v.requesterRoomId),
       requestToRoomId: Number(v.requestToRoomId),
-      itemId: Number(v.itemId),
       quantity: Number(v.quantity),
       note: v.note || null
     };
+
+    if (v.itemId === 'other') {
+      payload.itemId = null;
+      payload.otherItemName = v.otherItemName;
+    } else {
+      payload.itemId = Number(v.itemId);
+    }
 
     if (selectedItem && selectedItem.itemType) payload.itemType = selectedItem.itemType;
 
