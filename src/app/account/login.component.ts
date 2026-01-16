@@ -26,16 +26,21 @@ export class LoginComponent implements OnInit {
             password: ['', Validators.required]
         });
         this.accountService.hasAnyAccount()
-      .pipe(first())
-      .subscribe({
-        next: res => {
-          this.showRegister = !(res && res.exists);
-        },
-        error: err => {
-          console.warn('hasAnyAccount failed (showing register):', err);
-          this.showRegister = true;
-        }
-      });
+            .pipe(first())
+            .subscribe({
+                next: (res: any) => {
+                    console.log('[Login] hasAnyAccount response:', res);
+                    // show register button only if res.exists is explicitly false
+                    // or if the response indicates no accounts found
+                    const exists = res && (res.exists === true || res.exists === 1 || res.exists === 'true');
+                    this.showRegister = !exists;
+                    console.log('[Login] showRegister evaluated to:', this.showRegister);
+                },
+                error: err => {
+                    console.error('[Login] hasAnyAccount failed (showing register):', err);
+                    this.showRegister = true;
+                }
+            });
     }
 
     get f() { return this.form.controls; }
