@@ -40,6 +40,9 @@
 
           <button *ngIf="isStockroom() && r.status === 'approved'" class="btn btn-sm btn-danger ms-1"
             (click)="fulfill(r)">Fulfill</button>
+
+          <button *ngIf="r.status === 'fulfilled' && (r.itemType === 'other' || (!r.itemId && r.otherItemName))"
+            class="btn btn-sm btn-info ms-1" (click)="goToReceive(r)">Receive</button>
         </td>
       </tr>
     </tbody>
