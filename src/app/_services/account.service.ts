@@ -1,7 +1,7 @@
 ﻿import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { map, finalize, catchError } from 'rxjs/operators';
 
 import { environment } from '@environments/environment';
@@ -50,18 +50,12 @@ export class AccountService {
     }
     refreshToken() {
         return this.http.post<any>(`${baseUrl}/refresh-token`, {}, { withCredentials: true })
-            .pipe(
-                map((account) => {
-                    localStorage.setItem('account', JSON.stringify(account));
-                    this.accountSubject.next(account);
-                    this.startRefreshTokenTimer();
-                    return account;
-                }),
-                catchError(err => {
-                    this.logout();
-                    return throwError(() => err);
-                })
-            );
+            .pipe(map((account) => {
+                localStorage.setItem('account', JSON.stringify(account));
+                this.accountSubject.next(account);
+                this.startRefreshTokenTimer();
+                return account;
+            }));
     }
     revokeToken() {
         const refreshToken = localStorage.getItem('refreshToken');
