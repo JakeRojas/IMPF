@@ -7,7 +7,7 @@ import {
   AccountService,
   StockRequestService
 } from '@app/_services';
-import { StockRequest, Role } from '@app/_models';
+import { StockRequest } from '@app/_models';
 // ============================================================
 
 @Component({
@@ -106,29 +106,13 @@ export class StockRequestListComponent implements OnInit {
   fulfill(r: StockRequest) {
     const id = Number(r?.stockRequestId ?? r?.id);
     if (!Number.isFinite(id)) return this.alert.error('Invalid id');
-    if (!confirm('Fulfill this request? This will create a receive batch.')) return;
+    if (!confirm('Fulfill this request? This will create a release batch.')) return;
     this.sr.fulfill(id).pipe(first()).subscribe({
       next: () => { this.alert.success('Fulfilled'); this.load(); },
       error: e => this.alert.error(this._errToString(e))
     });
   }
 
-  goToReceive(r: StockRequest) {
-    const roomId = r.requesterRoomId || r.Room?.roomId;
-    if (!roomId) {
-      this.alert.error('Room ID not found for this request.');
-      return;
-    }
-    // navigate to the specific receive form for the room
-    // routes are /room/:id/receive/general|apparel|supply
-    let type = 'general';
-    const itype = (r.itemType || '').toLowerCase();
-    if (itype === 'apparel') type = 'apparel';
-    else if (itype === 'supply') type = 'supply';
-
-    this.router.navigate(['/room', roomId, 'receive', type]);
-  }
-
-  isAdmin() { return this.account?.role === Role.SuperAdmin || this.account?.role === Role.Admin; }
-  isStockroom() { return this.account?.role === Role.StockroomAdmin; }
+  isAdmin() { return this.account?.role === 'superAdmin' && this.account?.role === 'admin'; }
+  isStockroom() { return this.account?.role === 'stockroomAdmin' }
 }
