@@ -1,21 +1,21 @@
 import { Injectable } from '@angular/core';
 import { catchError } from 'rxjs/operators';
-import { 
-  Observable, 
-  throwError 
+import {
+  Observable,
+  throwError
 } from 'rxjs';
-import { 
-  HttpRequest, 
-  HttpHandler, 
-  HttpEvent, 
-  HttpInterceptor 
+import {
+  HttpRequest,
+  HttpHandler,
+  HttpEvent,
+  HttpInterceptor
 } from '@angular/common/http';
 
 import { AccountService, AlertService } from '@app/_services';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
-  constructor(private accountService: AccountService, private alertService: AlertService) {}
+  constructor(private accountService: AccountService, private alertService: AlertService) { }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(catchError(err => {
@@ -26,8 +26,9 @@ export class ErrorInterceptor implements HttpInterceptor {
       }
 
       if (err.status === 401 && this.accountService.accountValue) {
-        console.warn('Unauthorized - logging out', err);
-        this.accountService.logout();
+        // [DEACTIVATED] Automatic logout on 401 removed to prevent logout on browser refresh.
+        // AccountService.refreshToken() now handles session life independently.
+        console.warn('Unauthorized (401) observed. Automatic logout from interceptor is disabled.');
       }
 
       if (err.status === 403) {
