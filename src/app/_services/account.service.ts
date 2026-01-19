@@ -2,7 +2,7 @@
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { map, finalize, catchError } from 'rxjs/operators';
+import { map, finalize, catchError, shareReplay } from 'rxjs/operators';
 
 import { environment } from '@environments/environment';
 import { Account } from '@app/_models';
@@ -48,12 +48,13 @@ export class AccountService {
         localStorage.removeItem('account');
         this.router.navigate(['/account/login']);
     }
-    private isRefreshing = false;
+    private refreshRequest: Observable<Account | null> | null = null;
     refreshToken() {
-        if (this.isRefreshing) return of(null);
-        this.isRefreshing = true;
+        if (this.refreshRequest) {
+            return this.refreshRequest;
+        }
 
-        return this.http.post<any>(`${baseUrl}/refresh-token`, {}, { withCredentials: true })
+        this.refreshRequest = this.http.post<any>(`${baseUrl}/refresh-token`, {}, { withCredentials: true })
             .pipe(
                 map((account) => {
                     localStorage.setItem('account', JSON.stringify(account));
@@ -61,8 +62,12 @@ export class AccountService {
                     this.startRefreshTokenTimer();
                     return account;
                 }),
-                finalize(() => this.isRefreshing = false)
+                finalize(() => {
+                    this.refreshRequest = null;
+                }),
+                shareReplay(1)
             );
+        return this.refreshRequest;
     }
     revokeToken() {
         const refreshToken = localStorage.getItem('refreshToken');
@@ -98,13 +103,13 @@ export class AccountService {
         return this.http.get<Account[]>(baseUrl, { withCredentials: true });
     }
     getById(AccountId: number) {
-        return this.http.get<Account>(`${baseUrl}/${AccountId}`);
+        return this.http.get<Account>(`${baseUrl}/${AccountId}`, { withCredentials: true });
     }
     create(params: any) {
         return this.http.post(`${baseUrl}/create-user`, params, { withCredentials: true });
     }
     update(AccountId: number, params: any) {
-        return this.http.put(`${baseUrl}/${AccountId}`, params)
+        return this.http.put(`${baseUrl}/${AccountId}`, params, { withCredentials: true })
             .pipe(map((account: any) => {
                 if (account.AccountId === this.accountValue?.AccountId) {
                     account = { ...this.accountValue, ...account };
@@ -115,7 +120,7 @@ export class AccountService {
             }));
     }
     delete(AccountId: number) {
-        return this.http.delete(`${baseUrl}/${AccountId}`)
+        return this.http.delete(`${baseUrl}/${AccountId}`, { withCredentials: true })
             .pipe(finalize(() => {
                 if (AccountId === this.accountValue?.AccountId)
                     this.logout();

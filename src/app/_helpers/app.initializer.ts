@@ -6,13 +6,9 @@ import { AccountService } from '@app/_services';
 export function appInitializer(accountService: AccountService) {
   return () => {
     try {
-      const hasAccount = !!localStorage.getItem('account');
-      const hasRefreshCookie = typeof document !== 'undefined' && document.cookie && (document.cookie.includes('refreshToken=') || document.cookie.includes('fakeRefreshToken='));
-
-      if (!hasAccount && !hasRefreshCookie) {
-        return Promise.resolve();
-      }
-
+      // In production, refresh token cookies are often HttpOnly and invisible to document.cookie.
+      // We attempt a refresh on startup to restore the session if a valid cookie exists.
+      // This ensures that refreshing the page doesn't log the user out even if localStorage is transient.
       return accountService.refreshToken().pipe(
         catchError(() => of(null))
       ).toPromise();
