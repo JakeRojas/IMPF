@@ -29,16 +29,7 @@ export class ErrorInterceptor implements HttpInterceptor {
         // auto logout if 401 response returned from api
         console.warn('Unauthorized - attempting refresh', err);
         return this.accountService.refreshToken().pipe(
-          switchMap(() => {
-            // retry with the NEW token
-            const newAccount = this.accountService.accountValue;
-            if (newAccount && newAccount.jwtToken) {
-              request = request.clone({
-                setHeaders: { Authorization: `Bearer ${newAccount.jwtToken}` }
-              });
-            }
-            return next.handle(request);
-          }),
+          switchMap(() => next.handle(request)),
           catchError(() => {
             this.accountService.logout();
             return throwError(() => err);
