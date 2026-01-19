@@ -8,12 +8,23 @@ import { Account, Role } from './_models';
 export class AppComponent {
     Role = Role;
     account?: Account | null;
+    isSidebarVisible = false;
 
-    constructor(private accountService: AccountService) {
+    constructor(private accountService: AccountService, private router: Router) {
         this.accountService.account.subscribe(x => this.account = x);
+
+        // Close sidebar on navigation
+        this.router.events.subscribe(() => {
+            this.isSidebarVisible = false;
+        });
+    }
+
+    toggleSidebar() {
+        this.isSidebarVisible = !this.isSidebarVisible;
     }
 
     logout() {
+        this.isSidebarVisible = false;
         this.accountService.logout();
     }
 }

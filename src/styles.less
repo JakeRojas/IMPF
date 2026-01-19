@@ -1,39 +1,147 @@
 /* You can add global styles to this file, and also import other style files */
+@import (css) "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap";
+
+:root {
+  --primary: #0d6efd;
+  --primary-dark: #0a58ca;
+  --bg-sidebar: #f8f9fa;
+  --bg-dark: #212529;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f5f7fb;
+  color: #334155;
+}
+
 .app-container {
-    min-height: 320px;
+  min-height: 100vh;
+}
+
+/* Sidebar Styling */
+.sidebar {
+  transition: var(--transition);
+  z-index: 1000;
+
+  @media (max-width: 767.98px) {
+    position: fixed;
+    top: 56px;
+    /* Height of mobile navbar */
+    left: -100%;
+    width: 250px;
+    height: calc(100vh - 56px);
+    background: white;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border-right: 1px solid #dee2e6;
+
+    &.show {
+      left: 0;
+    }
+  }
+}
+
+.sidebar-overlay {
+  display: none;
+
+  @media (max-width: 767.98px) {
+    &.show {
+      display: block;
+      position: fixed;
+      top: 56px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+  }
+}
+
+/* Custom Nav Link styling */
+.nav-link {
+  color: #64748b;
+  font-weight: 500;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  margin-bottom: 0.25rem;
+  transition: var(--transition);
+
+  &:hover {
+    background: rgba(13, 110, 253, 0.05);
+    color: var(--primary);
+  }
+
+  &.active {
+    background: var(--primary) !important;
+    color: white !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+}
+
+/* Cards & Containers */
+.card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.transition-hover {
+  transition: var(--transition);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  }
+}
+
+/* Main Content Adjustment */
+.main-content {
+  flex: 1;
+  min-width: 0;
+  background-color: #f5f7fb;
+}
+
+/* Global Table Responsiveness */
+.table-responsive {
+  border-radius: 12px;
+  background: white;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 576px) {
+  h1 {
+    font-size: 1.75rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
+
+  .p-4 {
+    padding: 1rem !important;
+  }
+}
+
+.x-small {
+  font-size: 0.7rem;
 }
 
 .admin-nav {
-    padding-top: 0;
-    padding-bottom: 0;
-    background-color: #e8e9ea;
-    border-bottom: 1px solid #ccc;
+  padding-top: 0;
+  padding-bottom: 0;
+  background-color: #e8e9ea;
+  border-bottom: 1px solid #ccc;
 }
 
 .btn-delete-account {
-    width: 40px;
-    text-align: center;
-    box-sizing: content-box;
+  width: 40px;
+  text-align: center;
+  box-sizing: content-box;
 }
-
-
-
-
-
-.container-fluid {
-    min-height: 100vh;
-  }
-  
-  /* let the .main-content flex area actually shrink so overflow works */
-  .main-content {
-    /* flex behavior already provided by Bootstrap classes; ensure scroll works */
-    min-height: 0;
-  }
-
-  .transition-hover {
-    transition: all 0.3s ease;
-    &:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
-    }
-  }

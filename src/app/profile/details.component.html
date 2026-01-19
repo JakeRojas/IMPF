@@ -1,43 +1,60 @@
-﻿<div class="container mt-4" *ngIf="account">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow-lg border-0 rounded-lg overflow-hidden">
-                <div class="card-header bg-gradient bg-primary text-white text-center py-5">
-                    <div class="mb-3">
-                        <!-- Placeholder avatar if no image is available -->
-                        <div class="avatar-circle mx-auto bg-white text-primary d-flex align-items-center justify-content-center"
-                            style="width: 80px; height: 80px; border-radius: 50%; font-size: 2.5rem; font-weight: bold;">
+﻿<div class="row g-4" *ngIf="account">
+    <div class="col-lg-12">
+        <div class="card shadow-sm border-0 overflow-hidden">
+            <div class="card-body p-0">
+                <div class="bg-primary p-4 p-md-5 text-white position-relative">
+                    <div class="d-flex flex-column flex-md-row align-items-center position-relative z-index-1">
+                        <div class="avatar-circle bg-white text-primary d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-4 shadow"
+                            style="width: 100px; height: 100px; border-radius: 50%; font-size: 2.5rem; font-weight: bold; flex-shrink: 0;">
                             {{ account.firstName?.charAt(0) }}{{ account.lastName?.charAt(0) }}
                         </div>
-                    </div>
-                    <h2 class="fw-bold mb-1">{{account.title}} {{account.firstName}} {{account.lastName}}</h2>
-                    <span
-                        class="badge bg-white text-primary rounded-pill px-3 py-2 mt-2 font-monospace">{{account.role}}</span>
-                </div>
-                <div class="card-body p-5">
-                    <h5 class="text-muted mb-4 pb-2 border-bottom text-uppercase tracking-wide"
-                        style="font-size: 0.85rem; letter-spacing: 1px;">Contact Information</h5>
-
-                    <div class="row mb-3">
-                        <div class="col-sm-4 fw-bold text-secondary">Email Address</div>
-                        <div class="col-sm-8 text-dark">{{account.email}}</div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-sm-4 fw-bold text-secondary">Full Name</div>
-                        <div class="col-sm-8 text-dark">{{account.title}} {{account.firstName}} {{account.lastName}}
+                        <div class="text-center text-md-start">
+                            <h2 class="fw-bold mb-1">{{account.title}} {{account.firstName}} {{account.lastName}}</h2>
+                            <span class="badge bg-white bg-opacity-25 text-white rounded-pill px-3 py-2 mt-2">
+                                <i class="bi bi-shield-check me-1"></i> {{account.role}}
+                            </span>
+                        </div>
+                        <div class="ms-md-auto mt-4 mt-md-0">
+                            <a routerLink="update" class="btn btn-light shadow-sm">
+                                <i class="bi bi-pencil-square me-2"></i>Edit Profile
+                            </a>
                         </div>
                     </div>
+                </div>
+                <div class="p-4 p-md-5">
+                    <h5 class="text-muted mb-4 pb-2 border-bottom text-uppercase tracking-wide small fw-bold">
+                        Detailed Information
+                    </h5>
 
-                    <div class="row mb-3">
-                        <div class="col-sm-4 fw-bold text-secondary">Role Permission</div>
-                        <div class="col-sm-8 text-dark text-capitalize">{{account.role}}</div>
-                    </div>
-
-                    <div class="d-flex justify-content-end mt-5">
-                        <a routerLink="update" class="btn btn-primary btn-lg px-4 shadow-sm">
-                            Edit Profile
-                        </a>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3">
+                                <label class="text-muted small fw-bold text-uppercase d-block mb-1">Email
+                                    Address</label>
+                                <div class="text-dark"><i class="bi bi-envelope me-2"></i>{{account.email}}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3">
+                                <label class="text-muted small fw-bold text-uppercase d-block mb-1">Full Name</label>
+                                <div class="text-dark"><i class="bi bi-person me-2"></i>{{account.title}}
+                                    {{account.firstName}} {{account.lastName}}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3">
+                                <label class="text-muted small fw-bold text-uppercase d-block mb-1">Role
+                                    Permission</label>
+                                <div class="text-dark"><i class="bi bi-shield-lock me-2"></i>{{account.role}}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3">
+                                <label class="text-muted small fw-bold text-uppercase d-block mb-1">Account
+                                    Status</label>
+                                <div class="text-dark"><i class="bi bi-check-circle me-2 text-success"></i>Active</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -9,41 +9,61 @@
 </div>
 
 <div class="card p-3">
-  <table class="table table-sm">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Room</th>
-        <th>Requester</th>
-        <th>Item Type</th>
-        <th>Qty</th>
-        <th>Date</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let r of requests">
-        <td>{{ r.stockRequestId || r.id }}</td>
-        <td>{{ r.Room.roomName }}</td>
-        <td>{{ r.Account.firstName }} {{ r.Account.lastName }}</td>
-        <td>{{ r.itemType }}</td>
-        <td>{{ r.quantity }}</td>
-        <td>{{ r.createdAt | date:'short' }}</td>
-        <td>{{ r.status }}</td>
-        <td>
-          <button class="btn btn-sm btn-outline-primary" (click)="view(r)">View</button>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>ID</th>
+          <th>Room</th>
+          <th>Requester</th>
+          <th>Item Type</th>
+          <th>Qty</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of requests">
+          <td class="fw-bold text-primary">#{{ r.stockRequestId || r.id }}</td>
+          <td>{{ r.Room.roomName }}</td>
+          <td>{{ r.Account.firstName }} {{ r.Account.lastName }}</td>
+          <td><span class="badge bg-secondary">{{ r.itemType }}</span></td>
+          <td>{{ r.quantity }}</td>
+          <td class="small">{{ r.createdAt | date:'short' }}</td>
+          <td>
+            <span class="badge" [ngClass]="{
+              'bg-warning text-dark': r.status === 'pending',
+              'bg-success': r.status === 'approved',
+              'bg-danger': r.status === 'disapproved',
+              'bg-info text-dark': r.status === 'fulfilled'
+            }">{{ r.status }}</span>
+          </td>
+          <td class="text-end">
+            <div class="btn-group">
+              <button class="btn btn-sm btn-outline-primary" (click)="view(r)" title="View">
+                <i class="bi bi-eye"></i>
+              </button>
 
-          <button *ngIf="isAdmin() && r.status === 'pending'" class="btn btn-sm btn-success ms-1"
-            (click)="approve(r)">Approve</button>
-          <button *ngIf="isAdmin() && r.status === 'pending'" class="btn btn-sm btn-warning ms-1"
-            (click)="disapprove(r)">Disapprove</button>
+              <button *ngIf="isAdmin() && r.status === 'pending'" class="btn btn-sm btn-success ms-1"
+                (click)="approve(r)" title="Approve">
+                <i class="bi bi-check-lg"></i>
+              </button>
+              <button *ngIf="isAdmin() && r.status === 'pending'" class="btn btn-sm btn-warning ms-1"
+                (click)="disapprove(r)" title="Disapprove">
+                <i class="bi bi-x-lg"></i>
+              </button>
 
-          <button *ngIf="isStockroom() && r.status === 'approved'" class="btn btn-sm btn-danger ms-1"
-            (click)="fulfill(r)">Fulfill</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+              <button *ngIf="isStockroom() && r.status === 'approved'" class="btn btn-sm btn-danger ms-1"
+                (click)="fulfill(r)" title="Fulfill">
+                <i class="bi bi-box-seam"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <div *ngIf="loading" class="text-center">
     <span class="spinner-border spinner-border-sm"></span>
