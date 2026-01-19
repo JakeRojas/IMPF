@@ -48,14 +48,21 @@ export class AccountService {
         localStorage.removeItem('account');
         this.router.navigate(['/account/login']);
     }
+    private isRefreshing = false;
     refreshToken() {
+        if (this.isRefreshing) return of(null);
+        this.isRefreshing = true;
+
         return this.http.post<any>(`${baseUrl}/refresh-token`, {}, { withCredentials: true })
-            .pipe(map((account) => {
-                localStorage.setItem('account', JSON.stringify(account));
-                this.accountSubject.next(account);
-                this.startRefreshTokenTimer();
-                return account;
-            }));
+            .pipe(
+                map((account) => {
+                    localStorage.setItem('account', JSON.stringify(account));
+                    this.accountSubject.next(account);
+                    this.startRefreshTokenTimer();
+                    return account;
+                }),
+                finalize(() => this.isRefreshing = false)
+            );
     }
     revokeToken() {
         const refreshToken = localStorage.getItem('refreshToken');
@@ -123,12 +130,23 @@ export class AccountService {
     // helper methods
     private refreshTokenTimeout?: any;
     private startRefreshTokenTimer() {
-        const jwtBase64 = this.accountValue!.jwtToken!.split('.')[1];
-        const jwtToken = JSON.parse(atob(jwtBase64));
+        if (!this.accountValue || !this.accountValue.jwtToken) return;
 
-        const expires = new Date(jwtToken.exp * 1000);
-        const timeout = expires.getTime() - Date.now() - (60 * 1000);
-        this.refreshTokenTimeout = setTimeout(() => this.refreshToken().subscribe(), timeout);
+        try {
+            const jwtBase64 = this.accountValue.jwtToken.split('.')[1];
+            if (!jwtBase64) return;
+
+            const jwtToken = JSON.parse(atob(jwtBase64));
+
+            const expires = new Date(jwtToken.exp * 1000);
+            const timeout = expires.getTime() - Date.now() - (60 * 1000);
+
+            // only set timeout if it's in the future, otherwise it could loop or trigger immediately
+            this.stopRefreshTokenTimer();
+            this.refreshTokenTimeout = setTimeout(() => this.refreshToken().subscribe(), Math.max(0, timeout));
+        } catch (error) {
+            console.error('Error starting refresh token timer', error);
+        }
     }
     private stopRefreshTokenTimer() {
         clearTimeout(this.refreshTokenTimeout);

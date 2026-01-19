@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { 
-    HttpRequest, 
-    HttpHandler, 
-    HttpEvent, 
-    HttpInterceptor 
+import {
+    HttpRequest,
+    HttpHandler,
+    HttpEvent,
+    HttpInterceptor
 } from '@angular/common/http';
 
-import { environment }    from '@environments/environment';
+import { environment } from '@environments/environment';
 import { AccountService } from '@app/_services';
 
 @Injectable()
@@ -19,7 +19,9 @@ export class JwtInterceptor implements HttpInterceptor {
         const account = this.accountService.accountValue;
         const isLoggedIn = account && account.jwtToken;
         const isApiUrl = request.url.startsWith(environment.apiUrl);
-        if (isLoggedIn && isApiUrl) {
+        const isRefreshRequest = request.url.includes('/accounts/refresh-token');
+
+        if (isLoggedIn && isApiUrl && !isRefreshRequest) {
             request = request.clone({
                 setHeaders: { Authorization: `Bearer ${account.jwtToken}` }
             });

@@ -1,13 +1,13 @@
-import { APP_INITIALIZER }  from '@angular/core';
-import { of }               from 'rxjs';
-import { catchError }       from 'rxjs/operators';
-import { AccountService }   from '@app/_services';
+import { APP_INITIALIZER } from '@angular/core';
+import { of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { AccountService } from '@app/_services';
 
 export function appInitializer(accountService: AccountService) {
   return () => {
     try {
       const hasAccount = !!localStorage.getItem('account');
-      const hasRefreshCookie = typeof document !== 'undefined' && document.cookie && document.cookie.includes('refreshToken=');
+      const hasRefreshCookie = typeof document !== 'undefined' && document.cookie && (document.cookie.includes('refreshToken=') || document.cookie.includes('fakeRefreshToken='));
 
       if (!hasAccount && !hasRefreshCookie) {
         return Promise.resolve();

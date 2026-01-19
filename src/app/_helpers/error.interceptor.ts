@@ -25,22 +25,12 @@ export class ErrorInterceptor implements HttpInterceptor {
         return throwError(() => new Error('refresh-failed'));
       }
 
-      if (err.status === 401 && this.accountService.accountValue?.jwtToken) {
-        console.warn('Unauthorized - attempting silent refresh');
-
-        // Attempt to refresh the token
+      if (err.status === 401 && this.accountService.accountValue) {
+        // auto logout if 401 response returned from api
+        console.warn('Unauthorized - attempting refresh', err);
         return this.accountService.refreshToken().pipe(
-          switchMap((account) => {
-            // Refresh succeeded, retry the original request with the new token
-            console.log('Refresh succeeded, retrying request:', request.url);
-            const retriedRequest = request.clone({
-              setHeaders: { Authorization: `Bearer ${account.jwtToken}` }
-            });
-            return next.handle(retriedRequest);
-          }),
-          catchError((refreshErr) => {
-            // Refresh failed, log out and throw the original error
-            console.error('Refresh failed - logging out', refreshErr);
+          switchMap(() => next.handle(request)),
+          catchError(() => {
             this.accountService.logout();
             return throwError(() => err);
           })
