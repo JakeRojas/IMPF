@@ -1,39 +1,39 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global Styles & Variables */
 @import (css) "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap";
 
 :root {
   --primary: #0d6efd;
   --primary-dark: #0a58ca;
-  --bg-sidebar: #f8f9fa;
-  --bg-dark: #212529;
+  --bg-sidebar: #ffffff;
+  --bg-app: #f8fafc;
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --sidebar-width: 260px;
 }
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #f5f7fb;
-  color: #334155;
+  background-color: var(--bg-app);
+  color: #1e293b;
+  margin: 0;
 }
 
 .app-container {
   min-height: 100vh;
 }
 
-/* Sidebar Styling */
+/* SIDEBAR REFINEMENTS */
 .sidebar {
   transition: var(--transition);
-  z-index: 1000;
+  z-index: 1050;
+  background: var(--bg-sidebar);
 
   @media (max-width: 767.98px) {
     position: fixed;
-    top: 56px;
-    /* Height of mobile navbar */
+    top: 0;
     left: -100%;
-    width: 250px;
-    height: calc(100vh - 56px);
-    background: white;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-    border-right: 1px solid #dee2e6;
+    width: var(--sidebar-width);
+    height: 100vh;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
 
     &.show {
       left: 0;
@@ -48,42 +48,53 @@ body {
     &.show {
       display: block;
       position: fixed;
-      top: 56px;
+      top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 999;
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 1040;
     }
   }
 }
 
-/* Custom Nav Link styling */
+/* NAV LINKS */
 .nav-link {
-  color: #64748b;
+  color: #475569;
   font-weight: 500;
-  padding: 0.75rem 1.25rem;
+  padding: 0.75rem 1rem;
   border-radius: 8px;
-  margin-bottom: 0.25rem;
-  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  border: 1px solid transparent;
+
+  i {
+    font-size: 1.1rem;
+    width: 24px;
+  }
 
   &:hover {
-    background: rgba(13, 110, 253, 0.05);
+    background: #f1f5f9;
     color: var(--primary);
   }
 
   &.active {
-    background: var(--primary) !important;
-    color: white !important;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    background: #eef2ff !important;
+    color: var(--primary) !important;
+    border-color: rgba(13, 110, 253, 0.1);
+
+    i {
+      color: var(--primary);
+    }
   }
 }
 
-/* Cards & Containers */
+/* CARDS & COMPONENTS */
 .card {
-  border: none;
+  border: 1px solid rgba(226, 232, 240, 0.8);
   border-radius: 12px;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .transition-hover {
@@ -91,18 +102,11 @@ body {
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+    box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1) !important;
   }
 }
 
-/* Main Content Adjustment */
-.main-content {
-  flex: 1;
-  min-width: 0;
-  background-color: #f5f7fb;
-}
-
-/* Global Table Responsiveness */
+/* TABLE RESPONSIVENESS */
 .table-responsive {
   border-radius: 12px;
   background: white;
@@ -111,17 +115,18 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
+/* MOBILE TYPOGRAPHY */
 @media (max-width: 576px) {
   h1 {
-    font-size: 1.75rem;
-  }
-
-  h2 {
     font-size: 1.5rem;
   }
 
-  h3 {
+  h2 {
     font-size: 1.25rem;
+  }
+
+  h3 {
+    font-size: 1.1rem;
   }
 
   .p-4 {
@@ -129,19 +134,18 @@ body {
   }
 }
 
+/* UTILITIES */
 .x-small {
   font-size: 0.7rem;
 }
 
-.admin-nav {
-  padding-top: 0;
-  padding-bottom: 0;
-  background-color: #e8e9ea;
-  border-bottom: 1px solid #ccc;
+.main-content {
+  flex: 1;
+  min-width: 0;
+  background-color: var(--bg-app);
 }
 
-.btn-delete-account {
-  width: 40px;
-  text-align: center;
-  box-sizing: content-box;
+.avatar-circle-sm {
+  background: var(--primary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
