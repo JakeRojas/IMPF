@@ -9,42 +9,95 @@
 </div>
 
 <div class="card p-3">
-  <table class="table table-sm">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Room</th>
-        <th>Requester</th>
-        <th>Items</th>
-        <th>Date</th>
-        <th>Status</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let r of requests">
-        <td>{{ r.itemRequestId || r.id }}</td>
-        <td>{{ r.Room.roomName }}</td>
-        <td>{{ r.Account.firstName }} {{ r.Account.lastName }}</td>
-        <td>{{ (r.items || []).length }} item(s)</td>
-        <td>{{ r.createdAt | date:'short' }}</td>
-        <td>{{ r.status }}</td>
-        <td>
-          <button class="btn btn-sm btn-outline-primary" (click)="view(r)">View</button>
+  <!-- Desktop Table View -->
+  <div class="table-responsive d-none d-md-block">
+    <table class="table table-sm table-hover align-middle">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Room</th>
+          <th>Requester</th>
+          <th>Items</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of requests">
+          <td class="fw-bold text-primary">#{{ r.itemRequestId || r.id }}</td>
+          <td>{{ r.Room.roomName }}</td>
+          <td>{{ r.Account.firstName }} {{ r.Account.lastName }}</td>
+          <td>{{ (r.items || []).length }} item(s)</td>
+          <td>{{ r.createdAt | date:'short' }}</td>
+          <td><span class="badge bg-secondary">{{ r.status }}</span></td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-primary me-1" (click)="view(r)">View</button>
 
-          <button *ngIf="isStockroomAdmin() && r.status === 'pending'" class="btn btn-sm btn-success ms-1"
-            (click)="accept(r)">Accept</button>
-          <button *ngIf="isStockroomAdmin() && r.status === 'pending'" class="btn btn-sm btn-warning ms-1"
-            (click)="decline(r)">Decline</button>
-          <button *ngIf="isStockroomAdmin() && r.status === 'accepted'" class="btn btn-sm btn-secondary ms-1"
-            (click)="release(r)">Release</button>
+            <button *ngIf="isStockroomAdmin() && r.status === 'pending'" class="btn btn-sm btn-success me-1"
+              (click)="accept(r)">Accept</button>
+            <button *ngIf="isStockroomAdmin() && r.status === 'pending'" class="btn btn-sm btn-warning me-1"
+              (click)="decline(r)">Decline</button>
+            <button *ngIf="isStockroomAdmin() && r.status === 'accepted'" class="btn btn-sm btn-secondary me-1"
+              (click)="release(r)">Release</button>
 
-          <button *ngIf="isTeacher() && r.status === 'released'" class="btn btn-sm btn-danger ms-1"
-            (click)="fulfill(r)">Fulfill</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+            <button *ngIf="isTeacher() && r.status === 'released'" class="btn btn-sm btn-danger"
+              (click)="fulfill(r)">Fulfill</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mobile Card List View -->
+  <div class="mobile-list-view d-md-none">
+    <div *ngFor="let r of requests" class="mobile-card mb-3">
+      <div class="d-flex align-items-center mb-3 pb-2 border-bottom">
+        <div class="fw-bold text-primary">#{{ r.itemRequestId || r.id }}</div>
+        <div class="ms-auto">
+          <span class="badge bg-secondary">{{ r.status }}</span>
+        </div>
+      </div>
+
+      <div class="mobile-card-row">
+        <span class="label">Room</span>
+        <span class="value">{{ r.Room.roomName }}</span>
+      </div>
+
+      <div class="mobile-card-row">
+        <span class="label">Requester</span>
+        <span class="value">{{ r.Account.firstName }} {{ r.Account.lastName }}</span>
+      </div>
+
+      <div class="mobile-card-row">
+        <span class="label">Items</span>
+        <span class="value">{{ (r.items || []).length }} item(s)</span>
+      </div>
+
+      <div class="mobile-card-row">
+        <span class="label">Date</span>
+        <div class="value small text-muted">{{ r.createdAt | date:'short' }}</div>
+      </div>
+
+      <div class="mt-3 pt-2 border-top d-grid gap-2 d-flex justify-content-end flex-wrap">
+        <button class="btn btn-sm btn-outline-primary flex-grow-1" (click)="view(r)">View</button>
+
+        <button *ngIf="isStockroomAdmin() && r.status === 'pending'" class="btn btn-sm btn-success flex-grow-1"
+          (click)="accept(r)">Accept</button>
+        <button *ngIf="isStockroomAdmin() && r.status === 'pending'" class="btn btn-sm btn-warning flex-grow-1"
+          (click)="decline(r)">Decline</button>
+        <button *ngIf="isStockroomAdmin() && r.status === 'accepted'" class="btn btn-sm btn-secondary flex-grow-1"
+          (click)="release(r)">Release</button>
+
+        <button *ngIf="isTeacher() && r.status === 'released'" class="btn btn-sm btn-danger flex-grow-1"
+          (click)="fulfill(r)">Fulfill</button>
+      </div>
+    </div>
+
+    <div *ngIf="!loading && requests.length === 0" class="text-center py-5 text-muted">
+      No item requests found.
+    </div>
+  </div>
 
   <div *ngIf="loading" class="text-center"><span class="spinner-border spinner-border-sm"></span></div>
 

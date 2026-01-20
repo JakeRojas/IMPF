@@ -9,7 +9,8 @@
 </div>
 
 <div class="card p-3">
-  <div class="table-responsive">
+  <!-- Desktop Table View -->
+  <div class="table-responsive d-none d-md-block">
     <table class="table table-hover align-middle">
       <thead class="table-light">
         <tr>
@@ -63,6 +64,66 @@
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- Mobile Card List View -->
+  <div class="mobile-list-view d-md-none">
+    <div *ngFor="let r of requests" class="mobile-card mb-3">
+      <div class="d-flex align-items-center mb-3 pb-2 border-bottom">
+        <div class="fw-bold text-primary">#{{ r.stockRequestId || r.id }}</div>
+        <div class="ms-auto">
+          <span class="badge" [ngClass]="{
+            'bg-warning text-dark': r.status === 'pending',
+            'bg-success': r.status === 'approved',
+            'bg-danger': r.status === 'disapproved',
+            'bg-info text-dark': r.status === 'fulfilled'
+          }">{{ r.status }}</span>
+        </div>
+      </div>
+
+      <div class="mobile-card-row">
+        <span class="label">Room</span>
+        <span class="value">{{ r.Room.roomName }}</span>
+      </div>
+
+      <div class="mobile-card-row">
+        <span class="label">Requester</span>
+        <span class="value">{{ r.Account.firstName }} {{ r.Account.lastName }}</span>
+      </div>
+
+      <div class="mobile-card-row">
+        <span class="label">Item Details</span>
+        <span class="value">{{ r.quantity }}x {{ r.itemType }}</span>
+      </div>
+
+      <div class="mobile-card-row">
+        <span class="label">Date</span>
+        <div class="value small text-muted">{{ r.createdAt | date:'short' }}</div>
+      </div>
+
+      <div class="mt-3 pt-2 border-top d-grid gap-2 d-flex justify-content-end">
+        <button class="btn btn-sm btn-outline-primary col" (click)="view(r)">
+          <i class="bi bi-eye me-1"></i> View
+        </button>
+
+        <ng-container *ngIf="isAdmin() && r.status === 'pending'">
+          <button class="btn btn-sm btn-success col" (click)="approve(r)">
+            <i class="bi bi-check-lg"></i>
+          </button>
+          <button class="btn btn-sm btn-warning col" (click)="disapprove(r)">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </ng-container>
+
+        <button *ngIf="isStockroom() && r.status === 'approved'" class="btn btn-sm btn-danger col" (click)="fulfill(r)">
+          <i class="bi bi-box-seam me-1"></i> Fulfill
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="!loading && requests.length === 0" class="text-center py-5 text-muted">
+      No stock requests found.
+    </div>
   </div>
 
   <div *ngIf="loading" class="text-center">

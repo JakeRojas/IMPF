@@ -4,10 +4,11 @@
 :root {
   --primary: #0d6efd;
   --primary-dark: #0a58ca;
-  --bg-sidebar: #ffffff;
+  --bg-sidebar: #111827;
+  /* Darker sidebar like in screenshot */
   --bg-app: #f8fafc;
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --sidebar-width: 260px;
+  --sidebar-width: 280px;
 }
 
 body {
@@ -26,18 +27,33 @@ body {
   transition: var(--transition);
   z-index: 1050;
   background: var(--bg-sidebar);
+  color: #9ca3af;
+  flex-shrink: 0;
+  /* Prevent shrinking on flex */
 
+  /* Mobile Styles (Off-canvas) */
   @media (max-width: 767.98px) {
-    position: fixed;
+    position: fixed !important;
+    /* Force override */
     top: 0;
     left: -100%;
     width: var(--sidebar-width);
     height: 100vh;
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
 
     &.show {
       left: 0;
     }
+  }
+
+  /* Desktop Styles (Sticky) */
+  @media (min-width: 768px) {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    width: var(--sidebar-width);
+    overflow-y: auto;
+    /* Scrollable sidebar */
   }
 }
 
@@ -52,42 +68,54 @@ body {
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(15, 23, 42, 0.4);
+      background: rgba(0, 0, 0, 0.5);
       backdrop-filter: blur(4px);
       z-index: 1040;
     }
   }
 }
 
-/* NAV LINKS */
-.nav-link {
-  color: #475569;
+/* NAV LINKS (Dark Theme Sidebar) */
+.sidebar .nav-link {
+  color: #9ca3af;
   font-weight: 500;
   padding: 0.75rem 1rem;
   border-radius: 8px;
   display: flex;
   align-items: center;
-  border: 1px solid transparent;
+  margin-bottom: 0.25rem;
+  transition: all 0.2s ease;
 
   i {
     font-size: 1.1rem;
-    width: 24px;
+    width: 32px;
+    opacity: 0.7;
   }
 
   &:hover {
-    background: #f1f5f9;
-    color: var(--primary);
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+
+    i {
+      opacity: 1;
+    }
   }
 
   &.active {
-    background: #eef2ff !important;
+    background: rgba(13, 110, 253, 0.15) !important;
     color: var(--primary) !important;
-    border-color: rgba(13, 110, 253, 0.1);
 
     i {
       color: var(--primary);
+      opacity: 1;
     }
   }
+}
+
+/* SIDEBAR HEADER */
+.sidebar-user-info {
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* CARDS & COMPONENTS */
@@ -106,46 +134,109 @@ body {
   }
 }
 
-/* TABLE RESPONSIVENESS */
+/* TABLE RESPONSIVENESS & SCROLLBARS */
 .table-responsive {
   border-radius: 12px;
   background: white;
   margin-bottom: 1.5rem;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+
+  /* Custom Scrollbar */
+  &::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+
+    &:hover {
+      background: #94a3b8;
+    }
+  }
 }
 
-/* MOBILE TYPOGRAPHY */
-@media (max-width: 576px) {
+/* MOBILE CARD LIST VIEW (For replacing tables on mobile) */
+.mobile-list-view {
+  display: none;
+
+  @media (max-width: 767.98px) {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+.mobile-card {
+  background: white;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+
+  .mobile-card-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .label {
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .value {
+      color: #1e293b;
+      font-weight: 600;
+      text-align: right;
+    }
+  }
+}
+
+/* MOBILE TYPOGRAPHY & LAYOUT */
+@media (max-width: 767.98px) {
   h1 {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
   }
 
   h2 {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
   }
 
   h3 {
-    font-size: 1.1rem;
+    font-size: 1.25rem;
   }
 
   .p-4 {
-    padding: 1rem !important;
+    padding: 1.25rem !important;
   }
-}
 
-/* UTILITIES */
-.x-small {
-  font-size: 0.7rem;
+  .p-5 {
+    padding: 1.5rem !important;
+  }
+
+  /* Hide normal tables on mobile if they have the .d-md-table class */
+  .d-md-table {
+    display: none;
+  }
 }
 
 .main-content {
   flex: 1;
   min-width: 0;
-  background-color: var(--bg-app);
 }
 
 .avatar-circle-sm {
-  background: var(--primary);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }

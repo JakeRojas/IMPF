@@ -1,6 +1,5 @@
 ﻿import { Component } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import { Router } from '@angular/router';
 
 import { AccountService } from './_services';
 import { Account, Role } from './_models';
@@ -14,10 +13,8 @@ export class AppComponent {
     constructor(private accountService: AccountService, private router: Router) {
         this.accountService.account.subscribe(x => this.account = x);
 
-        // Close sidebar on navigation end
-        this.router.events.pipe(
-            filter(event => event instanceof NavigationEnd)
-        ).subscribe(() => {
+        // Close sidebar on navigation
+        this.router.events.subscribe(() => {
             this.isSidebarVisible = false;
         });
     }
@@ -26,12 +23,8 @@ export class AppComponent {
         this.isSidebarVisible = !this.isSidebarVisible;
     }
 
-    closeSidebar() {
-        this.isSidebarVisible = false;
-    }
-
     logout() {
-        this.closeSidebar();
+        this.isSidebarVisible = false;
         this.accountService.logout();
     }
 }

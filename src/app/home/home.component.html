@@ -128,7 +128,8 @@
                             All</a>
                     </div>
                     <div class="card-body p-0">
-                        <div class="table-responsive">
+                        <!-- Desktop Table View -->
+                        <div class="table-responsive d-none d-md-block">
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="bg-light">
                                     <tr>
@@ -164,6 +165,40 @@
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+
+                        <!-- Mobile Card List View -->
+                        <div class="mobile-list-view d-md-none p-3">
+                            <div *ngFor="let log of recentLogs" class="mobile-card mb-3">
+                                <div class="d-flex align-items-center mb-3 border-bottom pb-2">
+                                    <div class="avatar-circle-sm bg-primary text-white d-flex align-items-center justify-content-center fw-bold me-3"
+                                        style="width: 36px; height: 36px; border-radius: 50%; font-size: 0.9rem;">
+                                        {{ log.account?.firstName?.charAt(0) }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">{{log.account?.firstName}} {{log.account?.lastName}}</div>
+                                        <div class="small text-muted" style="font-size: 0.75rem;">{{log.account?.email}}
+                                        </div>
+                                    </div>
+                                    <div class="ms-auto text-end">
+                                        <span class="badge bg-light text-dark border">{{log.actionType}}</span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-2">
+                                    <div class="text-muted small fw-bold text-uppercase mb-1"
+                                        style="font-size: 0.7rem;">Details</div>
+                                    <div class="text-dark small">{{log.actionDetails}}</div>
+                                </div>
+
+                                <div class="text-end text-muted small fw-medium mt-2 pt-2 border-top border-light">
+                                    {{log.timestamp | date:'MMM d, y h:mm a'}}
+                                </div>
+                            </div>
+
+                            <div *ngIf="!loadingLogs && recentLogs.length === 0" class="text-center py-5 text-muted">
+                                No recent activity found.
+                            </div>
                         </div>
                     </div>
                 </div>
