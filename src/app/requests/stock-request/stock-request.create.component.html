@@ -36,11 +36,69 @@
       <div *ngIf="form.get('itemId')?.touched && form.get('itemId')?.invalid" class="text-danger small">Item is required
       </div>
 
-      <div *ngIf="form.get('itemId')?.value === 'other'" class="mt-2">
-        <label class="form-label">Specify Item Name</label>
-        <input type="text" class="form-control" formControlName="otherItemName" placeholder="Enter item name..." />
-        <div *ngIf="form.get('otherItemName')?.touched && form.get('otherItemName')?.invalid" class="text-danger small">
-          Item name is required</div>
+      <div *ngIf="form.get('itemId')?.value === 'other'" class="mt-3 p-3 border rounded bg-light">
+        <label class="form-label fw-bold">Unit Details</label>
+        <div class="mb-2">
+          <label class="form-label">Item Name</label>
+          <input type="text" class="form-control" formControlName="otherItemName" placeholder="Enter item name..." />
+          <div *ngIf="form.get('otherItemName')?.touched && form.get('otherItemName')?.invalid"
+            class="text-danger small">
+            Item name is required</div>
+        </div>
+
+        <!-- Apparel Fields -->
+        <div *ngIf="selectedRoomType === 'apparel'" class="row g-2">
+          <div class="col-md-6">
+            <label class="form-label small">Level</label>
+            <select class="form-select form-select-sm" formControlName="apparelLevel">
+              <option *ngFor="let opt of apparelLevels" [value]="opt">{{opt}}</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small">Type</label>
+            <select class="form-select form-select-sm" formControlName="apparelType">
+              <option *ngFor="let opt of apparelTypes" [value]="opt">{{opt}}</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small">For</label>
+            <select class="form-select form-select-sm" formControlName="apparelFor">
+              <option *ngFor="let opt of apparelFors" [value]="opt">{{opt}}</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small">Size</label>
+            <select class="form-select form-select-sm" formControlName="apparelSize">
+              <option *ngFor="let opt of apparelSizes" [value]="opt">{{opt}}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Supply Fields -->
+        <div *ngIf="selectedRoomType === 'supply'" class="row g-2">
+          <div class="col-12">
+            <label class="form-label small">Measure</label>
+            <select class="form-select form-select-sm" formControlName="supplyMeasure">
+              <option *ngFor="let opt of supplyMeasures" [value]="opt">{{opt}}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- General Fields (default) -->
+        <div *ngIf="!selectedRoomType || (selectedRoomType !== 'apparel' && selectedRoomType !== 'supply')"
+          class="row g-2">
+          <div class="col-md-6">
+            <label class="form-label small">Type</label>
+            <select class="form-select form-select-sm" formControlName="genItemType">
+              <option *ngFor="let opt of genItemTypes" [value]="opt">{{opt}}</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small">Size (Optional)</label>
+            <input type="text" class="form-control form-control-sm" formControlName="genItemSize"
+              placeholder="e.g. Large" />
+          </div>
+        </div>
       </div>
     </div>
 

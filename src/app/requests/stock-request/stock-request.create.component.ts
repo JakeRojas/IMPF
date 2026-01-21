@@ -15,6 +15,15 @@ export class StockRequestCreateComponent implements OnInit, OnDestroy {
   items: any[] = [];
   loading = false;
   loadingItems = false;
+  selectedRoomType: string | null = null;
+
+  // Options for dropdowns
+  apparelLevels = ['pre', 'elem', '7', '8', '9', '10', 'sh', 'it', 'hs', 'educ', 'teachers'];
+  apparelTypes = ['uniform', 'pe'];
+  apparelFors = ['boys', 'girls'];
+  apparelSizes = ['2', '4', '6', '8', '10', '12', '14', '16', '18', '20', 'xs', 's', 'm', 'l', 'xl', '2xl', '3xl'];
+  supplyMeasures = ['pc', 'box', 'bottle', 'pack', 'ream', 'meter', 'roll', 'gallon', 'unit', 'educ', 'teachers'];
+  genItemTypes = ['it', 'maintenance', 'unknownType'];
 
   private destroy$ = new Subject<void>();
 
@@ -32,34 +41,93 @@ export class StockRequestCreateComponent implements OnInit, OnDestroy {
       itemId: [null, Validators.required],
       otherItemName: [''],
       quantity: [1, [Validators.required, Validators.min(1)]],
-      note: ['']
+      note: [''],
+      // Dynamic fields
+      apparelLevel: ['teachers'],
+      apparelType: ['uniform'],
+      apparelFor: ['boys'],
+      apparelSize: ['m'],
+      supplyMeasure: ['pc'],
+      genItemType: ['unknownType'],
+      genItemSize: ['']
     });
 
-    this.form.get('itemId')!.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(val => {
-      const otherCtrl = this.form.get('otherItemName')!;
-      if (val === 'other') {
-        otherCtrl.setValidators([Validators.required]);
-      } else {
-        otherCtrl.clearValidators();
-        otherCtrl.setValue('');
-      }
-      otherCtrl.updateValueAndValidity();
+    // Listen to itemId changes
+    this.form.get('itemId')!.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.updateDynamicValidators();
     });
 
     this.loadRooms();
 
-    // when requesterRoomId changes, load the items for that room
+    // when requesterRoomId changes, load the items for that room and update type
     this.form.get('requesterRoomId')!.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(id => {
       this.items = [];
       this.form.get('itemId')!.setValue(null);
+
+      const foundRoom = this.rooms.find(r => r.roomId == id);
+      // 'stockroomType' exists on room model
+      this.selectedRoomType = foundRoom ? (foundRoom.stockroomType || '').toLowerCase() : null;
+
+      this.updateDynamicValidators();
+
       if (!id) return;
       this.loadItemsForRoom(Number(id));
+
     });
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  updateDynamicValidators() {
+    const isOther = this.form.get('itemId')?.value === 'other';
+    const roomType = this.selectedRoomType;
+
+    const otherNameCtrl = this.form.get('otherItemName')!;
+    const appLevelCtrl = this.form.get('apparelLevel')!;
+    const appTypeCtrl = this.form.get('apparelType')!;
+    const appForCtrl = this.form.get('apparelFor')!;
+    const appSizeCtrl = this.form.get('apparelSize')!;
+    const supMeasureCtrl = this.form.get('supplyMeasure')!;
+    const genTypeCtrl = this.form.get('genItemType')!;
+    const genSizeCtrl = this.form.get('genItemSize')!;
+
+    // Clear all first
+    otherNameCtrl.clearValidators();
+    appLevelCtrl.clearValidators();
+    appTypeCtrl.clearValidators();
+    appForCtrl.clearValidators();
+    appSizeCtrl.clearValidators();
+    supMeasureCtrl.clearValidators();
+    genTypeCtrl.clearValidators();
+    // genSize is optional usually
+
+    if (isOther) {
+      otherNameCtrl.setValidators([Validators.required]);
+
+      if (roomType === 'apparel') {
+        appLevelCtrl.setValidators([Validators.required]);
+        appTypeCtrl.setValidators([Validators.required]);
+        appForCtrl.setValidators([Validators.required]);
+        appSizeCtrl.setValidators([Validators.required]);
+      } else if (roomType === 'supply') {
+        supMeasureCtrl.setValidators([Validators.required]);
+      } else {
+        // General or default
+        genTypeCtrl.setValidators([Validators.required]);
+      }
+    }
+
+    otherNameCtrl.updateValueAndValidity();
+    appLevelCtrl.updateValueAndValidity();
+    appTypeCtrl.updateValueAndValidity();
+    appForCtrl.updateValueAndValidity();
+    appSizeCtrl.updateValueAndValidity();
+    supMeasureCtrl.updateValueAndValidity();
+    genTypeCtrl.updateValueAndValidity();
+    genSizeCtrl.updateValueAndValidity();
   }
 
   private loadRooms() {
@@ -95,6 +163,23 @@ export class StockRequestCreateComponent implements OnInit, OnDestroy {
     if (v.itemId === 'other') {
       payload.itemId = null;
       payload.otherItemName = v.otherItemName;
+
+      // Build details object based on room type
+      const details: any = {};
+
+      if (this.selectedRoomType === 'apparel') {
+        details.apparelLevel = v.apparelLevel;
+        details.apparelType = v.apparelType;
+        details.apparelFor = v.apparelFor;
+        details.apparelSize = v.apparelSize;
+      } else if (this.selectedRoomType === 'supply') {
+        details.supplyMeasure = v.supplyMeasure;
+      } else {
+        details.genItemType = v.genItemType;
+        details.genItemSize = v.genItemSize;
+      }
+      payload.details = details;
+
     } else {
       payload.itemId = Number(v.itemId);
     }
