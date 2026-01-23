@@ -16,6 +16,7 @@ export class TransferCreateComponent implements OnInit, OnDestroy {
 
   loading = false;
   loadingItems = false;
+  maxItemQty = 0;
 
   private destroy$ = new Subject<void>();
 
@@ -25,7 +26,7 @@ export class TransferCreateComponent implements OnInit, OnDestroy {
     private transferService: TransferService,
     private alert: AlertService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -43,8 +44,26 @@ export class TransferCreateComponent implements OnInit, OnDestroy {
     this.form.get('fromRoomId')!.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(id => {
       this.items = [];
       this.form.get('itemId')!.setValue(null);
+      this.maxItemQty = 0;
       if (!id) return;
       this.loadItemsForRoom(Number(id));
+    });
+
+    // when itemId changes, set max quantity
+    this.form.get('itemId')!.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(itemId => {
+      const selected = this.items.find(it => String(it.inventoryId ?? it.id) === String(itemId));
+      if (selected) {
+        this.maxItemQty = Number(selected.totalQuantity || 0);
+        this.form.get('quantity')!.setValidators([
+          Validators.required,
+          Validators.min(1),
+          Validators.max(this.maxItemQty)
+        ]);
+      } else {
+        this.maxItemQty = 0;
+        this.form.get('quantity')!.setValidators([Validators.required, Validators.min(1)]);
+      }
+      this.form.get('quantity')!.updateValueAndValidity();
     });
   }
 

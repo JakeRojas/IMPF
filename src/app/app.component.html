@@ -91,11 +91,12 @@
           <i class="bi bi-clipboard-check"></i>Item Requests
         </a>
 
-        <a class="nav-link mb-1" routerLink="/transfers" routerLinkActive="active" (click)="isSidebarVisible = false">
+        <a *ngIf="account.role === Role.SuperAdmin || account.role === Role.StockroomAdmin" class="nav-link mb-1"
+          routerLink="/transfers" routerLinkActive="active" (click)="isSidebarVisible = false">
           <i class="bi bi-arrow-left-right"></i>Transfers
         </a>
 
-        <a class="nav-link mb-1" routerLink="/borrow" routerLinkActive="active" (click)="isSidebarVisible = false">
+        <a routerLink="/borrow" class="nav-link mb-1" routerLinkActive="active" (click)="isSidebarVisible = false">
           <i class="bi bi-hand-index"></i>Borrowing
         </a>
       </nav>

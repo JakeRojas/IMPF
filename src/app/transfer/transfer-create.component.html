@@ -10,7 +10,7 @@
 </div>
 
 <h5 class="mb-3">Create Transfer</h5>
-  
+
 <form [formGroup]="form" (ngSubmit)="submit()">
 
   <div class="row">
@@ -18,7 +18,8 @@
       <label class="form-label">From Room (you must be in charge)</label>
       <select class="form-select" formControlName="fromRoomId">
         <option [ngValue]="null">-- select from room --</option>
-        <option *ngFor="let r of fromRooms" [ngValue]="r.roomId">{{ r.roomName }} {{ r.roomFloor ? '— ' + r.roomFloor : '' }}</option>
+        <option *ngFor="let r of fromRooms" [ngValue]="r.roomId">{{ r.roomName }} {{ r.roomFloor ? '— ' + r.roomFloor :
+          '' }}</option>
       </select>
       <div *ngIf="form.get('fromRoomId')?.touched && form.get('fromRoomId')?.invalid" class="text-danger small">
         Select a room you are in charge of
@@ -43,16 +44,25 @@
       <label class="form-label">Item</label>
       <select class="form-select" formControlName="itemId">
         <option [ngValue]="null">-- select item --</option>
-        <option *ngFor="let it of items" [value]="it.inventoryId ?? it.id">{{ it.name }} {{ it.totalQuantity ? '(' + it.totalQuantity + ')' : '' }}</option>
+        <option *ngFor="let it of items" [value]="it.inventoryId ?? it.id">{{ it.name }} {{ it.totalQuantity ? '(' +
+          it.totalQuantity + ')' : '' }}</option>
       </select>
-      <div *ngIf="form.get('itemId')?.touched && form.get('itemId')?.invalid" class="text-danger small">Item is required</div>
+      <div *ngIf="form.get('itemId')?.touched && form.get('itemId')?.invalid" class="text-danger small">Item is required
+      </div>
     </div>
 
     <div class="mb-3 col-6">
       <label class="form-label">Quantity</label>
       <input type="number" class="form-control" formControlName="quantity" min="1" />
-      <div *ngIf="form.get('quantity')?.touched && form.get('quantity')?.invalid" class="text-danger small">
+      <div *ngIf="form.get('quantity')?.touched && form.get('quantity')?.errors?.['required']"
+        class="text-danger small">
+        Quantity is required
+      </div>
+      <div *ngIf="form.get('quantity')?.touched && form.get('quantity')?.errors?.['min']" class="text-danger small">
         Quantity must be at least 1
+      </div>
+      <div *ngIf="form.get('quantity')?.touched && form.get('quantity')?.errors?.['max']" class="text-danger small">
+        Quantity cannot exceed available stock ({{ maxItemQty }})
       </div>
     </div>
   </div>

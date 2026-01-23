@@ -30,7 +30,7 @@ const routes: Routes = [
     { path: 'req-stock', loadChildren: stockRequestModule, canActivate: [AuthGuard], data: { roles: [Role.SuperAdmin, Role.Admin, Role.StockroomAdmin] } },
     { path: 'req-item', loadChildren: itemRequestModule, canActivate: [AuthGuard], data: { roles: [Role.SuperAdmin, Role.StockroomAdmin, Role.Teacher] } },
 
-    { path: 'transfers', loadChildren: transferModule, canActivate: [AuthGuard], data: { roles: [Role.SuperAdmin, Role.Admin, Role.StockroomAdmin, Role.Teacher] } },
+    { path: 'transfers', loadChildren: transferModule, canActivate: [AuthGuard], data: { roles: [Role.SuperAdmin, Role.StockroomAdmin] } },
     { path: 'borrow', loadChildren: borrowModule, canActivate: [AuthGuard], data: { roles: [Role.SuperAdmin, Role.Admin, Role.StockroomAdmin, Role.Teacher] } },
 
     // otherwise redirect to home

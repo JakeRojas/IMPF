@@ -1,52 +1,217 @@
-<div class="card p-4">
-    <div *ngIf="loading">Loading...</div>
-  
-    <ng-container *ngIf="!loading && transfer; else notFound">
-      <h2>Transfer #{{ transfer.transferId ?? transfer.id }}</h2>
-  
-      <div class="mb-3">
-        <strong>Item:</strong> {{ transfer.itemName || transfer.itemLabel || transfer.itemType }}
-      </div>
-  
-      <div class="mb-3">
-        <strong>Quantity:</strong> {{ transfer.quantity }}
-      </div>
-  
-      <div class="mb-3">
-        <strong>From Room:</strong>
-        <span>{{ transfer.fromRoom?.roomName ?? transfer.fromRoomName ?? transfer.fromRoomId }}</span>
-      </div>
-  
-      <div class="mb-3">
-        <strong>To Room:</strong>
-        <span>{{ transfer.toRoom?.roomName ?? transfer.toRoomName ?? transfer.toRoomId }}</span>
-        <span *ngIf="transfer.toRoom?.roomInCharge"> — In-charge: {{ transfer.toRoom.roomInCharge }}</span>
-      </div>
-  
-      <div class="mb-3">
-        <strong>Status:</strong> {{ transfer.status }}
-      </div>
-  
-      <div *ngIf="transfer.acceptedBy || transfer.acceptedAt" class="mb-3">
-        <strong>Accepted By:</strong> {{ transfer.acceptedBy }}<br />
-        <strong>Accepted At:</strong> {{ transfer.acceptedAt | date:'medium' }}
-      </div>
-  
-      <div *ngIf="transfer.notes" class="mb-3">
-        <strong>Notes:</strong> {{ transfer.notes }}
-      </div>
-  
-      <div class="btn-group">
-        <button class="btn btn-secondary" (click)="back()">Back</button>
-        <button class="btn btn-success" [disabled]="!canAccept() || loading" (click)="accept()">Accept</button>
-      </div>
-    </ng-container>
-  
-    <ng-template #notFound>
-      <div>Transfer not found.</div>
-      <div class="mt-2">
-        <button class="btn btn-secondary" (click)="back()">Back</button>
-      </div>
-    </ng-template>
+<div class="card border-0 shadow-sm overflow-hidden">
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status"></div>
+    <div class="mt-2 text-muted">Loading transfer protocol...</div>
   </div>
-  
+
+  <ng-container *ngIf="!loading && transfer; else notFound">
+    <!-- HEADER -->
+    <div class="card-header bg-white border-bottom-0 pt-4 px-4 pb-0">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb m-0 p-0">
+              <li class="breadcrumb-item"><a [routerLink]="['/transfers']"
+                  class="text-primary text-decoration-none">Transfer List</a></li>
+              <li class="breadcrumb-item active text-muted">Protocol #{{ transfer.transferId }}</li>
+            </ol>
+          </nav>
+          <h2 class="fw-bold mb-0 text-dark">Document #{{ transfer.transferId }}</h2>
+        </div>
+        <div class="text-end">
+          <span class="badge rounded-pill px-3 py-2 fs-6 shadow-sm" [ngClass]="{
+            'bg-warning text-dark': transfer.status === 'pending' || transfer.status === 'in_transfer',
+            'bg-info text-white': transfer.status === 'transfer_accepted',
+            'bg-success text-white': transfer.status === 'received',
+            'bg-secondary text-white': transfer.status !== 'pending' && transfer.status !== 'in_transfer' && transfer.status !== 'transfer_accepted' && transfer.status !== 'received'
+          }">
+            <i class="bi bi-info-circle me-1"></i> {{ transfer.status | titlecase }}
+          </span>
+          <div class="text-muted small mt-2">Created {{ transfer.createdAt | date:'mediumDate' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="card-body p-4">
+      <div class="row g-4">
+        <!-- ITEM INFO CARD -->
+        <div class="col-md-5">
+          <div class="item-detail-card bg-light rounded-4 p-4 h-100 border">
+            <h6 class="text-uppercase small fw-bold text-primary mb-3">Item Specifications</h6>
+
+            <div class="d-flex align-items-center mb-4">
+              <div
+                class="item-icon-bg bg-white text-primary rounded-3 shadow-sm d-flex align-items-center justify-content-center me-3"
+                style="width: 50px; height: 50px;">
+                <i class="bi bi-box-seam fs-3"></i>
+              </div>
+              <div>
+                <h4 class="fw-bold mb-0">
+                  {{ transfer.ApparelInventory?.apparelName || transfer.AdminSupplyInventory?.supplyName ||
+                  transfer.GenItemInventory?.genItemName || transfer.itemType | titlecase }}
+                </h4>
+                <div class="text-muted small">ID: {{ transfer.itemId }} • Unit: {{ transfer.itemType | titlecase }}
+                </div>
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-6">
+                <div class="p-3 bg-white rounded-3 shadow-xs border">
+                  <div class="text-muted extra-small text-uppercase fw-bold mb-1">Quantity</div>
+                  <div class="fs-4 fw-bold text-primary">{{ transfer.quantity }}</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="p-3 bg-white rounded-3 shadow-xs border">
+                  <div class="text-muted extra-small text-uppercase fw-bold mb-1">Protocol</div>
+                  <div class="fs-4 fw-bold text-dark">Active</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-top" *ngIf="transfer.creator">
+              <div class="d-flex align-items-center">
+                <div
+                  class="avatar-sm bg-primary-subtle text-primary rounded-circle me-2 d-flex align-items-center justify-content-center"
+                  style="width: 32px; height: 32px;">
+                  <i class="bi bi-person-fill"></i>
+                </div>
+                <div>
+                  <div class="extra-small text-muted">Initiated By</div>
+                  <div class="small fw-bold">{{ transfer.creator.firstName }} {{ transfer.creator.lastName }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ROUTE INFO -->
+        <div class="col-md-7">
+          <div class="route-card p-4 rounded-4 h-100 border">
+            <h6 class="text-uppercase small fw-bold text-primary mb-4">Transfer Logistics</h6>
+
+            <div class="transfer-route-visual d-flex align-items-center mb-5 mt-2">
+              <div class="room-point text-center">
+                <div
+                  class="room-circle bg-white border border-primary border-2 rounded-circle mb-2 d-flex align-items-center justify-content-center mx-auto"
+                  style="width: 60px; height: 60px;">
+                  <i class="bi bi-house-door-fill fs-3 text-primary"></i>
+                </div>
+                <div class="fw-bold small">{{ transfer.fromRoom?.roomName }}</div>
+                <div class="extra-small text-muted">Source</div>
+              </div>
+
+              <div
+                class="route-line flex-grow-1 border-top border-primary border-2 border-dashed mx-3 position-relative"
+                style="height: 0;">
+                <div class="route-arrow position-absolute" style="right: -10px; top: -11px;">
+                  <i class="bi bi-chevron-right text-primary fs-4"></i>
+                </div>
+              </div>
+
+              <div class="room-point text-center">
+                <div
+                  class="room-circle bg-primary text-white rounded-circle mb-2 d-flex align-items-center justify-content-center mx-auto shadow"
+                  style="width: 60px; height: 60px;">
+                  <i class="bi bi-geo-alt-fill fs-3"></i>
+                </div>
+                <div class="fw-bold small">{{ transfer.toRoom?.roomName }}</div>
+                <div class="extra-small text-muted">Destination</div>
+              </div>
+            </div>
+
+            <div class="row g-4 mt-2">
+              <div class="col-sm-6" *ngIf="transfer.acceptedBy || transfer.acceptedAt">
+                <div class="p-3 border rounded-3 bg-light-subtle shadow-xs">
+                  <div class="text-primary small fw-bold mb-2"><i class="bi bi-check-circle-fill me-1"></i> Acceptance
+                  </div>
+                  <div class="small fw-bold">{{ transfer.accepter ? (transfer.accepter.firstName + ' ' +
+                    transfer.accepter.lastName) : transfer.acceptedBy }}</div>
+                  <div class="extra-small text-muted mt-1">{{ transfer.acceptedAt | date:'medium' }}</div>
+                </div>
+              </div>
+
+              <div class="col-sm-6" *ngIf="transfer.receivedBy || transfer.receivedAt">
+                <div class="p-3 border rounded-3 bg-success-subtle shadow-xs">
+                  <div class="text-success small fw-bold mb-2"><i class="bi bi-box-fill me-1"></i> Physical Receipt
+                  </div>
+                  <div class="small fw-bold">{{ transfer.receiver ? (transfer.receiver.firstName + ' ' +
+                    transfer.receiver.lastName) : transfer.receivedBy }}</div>
+                  <div class="extra-small text-muted mt-1">{{ transfer.receivedAt | date:'medium' }}</div>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="transfer.notes" class="mt-4 pt-3 border-top">
+              <div class="extra-small text-uppercase fw-bold text-muted mb-1">Handover Notes</div>
+              <p class="small text-dark mb-0 italic">"{{ transfer.notes }}"</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="mt-5 pt-3 d-flex gap-3 justify-content-center border-top">
+        <button class="btn btn-outline-secondary px-5 rounded-pill fw-bold hover-up" (click)="back()">
+          <i class="bi bi-arrow-left me-1"></i> Back
+        </button>
+
+        <button *ngIf="canAccept()" class="btn btn-primary px-5 rounded-pill fw-bold shadow hover-up" (click)="accept()"
+          [disabled]="loading">
+          <i class="bi bi-check2-circle me-1"></i> Accept Transfer
+        </button>
+
+        <button *ngIf="canReceive()" class="btn btn-success px-5 rounded-pill fw-bold shadow hover-up"
+          (click)="receive()" [disabled]="loading">
+          <i class="bi bi-box-arrow-in-down me-1"></i> Confirm Physical Receipt
+        </button>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #notFound>
+    <div class="text-center py-5">
+      <div class="display-1 text-muted opacity-25 mb-3"><i class="bi bi-search"></i></div>
+      <h4 class="fw-bold">No Protocol Found</h4>
+      <p class="text-muted">This transfer record does not exist or has been archived.</p>
+      <button class="btn btn-primary px-4 mt-2 rounded-pill shadow-sm" (click)="back()">Return to Archive</button>
+    </div>
+  </ng-template>
+</div>
+
+<style>
+  .extra-small {
+    font-size: 0.75rem;
+  }
+
+  .letter-spacing-1 {
+    letter-spacing: 1px;
+  }
+
+  .italic {
+    font-style: italic;
+  }
+
+  .shadow-xs {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  }
+
+  .hover-up {
+    transition: all 0.3s ease;
+  }
+
+  .hover-up:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .border-dashed {
+    border-style: dashed !important;
+  }
+
+  .bg-light-subtle {
+    background-color: #f8fafc;
+  }
+</style>

@@ -1,118 +1,215 @@
-<div class="card mb-3">
-  <div class="card-body d-flex justify-content-between align-items-center">
-    <nav aria-label="breadcrumb">
-      <ol class="breadcrumb m-0 p-0">
-        <li class="breadcrumb-item active"><a>Transfer List</a></li>
-      </ol>
-    </nav>
-  </div>
-</div>
+<div class="card mb-4 border-0 shadow-sm">
+  <div class="card-body p-3">
+    <div class="d-flex flex-column gap-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb m-0 p-0 text-muted small">
+            <li class="breadcrumb-item active">Transfer List</li>
+          </ol>
+        </nav>
+      </div>
 
-<div class="card">
-  <div class="card-body">
-    <div class="mb-3 d-flex gap-2 align-items-center">
-      <select (change)="load()" class="form-select form-select-sm w-auto">
-        <option value="">All statuses</option>
-        <option value="in_transfer">In Transfer</option>
-        <option value="transfer_accepted">Transfer Accepted</option>
-        <option value="returning">Returning</option>
-        <option value="return_accepted">Return Accepted</option>
-      </select>
-      <button class="btn btn-outline-secondary btn-sm" (click)="load()">Refresh</button>
-    </div>
-
-    <!-- Desktop Table View -->
-    <div class="table-responsive d-none d-md-block">
-      <table class="table table-sm table-hover">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>From → To</th>
-            <th>Item</th>
-            <th>Qty</th>
-            <th>Status</th>
-            <th>Created</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let t of transfers">
-            <td>{{ t.transferId }}</td>
-            <td>{{ t.fromRoom.roomName }} → {{ t.toRoom.roomName }}</td>
-            <td>
-              {{ t.itemType }}<span *ngIf="t.itemId"> #{{ t.itemId }}</span>
-            </td>
-            <td>{{ t.quantity }}</td>
-            <td><span class="badge bg-secondary text-light">{{ t.status }}</span></td>
-            <td>{{ t.createdAt | date:'short' }}</td>
-            <td>
-              <button class="btn btn-sm btn-outline-primary me-1" (click)="view(t)">View</button>
-              <button *ngIf="canAccept(t)" class="btn btn-sm btn-success" (click)="accept(t)">Accept</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Mobile Card List View -->
-    <div class="mobile-list-view d-md-none">
-      <div *ngFor="let t of transfers" class="mobile-card mb-3">
-        <div class="d-flex align-items-center mb-3 pb-2 border-bottom">
-          <div class="fw-bold text-primary">#{{ t.transferId }}</div>
-          <div class="ms-auto">
-            <span class="badge bg-secondary text-light">{{ t.status }}</span>
+      <div class="row g-2 align-items-end">
+        <!-- Search -->
+        <div class="col-12 col-md-3">
+          <label class="small text-muted mb-1">Search</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" class="form-control border-start-0 ps-0" placeholder="ID, Room..."
+              [(ngModel)]="searchText" (ngModelChange)="onFilterChange()">
           </div>
         </div>
 
-        <div class="mobile-card-row">
-          <span class="label">Transfer Route</span>
-          <span class="value">{{ t.fromRoom.roomName }} → {{ t.toRoom.roomName }}</span>
+        <!-- Status -->
+        <div class="col-12 col-md-2">
+          <label class="small text-muted mb-1">Status</label>
+          <select class="form-select form-select-sm" [(ngModel)]="filterStatus" (ngModelChange)="onFilterChange()">
+            <option value="">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="in_transfer">In Transfer</option>
+            <option value="transfer_accepted">Accepted</option>
+            <option value="received">Received</option>
+            <option value="returning">Returning</option>
+            <option value="return_accepted">Return Accepted</option>
+          </select>
         </div>
 
-        <div class="mobile-card-row">
-          <span class="label">Item</span>
-          <span class="value">{{ t.itemType }}<span *ngIf="t.itemId"> #{{ t.itemId }}</span></span>
+        <!-- Item Type -->
+        <div class="col-12 col-md-2">
+          <label class="small text-muted mb-1">Item Type</label>
+          <select class="form-select form-select-sm" [(ngModel)]="selectedItemType" (ngModelChange)="onFilterChange()">
+            <option value="">All Types</option>
+            <option value="apparel">Apparel</option>
+            <option value="supply">Admin Supply</option>
+            <option value="genItem">General Item</option>
+          </select>
         </div>
 
-        <div class="mobile-card-row">
-          <span class="label">Quantity</span>
-          <span class="value">{{ t.quantity }}</span>
+        <!-- Date Range -->
+        <div class="col-6 col-md-2">
+          <label class="small text-muted mb-1">From</label>
+          <input type="date" class="form-control form-control-sm" [(ngModel)]="startDate"
+            (ngModelChange)="onFilterChange()">
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="small text-muted mb-1">To</label>
+          <input type="date" class="form-control form-control-sm" [(ngModel)]="endDate"
+            (ngModelChange)="onFilterChange()">
         </div>
 
-        <div class="mobile-card-row">
-          <span class="label">Date</span>
-          <div class="value small text-muted">{{ t.createdAt | date:'short' }}</div>
-        </div>
-
-        <div class="mt-3 pt-2 border-top d-grid gap-2 d-flex justify-content-end">
-          <button class="btn btn-sm btn-outline-primary flex-grow-1" (click)="view(t)">View</button>
-          <button *ngIf="canAccept(t)" class="btn btn-sm btn-success flex-grow-1" (click)="accept(t)">Accept</button>
+        <!-- Clear Button -->
+        <div class="col-12 col-md-1 d-flex gap-2">
+          <button class="btn btn-sm btn-outline-secondary w-100" (click)="clearFilters()" title="Clear Filters">
+            <i class="bi bi-x-circle"></i>
+          </button>
         </div>
       </div>
+    </div>
+  </div>
+</div>
 
-      <div *ngIf="!transfers || transfers.length === 0" class="text-center py-5 text-muted">
-        No transfers yet.
+<div class="card border-0 shadow-sm p-3">
+  <!-- Desktop Table View -->
+  <div class="table-responsive d-none d-md-block">
+    <table class="table table-hover align-middle">
+      <thead class="bg-light text-muted small uppercase">
+        <tr>
+          <th>ID</th>
+          <th>Logistics</th>
+          <th>Item Detals</th>
+          <th>Qty</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let t of transfers">
+          <td class="fw-bold text-primary">#{{ t.transferId }}</td>
+          <td>
+            <div class="small fw-semibold text-dark">{{ t.fromRoom.roomName }}</div>
+            <div class="text-muted small"><i class="bi bi-arrow-down text-primary mx-2"></i> {{ t.toRoom.roomName }}
+            </div>
+          </td>
+          <td>
+            <div class="text-capitalize small fw-semibold">{{ t.itemType }}</div>
+            <div class="text-muted small">ID: #{{ t.itemId }}</div>
+          </td>
+          <td>
+            <span class="badge bg-light text-dark border px-2">{{ t.quantity }}</span>
+          </td>
+          <td>
+            <span class="badge rounded-pill" [ngClass]="{
+              'bg-warning text-dark': t.status === 'pending' || t.status === 'in_transfer',
+              'bg-info text-dark': t.status === 'transfer_accepted',
+              'bg-success': t.status === 'received',
+              'bg-secondary': t.status === 'returning',
+              'bg-dark': t.status === 'return_accepted'
+            }">{{ (t.status || '').replace('_', ' ') }}</span>
+          </td>
+          <td class="small">{{ t.createdAt | date:'shortDate' }}</td>
+          <td class="text-end">
+            <div class="btn-group">
+              <button class="btn btn-sm btn-light border px-2" (click)="view(t)" title="View Details">
+                <i class="bi bi-eye"></i>
+              </button>
+              <button *ngIf="canAccept(t)" class="btn btn-sm btn-success px-2" (click)="accept(t)"
+                title="Accept Transfer">
+                <i class="bi bi-check-lg"></i>
+              </button>
+              <button *ngIf="canReceive(t)" class="btn btn-sm btn-primary px-2" (click)="receive(t)"
+                title="Confirm Receipt">
+                <i class="bi bi-box-seam"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="!loading && transfers.length === 0">
+          <td colspan="7" class="text-center py-5 text-muted">
+            <i class="bi bi-truck fs-1 d-block opacity-25"></i>
+            No transfers found.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mobile Card List View -->
+  <div class="mobile-list-view d-md-none">
+    <div *ngFor="let t of transfers" class="card border mb-3 shadow-none rounded-3">
+      <div class="card-body p-3">
+        <div class="d-flex align-items-center mb-3 pb-2 border-bottom">
+          <div class="fw-bold text-primary">#{{ t.transferId }}</div>
+          <div class="ms-auto">
+            <span class="badge rounded-pill" [ngClass]="{
+              'bg-warning text-dark': t.status === 'pending' || t.status === 'in_transfer',
+              'bg-info text-dark': t.status === 'transfer_accepted',
+              'bg-success': t.status === 'received',
+              'bg-secondary': t.status === 'returning',
+              'bg-dark': t.status === 'return_accepted'
+            }">{{ (t.status || '').replace('_', ' ') }}</span>
+          </div>
+        </div>
+
+        <div class="row g-2 mb-3">
+          <div class="col-12">
+            <div class="d-flex align-items-center gap-2">
+              <div class="flex-grow-1">
+                <span class="small text-muted d-block">From</span>
+                <span class="fw-semibold">{{ t.fromRoom.roomName }}</span>
+              </div>
+              <i class="bi bi-arrow-right text-muted"></i>
+              <div class="flex-grow-1 text-end">
+                <span class="small text-muted d-block">To</span>
+                <span class="fw-semibold">{{ t.toRoom.roomName }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 mt-2">
+            <span class="small text-muted d-block">Item</span>
+            <span class="text-capitalize">{{ t.itemType }} (#{{ t.itemId }})</span>
+          </div>
+          <div class="col-6 mt-2 text-end">
+            <span class="small text-muted d-block">Quantity</span>
+            <span class="badge bg-light text-dark border">{{ t.quantity }}</span>
+          </div>
+        </div>
+
+        <div class="d-grid gap-2">
+          <button class="btn btn-sm btn-outline-primary" (click)="view(t)">View Details</button>
+          <button *ngIf="canAccept(t)" class="btn btn-sm btn-success" (click)="accept(t)">Accept Transfer</button>
+          <button *ngIf="canReceive(t)" class="btn btn-sm btn-primary" (click)="receive(t)">Confirm Receipt</button>
+        </div>
       </div>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center mt-3" *ngIf="totalPages > 1 && !loading">
-      <div class="text-muted">
-        Showing {{ (page - 1) * limit + 1 }} to {{ (page * limit) > total ? total : (page * limit) }} of {{ total }}
-        transfers
-      </div>
-      <nav aria-label="Page navigation">
-        <ul class="pagination mb-0">
-          <li class="page-item" [class.disabled]="page === 1">
-            <button class="page-link" (click)="onPageChange(page - 1)">Previous</button>
-          </li>
-          <li class="page-item" *ngFor="let p of range(1, totalPages)" [class.active]="page === p">
-            <button class="page-link" (click)="onPageChange(p)">{{ p }}</button>
-          </li>
-          <li class="page-item" [class.disabled]="page === totalPages">
-            <button class="page-link" (click)="onPageChange(page + 1)">Next</button>
-          </li>
-        </ul>
-      </nav>
+    <div *ngIf="!loading && transfers.length === 0" class="text-center py-5 text-muted">
+      <i class="bi bi-truck fs-1 d-block opacity-25"></i>
+      No transfers found.
     </div>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border spinner-border-sm text-primary"></div>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top"
+    *ngIf="totalPages > 1 && !loading">
+    <div class="small text-muted">
+      Showing {{ (page - 1) * limit + 1 }} to {{ (page * limit) > total ? total : (page * limit) }} of {{ total }}
+    </div>
+    <nav aria-label="Page navigation">
+      <ul class="pagination pagination-sm mb-0">
+        <li class="page-item" [class.disabled]="page === 1">
+          <button class="page-link" (click)="onPageChange(page - 1)">Prev</button>
+        </li>
+        <li class="page-item" *ngFor="let p of range(1, totalPages)" [class.active]="page === p">
+          <button class="page-link" (click)="onPageChange(p)">{{ p }}</button>
+        </li>
+        <li class="page-item" [class.disabled]="page === totalPages">
+          <button class="page-link" (click)="onPageChange(page + 1)">Next</button>
+        </li>
+      </ul>
+    </nav>
   </div>
 </div>

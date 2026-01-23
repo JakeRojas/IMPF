@@ -45,4 +45,10 @@ export class TransferService {
     if (!Number.isFinite(n) || n <= 0) return throwError(() => new Error('Invalid id'));
     return this.http.post<any>(`${this.base}/${n}/accept`, {});
   }
+
+  receive(id: any): Observable<any> {
+    const n = Number(id);
+    if (!Number.isFinite(n) || n <= 0) return throwError(() => new Error('Invalid id'));
+    return this.http.post<any>(`${this.base}/${n}/receive`, {});
+  }
 }
