@@ -107,10 +107,35 @@ export class GenItemUnitListComponent implements OnInit {
     });
   }
 
+  downloadUnitQr(u: any) {
+    // Map unitType UI label to backend stockroomType string if needed
+    let stockroomType = u.unitType;
+    if (stockroomType === 'genitem') stockroomType = 'genitem'; // already set correctly usually
+
+    // For general item units, the ID might be under different names
+    const unitId = u.apparelId || u.adminSupplyId || u.genItemId || u.id;
+
+    this.qrService.getUnitQr(stockroomType, unitId).pipe(first()).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${stockroomType}-unit-${unitId}-qr.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        this.alert.success('Unit QR downloaded');
+      },
+      error: (err) => {
+        console.error('downloadUnitQr error', err);
+        this.alert.error('Failed to download QR code');
+      }
+    });
+  }
+
   // Selection Logic
-  selection = new Set<string>(); // Use string key to include type if needed, but here generic 'id' from backend is enough if unique
-  // wait, are IDs unique across types? Probably not.
-  // Let's use unitType:id as key
+  selection = new Set<string>();
   isSelected(u: any): boolean {
     return this.selection.has(`${u.unitType}:${u.id}`);
   }
@@ -138,15 +163,6 @@ export class GenItemUnitListComponent implements OnInit {
       this.alert.error('No units selected');
       return;
     }
-    // Since we have mixed types, we should probably just use 'general' and pass the unitIds?
-    // Wait, backend 'general' handler for selected units expects mixed IDs.
-    // But Apparel, Supply, and GenItem might have overlapping IDs.
-    // I should probably update backend to handle this or send separated IDs.
-
-    // For now, let's assume 'general' with mixed IDs works if we map them correctly.
-    // Actually, I'll send ALL selected IDs to the backend and the backend 'general' handler will try to find them in all tables.
-    // Note: This might hit the wrong item if IDs overlap!
-
     const stockroomType = 'general';
     const keys = Array.from(this.selection);
     const ids = keys.map(k => Number(k.split(':')[1]));

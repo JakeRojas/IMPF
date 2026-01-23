@@ -98,6 +98,27 @@ export class AdminSupplyUnitListComponent implements OnInit {
     });
   }
 
+  downloadUnitQr(u: any) {
+    const stockroomType = 'supply';
+    this.qrService.getUnitQr(stockroomType, u.adminSupplyId).pipe(first()).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${stockroomType}-unit-${u.adminSupplyId}-qr.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        this.alert.success('Unit QR downloaded');
+      },
+      error: (err) => {
+        console.error('downloadUnitQr error', err);
+        this.alert.error('Failed to download QR code');
+      }
+    });
+  }
+
   // Selection Logic
   selection = new Set<number>();
   get allSelected(): boolean {

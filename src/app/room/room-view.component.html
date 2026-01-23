@@ -1,55 +1,145 @@
-<div class="card mb-3">
-  <div class="card-body d-flex justify-content-between align-items-center">
-    <nav aria-label="breadcrumb">
-      <ol class="breadcrumb m-0 p-0">
-        <li class="breadcrumb-item"><a [routerLink]="['/room']">Room List</a></li>
-        <li class="breadcrumb-item active"><a>Room Information</a></li>
-      </ol>
-    </nav>
-  </div>
-</div>
-
-<div class="p-1 container">
-  <div class="row">
-    <h2>Room: {{ room?.roomName }}</h2>
-  </div>
-  
-  <div class="row">
-    <div class="col-6">
-      <p class="mb-3">
-        Floor: {{ room?.roomFloor }} •
-        Type: {{ room?.roomType }} •
-        <span *ngIf="room?.stockroomType">Stock: {{ room?.stockroomType }} •</span>
-        In charge: {{ room?.roomInCharge }}
-      </p>
+<div class="room-view-container" *ngIf="room">
+  <!-- PREMIUM BREADCRUMB & HEADER -->
+  <div class="card border-0 shadow-sm mb-4 bg-white overflow-hidden">
+    <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb m-0 p-0">
+          <li class="breadcrumb-item"><a [routerLink]="['/room']" class="text-primary text-decoration-none">Room
+              List</a>
+          </li>
+          <li class="breadcrumb-item active text-muted">Room Details</li>
+        </ol>
+      </nav>
     </div>
-    <div *ngIf="room?.roomType === 'stockroom' || room?.roomType === 'subStockroom'" class="col-6 btn-sm d-grid gap-2 d-md-flex justify-content-md-end">
-      <a class="btn btn-success" [routerLink]="['receive', stockPath]">Receive</a>
-      <a class="btn btn-danger" [routerLink]="['release', stockPath]">Release</a>
+
+    <div class="card-body px-4 pb-4">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div
+            class="room-icon-circle bg-primary-subtle text-primary p-3 rounded-circle d-flex align-items-center justify-content-center"
+            style="width: 60px; height: 60px;">
+            <i class="bi bi-door-open-fill fs-3"></i>
+          </div>
+          <div>
+            <h2 class="fw-bold mb-0 text-dark">{{ room.roomName }}</h2>
+            <div class="d-flex flex-wrap gap-2 mt-1">
+              <span class="badge rounded-pill bg-light text-dark border px-3 py-2 small">
+                <i class="bi bi-layers me-1 text-primary"></i> Floor {{ room.roomFloor }}
+              </span>
+              <span class="badge rounded-pill px-3 py-2 small" [ngClass]="{
+                'bg-info text-white': room.roomType === 'stockroom',
+                'bg-secondary text-white': room.roomType === 'subStockroom',
+                'bg-success-subtle text-success': room.roomType !== 'stockroom' && room.roomType !== 'subStockroom'
+              }">
+                <i class="bi bi-tag-fill me-1"></i> {{ room.roomType | titlecase }}
+              </span>
+              <span *ngIf="room.stockroomType" class="badge rounded-pill bg-primary shadow-sm px-3 py-2 small">
+                <i class="bi bi-box-seam me-1"></i> {{ room.stockroomType | titlecase }} Stock
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="isStockroom" class="d-flex gap-2">
+          <a class="btn btn-emerald text-white px-4 shadow-sm fw-bold hover-up" [routerLink]="['receive', stockPath]">
+            <i class="bi bi-box-arrow-in-down me-1"></i> Receive Stock
+          </a>
+          <a class="btn btn-rose text-white px-4 shadow-sm fw-bold hover-up" [routerLink]="['release', stockPath]">
+            <i class="bi bi-box-arrow-up me-1"></i> Release Stock
+          </a>
+        </div>
+      </div>
+
+      <div class="mt-3 text-muted small border-top pt-3 d-flex align-items-center gap-4">
+        <span>
+          <i class="bi bi-person-fill-gear me-1"></i>
+          <b>In Charge:</b>
+          {{ room.Account ? (room.Account.firstName + ' ' + room.Account.lastName) : (room.roomInCharge || 'No one
+          assigned') }}
+        </span>
+        <span *ngIf="room.roomBuilding"><i class="bi bi-building me-1"></i> <b>Building:</b> {{ room.roomBuilding
+          }}</span>
+      </div>
     </div>
   </div>
 
-  <div class="row">
-    <div class="mb-3">
-      <!-- Unit list visible for any room -->
-      <button class="btn btn-sm btn-outline-primary ms-3" [routerLink]="['units', stockPath]"> 
-        Unit List
+  <!-- NAVIGATION TABS -->
+  <div class="room-nav-tabs mb-4">
+    <div class="nav-container bg-white shadow-sm rounded-4 p-2 d-inline-flex gap-2">
+      <button class="btn btn-nav-tab" [routerLink]="['units', stockPath]" routerLinkActive="active shadow-sm">
+        <i class="bi bi-qr-code-scan me-2"></i> Units
       </button>
-  
-      <!-- Inventory / Receive / Release visible only if stockroom -->
-      <ng-container *ngIf="room?.roomType === 'stockroom' || room?.roomType === 'subStockroom'">
-        <button class="btn btn-sm btn-outline-secondary ms-1" [routerLink]="['inventory', stockPath]">
-          Inventory List
+
+      <ng-container *ngIf="isStockroom">
+        <button class="btn btn-nav-tab" [routerLink]="['inventory', stockPath]" routerLinkActive="active shadow-sm">
+          <i class="bi bi-stack me-2"></i> Inventory
         </button>
-        <button class="btn btn-sm btn-outline-secondary ms-1" [routerLink]="['receive', stockPath, 'list']">
-          Receive List
+        <button class="btn btn-nav-tab" [routerLink]="['receive', stockPath, 'list']"
+          routerLinkActive="active shadow-sm">
+          <i class="bi bi-receipt me-2"></i> Receives
         </button>
-        <button class="btn btn-sm btn-outline-secondary ms-1" [routerLink]="['release', stockPath, 'list']">
-          Release List
+        <button class="btn btn-nav-tab" [routerLink]="['release', stockPath, 'list']"
+          routerLinkActive="active shadow-sm">
+          <i class="bi bi-truck me-2"></i> Releases
         </button>
       </ng-container>
     </div>
   </div>
-    
-  <router-outlet></router-outlet>
+
+  <!-- CONTENT AREA -->
+  <div class="content-wrapper">
+    <router-outlet></router-outlet>
+  </div>
 </div>
+
+<style>
+  .btn-emerald {
+    background-color: #10b981;
+    border: none;
+  }
+
+  .btn-rose {
+    background-color: #f43f5e;
+    border: none;
+  }
+
+  .btn-emerald:hover {
+    background-color: #059669;
+  }
+
+  .btn-rose:hover {
+    background-color: #e11d48;
+  }
+
+  .btn-nav-tab {
+    border: none;
+    padding: 0.6rem 1.25rem;
+    border-radius: 12px;
+    color: #64748b;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    background: transparent;
+  }
+
+  .btn-nav-tab:hover {
+    background: #f8fafc;
+    color: #334155;
+  }
+
+  .btn-nav-tab.active {
+    background: #3b82f6;
+    color: white !important;
+  }
+
+  .hover-up {
+    transition: transform 0.2s ease;
+  }
+
+  .hover-up:hover {
+    transform: translateY(-2px);
+  }
+
+  .letter-spacing-1 {
+    letter-spacing: 0.5px;
+  }
+</style>

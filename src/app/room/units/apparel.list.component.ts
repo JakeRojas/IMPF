@@ -45,21 +45,10 @@ export class ApparelUnitListComponent implements OnInit {
       error: (err) => { this.loading = false; this.alert.error(err); }
     });
   }
-  // loadUnits() {
-  //   // ...
-  //   this.roomService.get...(...).subscribe({
-  //     next: (res) => {
-  //       this.units = res || [];
-  //       this.selection.clear(); // Add this
-  //       this.loading = false;
-  //     },
-  //     // ...
-  //   });
-  // }
 
   generateAllUnitsQr() {
     if (!Number.isFinite(this.roomId)) { this.alert.error('Invalid room'); return; }
-    const stockroomType = 'apparel'; // change to 'apparel' | 'supply' | 'genitem' depending on this view
+    const stockroomType = 'apparel';
 
     this.qrService.downloadAllUnitsPdf(stockroomType, this.roomId).pipe(first()).subscribe({
       next: (blob: Blob) => {
@@ -82,7 +71,6 @@ export class ApparelUnitListComponent implements OnInit {
   }
 
   startEdit(u: any) {
-    // mark editing state and make a shallow copy of original values for cancel
     u._orig = { description: u.description, status: u.status };
     u.editing = true;
   }
@@ -97,11 +85,9 @@ export class ApparelUnitListComponent implements OnInit {
   }
 
   saveUnit(u: any) {
-    // simple validation: only send description & status
     const payload: any = { description: u.description, status: u.status };
     this.roomService.updateApparelUnit(this.roomId, u.apparelId, payload).pipe(first()).subscribe({
       next: (updated: any) => {
-        // update local row from server response (optional)
         Object.assign(u, updated);
         u.editing = false;
         this.alert.success('Unit updated');
@@ -112,8 +98,26 @@ export class ApparelUnitListComponent implements OnInit {
     });
   }
 
-
-
+  downloadUnitQr(u: any) {
+    const stockroomType = 'apparel';
+    this.qrService.getUnitQr(stockroomType, u.apparelId).pipe(first()).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${stockroomType}-unit-${u.apparelId}-qr.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        this.alert.success('Unit QR downloaded');
+      },
+      error: (err) => {
+        console.error('downloadUnitQr error', err);
+        this.alert.error('Failed to download QR code');
+      }
+    });
+  }
 
   // Selection Logic
   selection = new Set<number>();
@@ -124,7 +128,6 @@ export class ApparelUnitListComponent implements OnInit {
     if (this.allSelected) {
       this.selection.clear();
     } else {
-      // Note: Use correct ID field based on component (apparelId, adminSupplyId, genItemId)
       this.units.forEach(u => this.selection.add(u.apparelId));
     }
   }
@@ -143,7 +146,7 @@ export class ApparelUnitListComponent implements OnInit {
       this.alert.error('No units selected');
       return;
     }
-    const stockroomType = 'apparel'; // Update this for Supply/GenItem
+    const stockroomType = 'apparel';
     const ids = Array.from(this.selection);
     this.qrService.downloadSelectedUnitsPdf(stockroomType, ids).pipe(first()).subscribe({
       next: (blob: Blob) => {

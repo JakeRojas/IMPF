@@ -55,7 +55,8 @@
 
           <div class="room-info-item d-flex align-items-center mb-2">
             <i class="bi bi-person-circle text-muted me-2"></i>
-            <span class="small">{{ r.Account.firstName }} {{ r.Account.lastName }}</span>
+            <span class="small">{{ r.Account ? (r.Account.firstName + ' ' + r.Account.lastName) : (r.roomInCharge ||
+              'Unassigned') }}</span>
           </div>
 
           <div *ngIf="r.stockroomType" class="room-info-item d-flex align-items-center">
