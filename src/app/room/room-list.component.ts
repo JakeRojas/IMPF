@@ -1,12 +1,12 @@
-import { Component, OnInit }  from '@angular/core';
-import { Router }             from '@angular/router';
-import { first }              from 'rxjs/operators';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { first } from 'rxjs/operators';
 
-import { 
-  RoomService, 
+import {
+  RoomService,
   AccountService,
-  QrService, 
-  AlertService 
+  QrService,
+  AlertService
 } from '@app/_services';
 import { Role } from '@app/_models';
 
@@ -15,15 +15,17 @@ export class RoomListComponent implements OnInit {
   rooms: any[] = [];
   loading = false;
   isSuperAdmin = false;
+  searchText = '';
+  selectedType = '';
 
   constructor(
-    private roomService:  RoomService,
+    private roomService: RoomService,
     private accountService: AccountService,
-    private qrService:    QrService,
-    private alert:        AlertService,
+    private qrService: QrService,
+    private alert: AlertService,
 
-    private router:       Router
-  ) {}
+    private router: Router
+  ) { }
 
   ngOnInit() {
     const user = this.accountService.accountValue;
@@ -40,6 +42,21 @@ export class RoomListComponent implements OnInit {
         next: rooms => { this.rooms = rooms; this.loading = false; },
         error: err => { this.alert.error(err); this.loading = false; }
       });
+  }
+
+  get filteredRooms() {
+    return this.rooms.filter(r => {
+      const matchesSearch = r.roomName.toLowerCase().includes(this.searchText.toLowerCase()) ||
+        r.roomType.toLowerCase().includes(this.searchText.toLowerCase()) ||
+        (r.stockroomType && r.stockroomType.toLowerCase().includes(this.searchText.toLowerCase()));
+      const matchesType = this.selectedType ? r.roomType === this.selectedType : true;
+      return matchesSearch && matchesType;
+    });
+  }
+
+  get roomTypes() {
+    const types = this.rooms.map(r => r.roomType);
+    return [...new Set(types)];
   }
 
   view(room: any) {

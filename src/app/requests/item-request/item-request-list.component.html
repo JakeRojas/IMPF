@@ -1,23 +1,72 @@
-<div class="card mb-3">
-  <div class="card-body d-flex justify-content-between align-items-center">
-    <nav aria-label="breadcrumb">
-      <ol class="breadcrumb m-0 p-0">
-        <li class="breadcrumb-item active"><a>Item Request List</a></li>
-      </ol>
-    </nav>
+<div class="card mb-4 border-0 shadow-sm">
+  <div class="card-body p-3">
+    <div class="d-flex flex-column gap-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb m-0 p-0 text-muted small">
+            <li class="breadcrumb-item active">Item Request List</li>
+          </ol>
+        </nav>
+      </div>
+
+      <div class="row g-2 align-items-end">
+        <!-- Search -->
+        <div class="col-12 col-md-3">
+          <label class="small text-muted mb-1">Search</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" class="form-control border-start-0 ps-0" placeholder="ID, Room, Requester..."
+              [(ngModel)]="searchText" (ngModelChange)="onFilterChange()">
+          </div>
+        </div>
+
+        <!-- Item Type -->
+        <div class="col-12 col-md-3">
+          <label class="small text-muted mb-1">Item Type</label>
+          <select class="form-select form-select-sm" [(ngModel)]="selectedItemType" (ngModelChange)="onFilterChange()">
+            <option value="">All Types</option>
+            <option value="apparel">Apparel</option>
+            <option value="supply">Admin Supply</option>
+            <option value="IT">IT</option>
+            <option value="Maintenance">Maintenance</option>
+            <option value="General Item">General Item</option>
+          </select>
+        </div>
+
+        <!-- Date Range -->
+        <div class="col-6 col-md-2">
+          <label class="small text-muted mb-1">From</label>
+          <input type="date" class="form-control form-control-sm" [(ngModel)]="startDate"
+            (ngModelChange)="onFilterChange()">
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="small text-muted mb-1">To</label>
+          <input type="date" class="form-control form-control-sm" [(ngModel)]="endDate"
+            (ngModelChange)="onFilterChange()">
+        </div>
+
+        <!-- Clear Button -->
+        <div class="col-12 col-md-2 d-flex gap-2">
+          <button class="btn btn-sm btn-outline-secondary w-100" (click)="clearFilters()">
+            <i class="bi bi-x-circle me-1"></i> Clear
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
-<div class="card p-3">
+<div class="card border-0 shadow-sm p-3">
   <!-- Desktop Table View -->
   <div class="table-responsive d-none d-md-block">
-    <table class="table table-sm table-hover align-middle">
-      <thead>
+    <table class="table table-hover align-middle">
+      <thead class="bg-light">
         <tr>
           <th>ID</th>
           <th>Room</th>
           <th>Requester</th>
           <th>Items</th>
+          <th>Category</th>
           <th>Date</th>
           <th>Status</th>
           <th class="text-end">Actions</th>
@@ -26,23 +75,63 @@
       <tbody>
         <tr *ngFor="let r of requests">
           <td class="fw-bold text-primary">#{{ r.itemRequestId || r.id }}</td>
-          <td>{{ r.Room.roomName }}</td>
+          <td>{{ r.Room?.roomName || 'Room ' + r.requesterRoomId }}</td>
           <td>{{ r.Account.firstName }} {{ r.Account.lastName }}</td>
-          <td>{{ (r.items || []).length }} item(s)</td>
-          <td>{{ r.createdAt | date:'short' }}</td>
-          <td><span class="badge bg-secondary">{{ r.status }}</span></td>
+          <td>
+            <span class="badge bg-light text-dark border shadow-sm px-2">
+              <i class="bi bi-box-seam me-1 text-primary"></i>
+              {{ (r.items?.length || 1) }}
+            </span>
+          </td>
+          <td>
+            <span class="badge rounded-pill text-capitalize" [ngClass]="{
+              'bg-info-subtle text-info': r.itemType === 'apparel',
+              'bg-success-subtle text-success': r.itemType === 'supply' || r.itemType === 'admin supply',
+              'bg-primary-subtle text-primary': r.itemType === 'genItem' || r.itemType === 'IT' || r.itemType === 'General Item',
+              'bg-warning-subtle text-warning': r.itemType === 'Maintenance',
+              'bg-secondary-subtle text-secondary': r.itemType === 'other'
+            }">{{ r.itemType === 'other' ? 'General Item' : r.itemType }}</span>
+          </td>
+          <td class="small">{{ r.createdAt | date:'short' }}</td>
+          <td>
+            <span class="badge rounded-pill" [ngClass]="{
+              'bg-warning text-dark': r.status === 'pending',
+              'bg-success': r.status === 'accepted' || r.status === 'approved',
+              'bg-danger': r.status === 'declined' || r.status === 'disapproved',
+              'bg-info text-dark': r.status === 'released',
+              'bg-primary': r.status === 'fulfilled'
+            }">{{ r.status }}</span>
+          </td>
           <td class="text-end">
-            <button class="btn btn-sm btn-outline-primary me-1" (click)="view(r)">View</button>
+            <div class="btn-group">
+              <button class="btn btn-sm btn-light border" (click)="view(r)" title="View Details">
+                <i class="bi bi-eye"></i>
+              </button>
 
-            <button *ngIf="isStockroomAdmin() && r.status === 'pending'" class="btn btn-sm btn-success me-1"
-              (click)="accept(r)">Accept</button>
-            <button *ngIf="isStockroomAdmin() && r.status === 'pending'" class="btn btn-sm btn-warning me-1"
-              (click)="decline(r)">Decline</button>
-            <button *ngIf="isStockroomAdmin() && r.status === 'accepted'" class="btn btn-sm btn-secondary me-1"
-              (click)="release(r)">Release</button>
+              <button *ngIf="isStockroomAdmin() && r.status === 'pending'" class="btn btn-sm btn-success"
+                (click)="accept(r)" title="Accept">
+                <i class="bi bi-check-lg"></i>
+              </button>
+              <button *ngIf="isStockroomAdmin() && r.status === 'pending'" class="btn btn-sm btn-warning"
+                (click)="decline(r)" title="Decline">
+                <i class="bi bi-x-lg"></i>
+              </button>
+              <button *ngIf="isStockroomAdmin() && r.status === 'accepted'" class="btn btn-sm btn-secondary"
+                (click)="release(r)" title="Release Items">
+                <i class="bi bi-box-arrow-right"></i>
+              </button>
 
-            <button *ngIf="isTeacher() && r.status === 'released'" class="btn btn-sm btn-danger"
-              (click)="fulfill(r)">Fulfill</button>
+              <button *ngIf="isTeacher() && r.status === 'released'" class="btn btn-sm btn-danger" (click)="fulfill(r)"
+                title="Fulfill">
+                <i class="bi bi-check2-all"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="!loading && requests.length === 0">
+          <td colspan="7" class="text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-1 d-block opacity-25"></i>
+            No item requests found.
           </td>
         </tr>
       </tbody>
@@ -51,65 +140,78 @@
 
   <!-- Mobile Card List View -->
   <div class="mobile-list-view d-md-none">
-    <div *ngFor="let r of requests" class="mobile-card mb-3">
-      <div class="d-flex align-items-center mb-3 pb-2 border-bottom">
-        <div class="fw-bold text-primary">#{{ r.itemRequestId || r.id }}</div>
-        <div class="ms-auto">
-          <span class="badge bg-secondary">{{ r.status }}</span>
+    <div *ngFor="let r of requests" class="card border mb-3 shadow-none rounded-3">
+      <div class="card-body p-3">
+        <div class="d-flex align-items-center mb-3 pb-2 border-bottom">
+          <div class="fw-bold text-primary">#{{ r.itemRequestId || r.id }}</div>
+          <div class="ms-auto">
+            <span class="badge rounded-pill" [ngClass]="{
+              'bg-warning text-dark': r.status === 'pending',
+              'bg-success': r.status === 'accepted' || r.status === 'approved',
+              'bg-danger': r.status === 'declined' || r.status === 'disapproved',
+              'bg-info text-dark': r.status === 'released',
+              'bg-primary': r.status === 'fulfilled'
+            }">{{ r.status }}</span>
+          </div>
         </div>
-      </div>
 
-      <div class="mobile-card-row">
-        <span class="label">Room</span>
-        <span class="value">{{ r.Room.roomName }}</span>
-      </div>
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <span class="small text-muted d-block">Room</span>
+            <span class="fw-semibold">{{ r.Room.roomName }}</span>
+          </div>
+          <div class="col-6 text-end">
+            <span class="small text-muted d-block">Requester</span>
+            <span class="fw-semibold">{{ r.Account.firstName }} {{ r.Account.lastName }}</span>
+          </div>
+          <div class="col-12 mt-2">
+            <span class="small text-muted d-block">Item Category</span>
+            <span class="badge rounded-pill text-capitalize" [ngClass]="{
+              'bg-info-subtle text-info': r.itemType === 'apparel',
+              'bg-success-subtle text-success': r.itemType === 'supply' || r.itemType === 'admin supply',
+              'bg-primary-subtle text-primary': r.itemType === 'genItem' || r.itemType === 'IT' || r.itemType === 'General Item',
+              'bg-warning-subtle text-warning': r.itemType === 'Maintenance',
+              'bg-secondary-subtle text-secondary': r.itemType === 'other'
+            }">{{ r.itemType === 'other' ? 'General Item' : r.itemType }}</span>
+          </div>
+        </div>
 
-      <div class="mobile-card-row">
-        <span class="label">Requester</span>
-        <span class="value">{{ r.Account.firstName }} {{ r.Account.lastName }}</span>
-      </div>
+        <div class="d-grid gap-2">
+          <button class="btn btn-sm btn-outline-primary" (click)="view(r)">View Details</button>
 
-      <div class="mobile-card-row">
-        <span class="label">Items</span>
-        <span class="value">{{ (r.items || []).length }} item(s)</span>
-      </div>
+          <div class="d-flex gap-2" *ngIf="isStockroomAdmin() && r.status === 'pending'">
+            <button class="btn btn-sm btn-success flex-grow-1" (click)="accept(r)">Accept</button>
+            <button class="btn btn-sm btn-warning flex-grow-1" (click)="decline(r)">Decline</button>
+          </div>
 
-      <div class="mobile-card-row">
-        <span class="label">Date</span>
-        <div class="value small text-muted">{{ r.createdAt | date:'short' }}</div>
-      </div>
+          <button *ngIf="isStockroomAdmin() && r.status === 'accepted'" class="btn btn-sm btn-secondary"
+            (click)="release(r)">Release Items</button>
 
-      <div class="mt-3 pt-2 border-top d-grid gap-2 d-flex justify-content-end flex-wrap">
-        <button class="btn btn-sm btn-outline-primary flex-grow-1" (click)="view(r)">View</button>
-
-        <button *ngIf="isStockroomAdmin() && r.status === 'pending'" class="btn btn-sm btn-success flex-grow-1"
-          (click)="accept(r)">Accept</button>
-        <button *ngIf="isStockroomAdmin() && r.status === 'pending'" class="btn btn-sm btn-warning flex-grow-1"
-          (click)="decline(r)">Decline</button>
-        <button *ngIf="isStockroomAdmin() && r.status === 'accepted'" class="btn btn-sm btn-secondary flex-grow-1"
-          (click)="release(r)">Release</button>
-
-        <button *ngIf="isTeacher() && r.status === 'released'" class="btn btn-sm btn-danger flex-grow-1"
-          (click)="fulfill(r)">Fulfill</button>
+          <button *ngIf="isTeacher() && r.status === 'released'" class="btn btn-sm btn-danger"
+            (click)="fulfill(r)">Fulfill Request</button>
+        </div>
       </div>
     </div>
 
     <div *ngIf="!loading && requests.length === 0" class="text-center py-5 text-muted">
+      <i class="bi bi-inbox fs-1 d-block opacity-25"></i>
       No item requests found.
     </div>
   </div>
 
-  <div *ngIf="loading" class="text-center"><span class="spinner-border spinner-border-sm"></span></div>
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border spinner-border-sm text-primary"></div>
+  </div>
 
-  <div class="d-flex justify-content-between align-items-center mt-3" *ngIf="totalPages > 1 && !loading">
-    <div class="text-muted">
+  <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top"
+    *ngIf="totalPages > 1 && !loading">
+    <div class="small text-muted">
       Showing {{ (page - 1) * limit + 1 }} to {{ (page * limit) > total ? total : (page * limit) }} of {{ total }}
-      requests
     </div>
     <nav aria-label="Page navigation">
-      <ul class="pagination mb-0">
+      <ul class="pagination pagination-sm mb-0">
         <li class="page-item" [class.disabled]="page === 1">
-          <button class="page-link" (click)="onPageChange(page - 1)">Previous</button>
+          <button class="page-link" (click)="onPageChange(page - 1)">Prev</button>
         </li>
         <li class="page-item" *ngFor="let p of range(1, totalPages)" [class.active]="page === p">
           <button class="page-link" (click)="onPageChange(p)">{{ p }}</button>

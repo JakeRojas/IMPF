@@ -66,27 +66,15 @@ export class StockRequestViewComponent implements OnInit {
     this.sr.get(this.id).pipe(first()).subscribe({
       next: (res: StockRequest) => {
         this.request = res;
-        this.requestedItemRows = this.getRequestedItemDisplayRows(this.request?.requestedItem);
+        this.requestedItemRows = this.getRequestedItemDisplayRows(this.request);
         this.loading = false;
       },
       error: e => { this.alert.error(this._errToString(e)); this.loading = false; this.router.navigate(['/req-stock']); }
     });
   }
 
-  // approve() { 
-  //   if (!confirm('Approve?')) return; 
-  //       this.sr.approve(this.id)
-  //       .pipe(first())
-  //       .subscribe(() => { 
-  //           this.alert.success('Approved'); 
-  //           this.load(); 
-  //       }, e => this.alert.error(this._errToString(e))); 
-  //   }
   approve() {
-    // [MODIFIED] Show quantity in confirmation
     if (!confirm(`Approve this request for ${this.request?.quantity} items?`)) return;
-
-    // [MODIFIED] Pass this.request?.quantity
     this.sr.approve(this.id, this.request?.quantity)
       .pipe(first())
       .subscribe(() => {
@@ -119,8 +107,6 @@ export class StockRequestViewComponent implements OnInit {
 
   goBack() { this.router.navigate(['/req-stock']); }
 
-  // ---------------- helpers for displaying requestedItem ----------------
-
   private _stringify(val: any): string {
     if (val === null || typeof val === 'undefined') return '—';
     if (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') return String(val);
@@ -128,103 +114,62 @@ export class StockRequestViewComponent implements OnInit {
     try { return JSON.stringify(val, null, 0); } catch { return String(val); }
   }
 
-  getRequestedItemDisplayRows(ri?: RequestedItem | null): Array<{ label: string; value: string | number | null }> {
-    if (!ri) return [];
+  getRequestedItemDisplayRows(request: any): Array<{ label: string; value: string | number | null }> {
+    if (!request) return [];
 
+    const ri = request.requestedItem;
     const rows: Array<{ label: string; value: any }> = [];
 
-    if (ri.kind === 'inventory' && ri.inventory) {
+    // Case 1: Existing Inventory Item
+    if (ri && ri.kind === 'inventory' && ri.inventory) {
       const inv: any = ri.inventory;
+      const type = (ri.type || '').toLowerCase();
 
-      // Apparel common fields
-      if (ri.type === 'apparel') {
-        rows.push({ label: 'Apparel Name', value: inv.apparelName ?? inv.name ?? inv.title ?? this._stringify(inv.id) });
-        rows.push({ label: 'Apparel Level', value: inv.apparelLevel ?? '—' });
-        rows.push({ label: 'Apparel Type', value: inv.apparelType ?? '—' });
-        rows.push({ label: 'Apparel For', value: inv.apparelFor ?? '—' });
-        rows.push({ label: 'Apparel Size', value: inv.apparelSize ?? '—' });
-        rows.push({ label: 'Inventory ID', value: inv.apparelInventoryId ?? inv.id ?? '—' });
-      }
-      // Supply common fields
-      else if (ri.type === 'supply') {
-        rows.push({ label: 'Supply Name', value: inv.supplyName ?? inv.name ?? this._stringify(inv.id) });
-        rows.push({ label: 'Measure', value: inv.supplyMeasure ?? '—' });
-        rows.push({ label: 'Inventory ID', value: inv.adminSupplyInventoryId ?? inv.id ?? '—' });
-      }
-      // GenItem common fields
-      else if (ri.type === 'genitem') {
-        rows.push({ label: 'GenItem Name', value: inv.genItemName ?? inv.name ?? this._stringify(inv.id) });
-        rows.push({ label: 'GenItem Size', value: inv.genItemSize ?? '—' });
-        rows.push({ label: 'GenItem Type', value: inv.genItemType ?? '—' });
-        rows.push({ label: 'Inventory ID', value: inv.genItemInventoryId ?? inv.id ?? '—' });
+      if (type.includes('apparel')) {
+        rows.push({ label: 'Item Name', value: inv.apparelName || inv.name });
+        rows.push({ label: 'Level/Department', value: inv.apparelLevel });
+        rows.push({ label: 'Apparel Type', value: inv.apparelType });
+        rows.push({ label: 'For', value: inv.apparelFor });
+        rows.push({ label: 'Size', value: inv.apparelSize });
+      } else if (type.includes('supply')) {
+        rows.push({ label: 'Item Name', value: inv.supplyName || inv.name });
+        rows.push({ label: 'Measurement', value: inv.supplyMeasure });
       } else {
-        // unknown inventory type: show id & name-like fields
-        rows.push({ label: 'Inventory ID', value: inv.id ?? '—' });
-        rows.push({ label: 'Name', value: inv.name ?? inv.title ?? '—' });
+        rows.push({ label: 'Item Name', value: inv.genItemName || inv.name });
+        rows.push({ label: 'Specific Type', value: inv.genItemType || type });
+        rows.push({ label: 'Size/Spec', value: inv.genItemSize });
       }
 
-      // common inventory fields
-      rows.push({ label: 'Room ID', value: inv.roomId ?? inv.room_id ?? '—' });
-      rows.push({ label: 'Total Quantity', value: inv.totalQuantity ?? inv.supplyQuantity ?? inv.quantity ?? '—' });
-
-      // show any extra keys not already shown
-      const shown = new Set(rows.map(r => this._normalizeLabelKey(r.label)));
-      Object.keys(inv || {}).forEach(k => {
-        const keyLabel = this._niceLabel(k);
-        if (!shown.has(this._normalizeLabelKey(keyLabel))) {
-          rows.push({ label: keyLabel, value: this._stringify(inv[k]) });
-          shown.add(this._normalizeLabelKey(keyLabel));
-        }
-      });
+      rows.push({ label: 'Current Inventory Stock', value: inv.totalQuantity ?? inv.supplyQuantity ?? inv.quantity ?? '0' });
+      rows.push({ label: 'Database ID', value: inv.apparelInventoryId || inv.adminSupplyInventoryId || inv.genItemInventoryId || inv.id });
 
       return rows;
     }
 
-    // -- unit record --
-    if (ri.kind === 'unit' && ri.unit) {
+    // Case 2: New Item Request ("Other")
+    if (request.otherItemName) {
+      rows.push({ label: 'Requested New Item', value: request.otherItemName });
+      rows.push({ label: 'Proposed Category', value: request.itemType });
+
+      if (request.details) {
+        Object.keys(request.details).forEach(k => {
+          const val = request.details[k];
+          if (val) {
+            rows.push({ label: this._niceLabel(k), value: this._stringify(val) });
+          }
+        });
+      }
+      return rows;
+    }
+
+    // Case 3: Unit record fallback
+    if (ri && ri.kind === 'unit' && ri.unit) {
       const unit: any = ri.unit;
       rows.push({ label: 'Unit ID', value: unit.id ?? unit.apparelId ?? '—' });
       rows.push({ label: 'Status', value: unit.status ?? '—' });
-      rows.push({ label: 'Room ID', value: unit.roomId ?? '—' });
-      rows.push({
-        label: 'Parent Inventory FK', value:
-          unit.apparelInventoryId ?? unit.adminSupplyInventoryId ?? unit.genItemInventoryId ?? '—'
-      });
-
-      // parent inventory summary (if available)
-      if (ri.inventory) {
-        rows.push({ label: '--- Parent Inventory ---', value: '---' });
-        const inv = ri.inventory as any;
-        rows.push({ label: 'Inventory ID', value: inv.id ?? inv.apparelInventoryId ?? inv.adminSupplyInventoryId ?? inv.genItemInventoryId ?? '—' });
-        rows.push({ label: 'Inventory Name', value: inv.apparelName ?? inv.supplyName ?? inv.genItemName ?? inv.name ?? '—' });
-        rows.push({ label: 'Inventory Qty', value: inv.totalQuantity ?? inv.supplyQuantity ?? inv.quantity ?? '—' });
-      }
-
-      // show other unit keys
-      const shownU = new Set(['unit id', 'status', 'room id', 'parent inventory fk']);
-      Object.keys(unit || {}).forEach(k => {
-        const keyLabel = this._niceLabel(k);
-        if (!shownU.has(this._normalizeLabelKey(keyLabel))) {
-          rows.push({ label: keyLabel, value: this._stringify(unit[k]) });
-          shownU.add(this._normalizeLabelKey(keyLabel));
-        }
-      });
-
       return rows;
     }
 
-    // unknown kind: show raw fields
-    if (ri.inventory || ri.unit) {
-      const target = ri.inventory || ri.unit;
-      Object.keys(target || {}).forEach(k => {
-        rows.push({ label: this._niceLabel(k), value: this._stringify((target as any)[k]) });
-      });
-      return rows;
-    }
-
-    // fallback
-    rows.push({ label: 'Type', value: ri.type ?? '—' });
-    rows.push({ label: 'Kind', value: ri.kind ?? '—' });
     return rows;
   }
 
@@ -234,8 +179,19 @@ export class StockRequestViewComponent implements OnInit {
 
   private _niceLabel(k: string) {
     if (!k) return k;
+    // Special cleanup for common keys
+    let filtered = k;
+    const prefixes = ['apparel', 'genitem', 'item', 'supply', 'admin'];
+    prefixes.forEach(p => {
+      if (filtered.toLowerCase().startsWith(p)) {
+        filtered = filtered.substring(p.length);
+      }
+    });
+
     // convert camelCase / snake_case to Title Case
-    const spaced = k.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_\-]+/g, ' ');
+    const spaced = filtered.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_\-]+/g, ' ').trim();
+    if (!spaced) return k; // if we filtered everything out, return original
+
     return spaced.split(' ').map(p => p[0]?.toUpperCase() + p.slice(1)).join(' ');
   }
 }

@@ -1,70 +1,140 @@
-<div class="card mb-3">
-  <div class="card-body d-flex justify-content-between align-items-center">
-    <nav aria-label="breadcrumb">
-      <ol class="breadcrumb m-0 p-0">
-        <li class="breadcrumb-item"><a [routerLink]="['/req-stock']">Request List</a></li>
-        <li class="breadcrumb-item active"><a>Request Information</a></li>
-      </ol>
-    </nav>
+<div class="card mb-4 border-0 shadow-sm">
+  <div class="card-body p-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb m-0 p-0 text-muted small">
+          <li class="breadcrumb-item"><a [routerLink]="['/req-stock']" class="text-decoration-none">Stock Request
+              List</a></li>
+          <li class="breadcrumb-item active">Request #{{ id }}</li>
+        </ol>
+      </nav>
+    </div>
   </div>
 </div>
 
-<div class="container p-3">
-  <div *ngIf="request">
-    <h4>Request #{{ request.stockRequestId || request.id }}</h4>
+<div class="row g-4" *ngIf="request">
+  <!-- PRIMARY INFO CARD -->
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-transparent border-0 pt-4 px-4">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <span class="badge rounded-pill mb-2" [ngClass]="{
+              'bg-warning text-dark': request.status === 'pending',
+              'bg-success': request.status === 'approved',
+              'bg-danger': request.status === 'disapproved',
+              'bg-info text-dark': request.status === 'fulfilled'
+            }">{{ request.status | uppercase }}</span>
+            <h3 class="fw-bold mb-0">Request #{{ request.stockRequestId || id }}</h3>
+          </div>
+          <div class="text-end text-muted small">
+            <div>Created On</div>
+            <div class="fw-bold text-dark">{{ request.createdAt | date: 'mediumDate' }}</div>
+            <div>{{ request.createdAt | date: 'shortTime' }}</div>
+          </div>
+        </div>
+      </div>
 
-    <dl class="row">
-      <dt class="col-sm-3">Room</dt>
-      <dd class="col-sm-9">{{ request.requesterRoomId }}</dd>
-      <dt class="col-sm-3">Requester</dt>
-      <dd class="col-sm-9">{{ request.Account.firstName }} {{ request.Account.lastName }}</dd>
-      <dt class="col-sm-3">Status</dt>
-      <dd class="col-sm-9">{{ request.status }}</dd>
-      <dt class="col-sm-3">Qty</dt>
-      <!-- <dd class="col-sm-9">{{ request.quantity }}</dd> -->
-      <dd class="col-sm-9">
-        <ng-container *ngIf="isAdmin() && request.status === 'pending'; else readOnlyQty">
-          <input type="number" class="form-control form-control-sm w-25" [(ngModel)]="request.quantity" min="1">
-        </ng-container>
-        <ng-template #readOnlyQty>
-          {{ request.quantity }}
-        </ng-template>
-      </dd>
-      <dt class="col-sm-3">Note</dt>
-      <dd class="col-sm-9">{{ request.note }}</dd>
-      <dt class="col-sm-3">Created</dt>
-      <dd class="col-sm-9">{{ request.createdAt | date: 'short' }}</dd>
-    </dl>
+      <div class="card-body px-4">
+        <div class="row mb-4">
+          <div class="col-md-6 mb-3 mb-md-0">
+            <label class="text-muted small fw-bold text-uppercase mb-2 d-block">Requester Info</label>
+            <div class="d-flex align-items-center">
+              <div class="avatar-circle-sm bg-primary text-white d-flex align-items-center justify-content-center me-2"
+                style="width: 32px; height: 32px; font-size: 0.8rem;">
+                {{ request.Account.firstName?.charAt(0) }}
+              </div>
+              <div>
+                <div class="fw-bold mb-0">{{ request.Account.firstName }} {{ request.Account.lastName }}</div>
+                <div class="small text-muted">ID: {{ request.accountId }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="text-muted small fw-bold text-uppercase mb-2 d-block">Source Room</label>
+            <div class="d-flex align-items-center">
+              <i class="bi bi-door-open text-primary fs-4 me-2"></i>
+              <div>
+                <div class="fw-bold mb-0">{{ request.Room?.roomName || 'Room: ' + request.requesterRoomId }}</div>
+                <div class="small text-muted">Destination for stock</div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-    <hr />
+        <div class="mb-4">
+          <label class="text-muted small fw-bold text-uppercase mb-2 d-block">Request Notes</label>
+          <div class="p-3 bg-light rounded-3 italic">
+            <i class="bi bi-chat-left-quote text-muted me-2"></i>
+            {{ request.note || 'No notes provided for this request.' }}
+          </div>
+        </div>
 
-    <h5>Requested Item</h5>
-
-    <div *ngIf="requestedItemRows && requestedItemRows.length > 0; else noItem">
-      <table class="table table-sm table-borderless">
-        <tbody>
-          <tr *ngFor="let row of requestedItemRows">
-            <th class="w-25" style="vertical-align: top;">{{ row.label }}</th>
-            <td style="vertical-align: top;">{{ row.value }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <ng-template #noItem>
-      <div class="text-muted">No requested item details available. (ItemId: {{ request.itemId }} / Type: {{
-        request.itemType }})</div>
-    </ng-template>
-
-    <div class="mt-3">
-      <button *ngIf="isAdmin() && request.status === 'pending'" class="btn btn-success me-1"
-        (click)="approve()">Approve</button>
-      <button *ngIf="isAdmin() && request.status === 'pending'" class="btn btn-warning me-1"
-        (click)="disapprove()">Disapprove</button>
-      <button *ngIf="isStockroom() && request.status === 'approved'" class="btn btn-danger"
-        (click)="fulfill()">Fulfill</button>
+        <div class="actions mt-5 border-top pt-4">
+          <ng-container *ngIf="isAdmin() && request.status === 'pending'">
+            <button class="btn btn-success px-4 me-2 shadow-sm" (click)="approve()">
+              <i class="bi bi-check-circle me-1"></i> Approve
+            </button>
+            <button class="btn btn-outline-danger px-4 shadow-sm" (click)="disapprove()">
+              <i class="bi bi-x-circle me-1"></i> Disapprove
+            </button>
+          </ng-container>
+          <button *ngIf="isStockroom() && request.status === 'approved'" class="btn btn-primary px-4 shadow-sm"
+            (click)="fulfill()">
+            <i class="bi bi-box-seam me-1"></i> Fulfill Request
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div *ngIf="loading" class="text-center"><span class="spinner-border spinner-border-sm"></span></div>
+  <!-- SECONDARY DETAILS (Requested Item) -->
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
+        <h5 class="fw-bold"><i class="bi bi-box-seam-fill text-primary me-2"></i>Requested Item</h5>
+      </div>
+      <div class="card-body px-4">
+        <!-- Quantity Selector if Admin & Pending -->
+        <div class="mb-4 p-3 bg-primary-subtle rounded-3 text-primary">
+          <label class="small fw-bold text-uppercase d-block mb-1">Requested Quantity</label>
+          <div class="d-flex align-items-center gap-2">
+            <ng-container *ngIf="isAdmin() && request.status === 'pending'; else readOnlyQty">
+              <input type="number" class="form-control fw-bold border-0 shadow-sm" style="width: 80px;"
+                [(ngModel)]="request.quantity" min="1">
+              <span class="small font-monospace">Units</span>
+            </ng-container>
+            <ng-template #readOnlyQty>
+              <h2 class="mb-0 fw-bold">{{ request.quantity }}</h2>
+              <span class="small font-monospace">Units</span>
+            </ng-template>
+          </div>
+        </div>
+
+        <!-- Detail Table -->
+        <div *ngIf="requestedItemRows && requestedItemRows.length > 0; else noItem" class="item-details">
+          <div *ngFor="let row of requestedItemRows" class="mb-3">
+            <label class="text-muted small fw-semibold text-uppercase d-block mb-1">{{ row.label }}</label>
+            <div class="fw-bold fs-5 text-dark border-bottom pb-1 border-light">{{ row.value || '—' }}</div>
+          </div>
+        </div>
+
+        <ng-template #noItem>
+          <div class="text-center py-4 text-muted">
+            <i class="bi bi-info-circle fs-1 mb-2 d-block opacity-25"></i>
+            <p class="small">No specific item details linked yet.</p>
+            <div class="bg-light p-2 rounded small font-monospace">
+              Type: {{ request.itemType }}
+            </div>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="loading" class="text-center py-5">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
 </div>

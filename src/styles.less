@@ -240,3 +240,34 @@ body {
 .avatar-circle-sm {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
+
+/* Submenu Animation */
+.animate-slide {
+  animation: slideDown 0.3s ease-out forwards;
+  transform-origin: top center;
+  overflow: hidden;
+}
+
+@keyframes slideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+    max-height: 0;
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 500px;
+  }
+}
+
+.admin-submenu .nav-link {
+  font-size: 0.85rem;
+  padding: 0.5rem 1rem !important;
+
+  i {
+    width: 24px !important;
+    font-size: 0.9rem !important;
+  }
+}

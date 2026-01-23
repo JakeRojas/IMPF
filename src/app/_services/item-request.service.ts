@@ -31,10 +31,10 @@ export class ItemRequestService {
     return this.http.post<any>(this.base, payload);
   }
 
-  accept(id: any): Observable<any> {
+  accept(id: any, updateData: any = {}): Observable<any> {
     const n = Number(id);
     if (!Number.isFinite(n) || n <= 0) return throwError(() => new Error('Invalid id'));
-    return this.http.post<any>(`${this.base}/${n}/accept`, {});
+    return this.http.post<any>(`${this.base}/${n}/accept`, updateData);
   }
 
   decline(id: any, reason?: string): Observable<any> {

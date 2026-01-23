@@ -24,6 +24,12 @@ export class ItemRequestListComponent implements OnInit {
   total = 0;
   totalPages = 0;
 
+  // Filters
+  searchText = '';
+  selectedItemType = '';
+  startDate = '';
+  endDate = '';
+
   constructor(
     private router: Router,
     private ir: ItemRequestService,
@@ -47,7 +53,13 @@ export class ItemRequestListComponent implements OnInit {
 
   load() {
     this.loading = true;
-    this.ir.list({}, this.page, this.limit).pipe(first()).subscribe({
+    const params: any = {};
+    if (this.searchText) params.search = this.searchText;
+    if (this.selectedItemType) params.itemType = this.selectedItemType;
+    if (this.startDate) params.startDate = this.startDate;
+    if (this.endDate) params.endDate = this.endDate;
+
+    this.ir.list(params, this.page, this.limit).pipe(first()).subscribe({
       next: (res) => {
         this.requests = res.data || [];
         if (res.meta) {
@@ -59,6 +71,20 @@ export class ItemRequestListComponent implements OnInit {
       },
       error: e => { this.alert.error(this._errToString(e)); this.loading = false; }
     });
+  }
+
+  onFilterChange() {
+    this.page = 1;
+    this.load();
+  }
+
+  clearFilters() {
+    this.searchText = '';
+    this.selectedItemType = '';
+    this.startDate = '';
+    this.endDate = '';
+    this.page = 1;
+    this.load();
   }
 
   onPageChange(page: number) {
