@@ -2,10 +2,11 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-import { LayoutComponent        } from './layout.component';
-import { BorrowRoutingModule    } from './borrow-routing.module';
-import { BorrowListComponent    } from './borrow-list.component';
-import { BorrowCreateComponent  } from './borrow-create.component';
+import { LayoutComponent } from './layout.component';
+import { BorrowRoutingModule } from './borrow-routing.module';
+import { BorrowListComponent } from './borrow-list.component';
+import { BorrowCreateComponent } from './borrow-create.component';
+import { BorrowViewComponent } from './borrow-view.component';
 
 @NgModule({
   imports: [
@@ -17,7 +18,8 @@ import { BorrowCreateComponent  } from './borrow-create.component';
   declarations: [
     LayoutComponent,
     BorrowListComponent,
-    BorrowCreateComponent
+    BorrowCreateComponent,
+    BorrowViewComponent
   ]
 })
-export class BorrowModule {}
+export class BorrowModule { }

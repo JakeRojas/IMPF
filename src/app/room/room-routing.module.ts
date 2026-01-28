@@ -10,21 +10,22 @@ const addEditModule = () => import('./add-edit/list.module').then(x => x.AddEdit
 
 // new feature modules (lazy)
 const inventoryModule = () => import('./inventory/inventory.module').then(x => x.InventoryModule);
-const receiveModule   = () => import('./receive/receive.module').then(x => x.ReceiveModule);
-const releaseModule   = () => import('./release/release.module').then(x => x.ReleaseModule);
+const receiveModule = () => import('./receive/receive.module').then(x => x.ReceiveModule);
+const releaseModule = () => import('./release/release.module').then(x => x.ReleaseModule);
 
 const routes: Routes = [
-  { path: '', component: LayoutComponent,
+  {
+    path: '', component: LayoutComponent,
     children: [
-      { path: '', component: RoomListComponent},
+      { path: '', component: RoomListComponent },
       { path: '', loadChildren: addEditModule },
       {
         path: ':id', component: RoomViewComponent,
         children: [
-          { path: 'units',   loadChildren: unitModule },
+          { path: 'units', loadChildren: unitModule },
           { path: 'inventory', loadChildren: inventoryModule },
-          { path: 'receive',   loadChildren: receiveModule },
-          { path: 'release',   loadChildren: releaseModule },
+          { path: 'receive', loadChildren: receiveModule },
+          { path: 'release', loadChildren: releaseModule },
         ],
       },
     ]
@@ -32,7 +33,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-    imports: [RouterModule.forChild(routes)],
-    exports: [RouterModule]
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule]
 })
 export class RoomRoutingModule { }

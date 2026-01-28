@@ -16,7 +16,7 @@ import { RoomViewComponent } from './room-view.component';
         FormsModule,
         RouterModule
     ],
-    declarations: [ 
+    declarations: [
         LayoutComponent,
         RoomListComponent,
         RoomViewComponent
