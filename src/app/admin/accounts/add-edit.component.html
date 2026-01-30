@@ -2,7 +2,8 @@
     <div class="row">
         <div class="mb-3 col-2">
             <label class="form-label">Title</label>
-            <select formControlName="title" class="form-select" [ngClass]="{ 'is-invalid': submitted && f.title.errors }">
+            <select formControlName="title" class="form-select"
+                [ngClass]="{ 'is-invalid': submitted && f.title.errors }">
                 <option value=""></option>
                 <option value="Mr">Mr</option>
                 <option value="Mrs">Mrs</option>
@@ -15,14 +16,16 @@
         </div>
         <div class="mb-3 col-5">
             <label class="form-label">First Name</label>
-            <input type="text" formControlName="firstName" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.firstName.errors }" />
+            <input type="text" formControlName="firstName" class="form-control"
+                [ngClass]="{ 'is-invalid': submitted && f.firstName.errors }" />
             <div *ngIf="submitted && f.firstName.errors" class="invalid-feedback">
                 <div *ngIf="f.firstName.errors.required">First Name is required</div>
             </div>
         </div>
         <div class="mb-3 col-5">
             <label class="form-label">Last Name</label>
-            <input type="text" formControlName="lastName" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.lastName.errors }" />
+            <input type="text" formControlName="lastName" class="form-control"
+                [ngClass]="{ 'is-invalid': submitted && f.lastName.errors }" />
             <div *ngIf="submitted && f.lastName.errors" class="invalid-feedback">
                 <div *ngIf="f.lastName.errors.required">Last Name is required</div>
             </div>
@@ -44,7 +47,8 @@
         </div>
         <div class="mb-3 col-5">
             <label class="form-label">Status</label>
-            <select formControlName="status" class="form-select" [ngClass]="{ 'is-invalid': submitted && f.status.errors }">
+            <select formControlName="status" class="form-select"
+                [ngClass]="{ 'is-invalid': submitted && f.status.errors }">
                 <option value="active">Reactivate</option>
                 <option value="deactivated">Deactivate</option>
             </select>
@@ -56,7 +60,8 @@
     <div class="row">
         <div class="mb-3 col-7">
             <label class="form-label">Email</label>
-            <input type="text" formControlName="email" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.email.errors }" />
+            <input type="text" formControlName="email" class="form-control"
+                [ngClass]="{ 'is-invalid': submitted && f.email.errors }" />
             <div *ngIf="submitted && f.email.errors" class="invalid-feedback">
                 <div *ngIf="f.email.errors.required">Email is required</div>
                 <div *ngIf="f.email.errors.email">Email must be a valid email address</div>
@@ -70,7 +75,8 @@
     <div class="row">
         <div class="mb-3 col">
             <label class="form-label">Password</label>
-            <input type="password" formControlName="password" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.password.errors }" />
+            <input type="password" formControlName="password" class="form-control"
+                [ngClass]="{ 'is-invalid': submitted && f.password.errors }" />
             <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
                 <div *ngIf="f.password.errors.required">Password is required</div>
                 <div *ngIf="f.password.errors.minlength">Password must be at least 6 characters</div>
@@ -78,13 +84,80 @@
         </div>
         <div class="mb-3 col">
             <label class="form-label">Confirm Password</label>
-            <input type="password" formControlName="confirmPassword" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.confirmPassword.errors }" />
+            <input type="password" formControlName="confirmPassword" class="form-control"
+                [ngClass]="{ 'is-invalid': submitted && f.confirmPassword.errors }" />
             <div *ngIf="submitted && f.confirmPassword.errors" class="invalid-feedback">
                 <div *ngIf="f.confirmPassword.errors.required">Confirm Password is required</div>
                 <div *ngIf="f.confirmPassword.errors.mustMatch">Passwords must match</div>
             </div>
         </div>
     </div>
+    <div *ngIf="AccountId" class="mt-4">
+        <hr />
+        <h3>Room View Access Management</h3>
+        <p class="text-muted">Quickly grant or revoke viewing access to rooms by type. This does not change the "Room In
+            Charge" status.</p>
+
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Room Type</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Stockrooms</strong></td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-success me-2"
+                                (click)="grantAccess('stockrooms')">Grant Access</button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                (click)="revokeAccess('stockrooms')">Remove Access</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Sub Stockrooms</strong></td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-success me-2"
+                                (click)="grantAccess('sub stockrooms')">Grant Access</button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                (click)="revokeAccess('sub stockrooms')">Remove Access</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Offices</strong></td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-success me-2"
+                                (click)="grantAccess('offices')">Grant Access</button>
+                            <button type="button" class="btn btn-sm btn-danger" (click)="revokeAccess('offices')">Remove
+                                Access</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Classrooms</strong></td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-success me-2"
+                                (click)="grantAccess('classroom')">Grant Access</button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                (click)="revokeAccess('classroom')">Remove Access</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Open Areas</strong></td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-success me-2"
+                                (click)="grantAccess('open area')">Grant Access</button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                (click)="revokeAccess('open area')">Remove Access</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <hr />
+    </div>
+
     <div class="mb-3">
         <button type="submit" [disabled]="submitting" class="btn btn-primary">
             <span *ngIf="submitting" class="spinner-border spinner-border-sm me-1"></span>

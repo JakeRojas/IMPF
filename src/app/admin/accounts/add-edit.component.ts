@@ -27,14 +27,14 @@ export class AddEditComponent implements OnInit {
         this.AccountId = this.route.snapshot.params['AccountId'];
 
         this.form = this.formBuilder.group({
-            title:              ['', Validators.required],
-            firstName:          ['', Validators.required],
-            lastName:           ['', Validators.required],
-            email:              ['', [Validators.required, Validators.email]],
-            role:               ['', Validators.required],
-            status:             ['', Validators.required],
-            password:           ['', [Validators.minLength(6), ...(!this.AccountId ? [Validators.required] : [])]],
-            confirmPassword:    ['']
+            title: ['', Validators.required],
+            firstName: ['', Validators.required],
+            lastName: ['', Validators.required],
+            email: ['', [Validators.required, Validators.email]],
+            role: ['', Validators.required],
+            status: ['', Validators.required],
+            password: ['', [Validators.minLength(6), ...(!this.AccountId ? [Validators.required] : [])]],
+            confirmPassword: ['']
         }, {
             validator: MustMatch('password', 'confirmPassword')
         });
@@ -86,6 +86,40 @@ export class AddEditComponent implements OnInit {
                     console.error('Create account error:', error);
                     this.alertService.error(error);
                     this.submitting = false;
+                }
+            });
+    }
+
+    grantAccess(roomType: string) {
+        if (!this.AccountId) return;
+        this.loading = true;
+        this.accountService.grantRoomAccess(this.AccountId, roomType)
+            .pipe(first())
+            .subscribe({
+                next: (res: any) => {
+                    this.alertService.success(res.message);
+                    this.loading = false;
+                },
+                error: (error: any) => {
+                    this.alertService.error(error);
+                    this.loading = false;
+                }
+            });
+    }
+
+    revokeAccess(roomType: string) {
+        if (!this.AccountId) return;
+        this.loading = true;
+        this.accountService.revokeRoomAccess(this.AccountId, roomType)
+            .pipe(first())
+            .subscribe({
+                next: (res: any) => {
+                    this.alertService.success(res.message);
+                    this.loading = false;
+                },
+                error: (error: any) => {
+                    this.alertService.error(error);
+                    this.loading = false;
                 }
             });
     }

@@ -122,6 +122,14 @@ export class AccountService {
             }));
     }
 
+    grantRoomAccess(AccountId: number, roomType: string) {
+        return this.http.post(`${baseUrl}/${AccountId}/grant-room-access`, { roomType });
+    }
+
+    revokeRoomAccess(AccountId: number, roomType: string) {
+        return this.http.post(`${baseUrl}/${AccountId}/revoke-room-access`, { roomType });
+    }
+
     getAllActivityLogs(filters: any = {}, page: number = 1, limit: number = 10) {
         const params = { ...filters, page: page.toString(), limit: limit.toString() };
         return this.http.get<{ success: boolean, data: any[], meta: any }>(`${baseUrl}/activity-logs`, { params, withCredentials: true });
