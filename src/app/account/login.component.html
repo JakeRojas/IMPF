@@ -21,8 +21,12 @@
             <label class="form-label fw-semibold small">Password</label>
             <div class="input-group">
                 <span class="input-group-text bg-white border-end-0"><i class="bi bi-lock text-muted"></i></span>
-                <input type="password" formControlName="password" class="form-control border-start-0 ps-0"
-                    placeholder="••••••••" [ngClass]="{ 'is-invalid': submitted && f.password.errors }" />
+                <input [type]="hidePassword ? 'password' : 'text'" formControlName="password"
+                    class="form-control border-start-0 border-end-0 ps-0" placeholder="••••••••"
+                    [ngClass]="{ 'is-invalid': submitted && f.password.errors }" />
+                <button type="button" class="btn bg-white border border-start-0" (click)="hidePassword = !hidePassword">
+                    <i class="bi" [ngClass]="hidePassword ? 'bi-eye-slash text-muted' : 'bi-eye text-primary'"></i>
+                </button>
                 <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
                     <div *ngIf="f.password.errors.required">Password is required</div>
                 </div>

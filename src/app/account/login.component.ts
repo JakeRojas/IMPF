@@ -11,6 +11,7 @@ export class LoginComponent implements OnInit {
     submitting = false;
     submitted = false;
     showRegister = false;
+    hidePassword = true;
 
     constructor(
         private formBuilder: FormBuilder,
