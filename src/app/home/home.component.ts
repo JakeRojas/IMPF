@@ -30,6 +30,27 @@ export class HomeComponent implements OnInit {
     weeklyStats: any;
     chart: any;
 
+    // Visibility Getters
+    get showStockCard() { return ['superadmin', 'admin', 'stockroomadmin'].includes(this.role); }
+    get showItemCard() { return true; } // All roles
+    get showTransferCard() { return ['superadmin', 'admin', 'stockroomadmin'].includes(this.role); }
+    get showBorrowCard() { return true; } // All roles
+    get showOnlineUsersCard() { return ['superadmin'].includes(this.role); }
+    get showWeeklyStats() { return true; }
+    get showRecentActivity() { return true; }
+
+    get role() { return String(this.account?.role || '').toLowerCase(); }
+
+    // Breakdown Data
+    breakdowns: any = {};
+    onlineUsersList: any[] = [];
+
+    // Modal State
+    showModal = false;
+    modalTitle = '';
+    modalData: any[] = [];
+    modalType: 'stock' | 'item' | 'borrow' | 'online' = 'stock';
+
     constructor(
         private accountService: AccountService,
         private stockService: StockRequestService,
@@ -40,32 +61,8 @@ export class HomeComponent implements OnInit {
     ) { }
 
     ngOnInit() {
-        this.loadStats();
         this.loadRecentLogs();
         this.loadDashboardStats();
-    }
-
-    loadStats() {
-        // Fetch counts by requesting 1 item and reading meta.total
-        this.stockService.list({}, 1, 1).pipe(first()).subscribe({
-            next: (res: any) => this.stockCount = res.meta?.total || 0,
-            error: () => this.stockCount = 0
-        });
-
-        this.itemService.list({}, 1, 1).pipe(first()).subscribe({
-            next: (res: any) => this.itemCount = res.meta?.total || 0,
-            error: () => this.itemCount = 0
-        });
-
-        this.transferService.list({}, 1, 1).pipe(first()).subscribe({
-            next: (res: any) => this.transferCount = res.meta?.total || 0,
-            error: () => this.transferCount = 0
-        });
-
-        this.borrowService.list({}, 1, 1).pipe(first()).subscribe({
-            next: (res: any) => this.borrowCount = res.meta?.total || 0,
-            error: () => this.borrowCount = 0
-        });
     }
 
     loadRecentLogs() {
@@ -79,18 +76,25 @@ export class HomeComponent implements OnInit {
         });
     }
 
-    loadDashboardStats() {
-        if (!this.isAdmin) return;
+    lastWeekStats: any = {};
+    lastMonthStats: any = {};
 
+    loadDashboardStats() {
         this.statsService.getDashboardStats().pipe(first()).subscribe({
             next: (res: any) => {
-                this.weeklyStats = res.weekly;
-                this.onlineUsers = res.daily.onlineUsers;
-                // Update specific today counts if they differ (optional, but keep consistent)
-                this.stockCount = res.daily.stockRequests;
-                this.itemCount = res.daily.itemRequests;
-                this.transferCount = res.daily.transfers;
-                this.borrowCount = res.daily.borrows;
+                this.weeklyStats = res.weekly || { labels: [], stockRequests: [], itemRequests: [], transfers: [], borrows: [] };
+                this.lastWeekStats = res.lastWeek || {};
+                this.lastMonthStats = res.lastMonth || {};
+
+                // Update specific daily counts
+                this.stockCount = res.daily?.stockRequests || 0;
+                this.itemCount = res.daily?.itemRequests || 0;
+                this.transferCount = res.daily?.transfers || 0;
+                this.borrowCount = res.daily?.borrows || 0;
+                this.onlineUsers = res.daily?.onlineUsers || 0;
+
+                this.breakdowns = res.breakdowns || { stock: [], item: [], borrow: [] };
+                this.onlineUsersList = res.online || [];
 
                 setTimeout(() => this.createChart(), 100);
             },
@@ -106,43 +110,65 @@ export class HomeComponent implements OnInit {
             this.chart.destroy();
         }
 
+        // Filter datasets based on role visibility
+        const datasets = [];
+
+        // Stock Requests
+        if (this.showStockCard) {
+            datasets.push({
+                label: 'Stock Requests',
+                data: this.weeklyStats.stockRequests || [],
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true
+            });
+        }
+
+        // Item Requests (Everyone)
+        datasets.push({
+            label: 'Item Requests',
+            data: this.weeklyStats.itemRequests || [],
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 2,
+            tension: 0.4,
+            fill: true
+        });
+
+        // Transfers
+        if (this.showTransferCard) {
+            datasets.push({
+                label: 'Transfers',
+                data: this.weeklyStats.transfers || [],
+                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                borderColor: 'rgba(153, 102, 255, 1)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true
+            });
+        }
+
+        // Borrows (Everyone)
+        datasets.push({
+            label: 'Borrows',
+            data: this.weeklyStats.borrows || [],
+            backgroundColor: 'rgba(255, 159, 64, 0.2)',
+            borderColor: 'rgba(255, 159, 64, 1)',
+            borderWidth: 2,
+            tension: 0.4,
+            fill: true
+        });
+
         this.chart = new Chart(ctx, {
-            type: 'bar',
+            type: 'line',
             data: {
-                labels: this.weeklyStats.labels.map((l: string) => {
+                labels: (this.weeklyStats.labels || []).map((l: string) => {
                     const d = new Date(l);
                     return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
                 }),
-                datasets: [
-                    {
-                        label: 'Stock Requests',
-                        data: this.weeklyStats.stockRequests,
-                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Item Requests',
-                        data: this.weeklyStats.itemRequests,
-                        backgroundColor: 'rgba(75, 192, 192, 0.7)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Transfers',
-                        data: this.weeklyStats.transfers,
-                        backgroundColor: 'rgba(153, 102, 255, 0.7)',
-                        borderColor: 'rgba(153, 102, 255, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Borrows',
-                        data: this.weeklyStats.borrows,
-                        backgroundColor: 'rgba(255, 159, 64, 0.7)',
-                        borderColor: 'rgba(255, 159, 64, 1)',
-                        borderWidth: 1
-                    }
-                ]
+                datasets: datasets
             },
             options: {
                 responsive: true,
@@ -150,23 +176,39 @@ export class HomeComponent implements OnInit {
                 scales: {
                     y: {
                         beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
-                        }
+                        ticks: { stepSize: 1 }
                     }
                 },
                 plugins: {
-                    legend: {
-                        position: 'top',
-                    }
+                    legend: { position: 'top' }
                 }
             }
         });
     }
 
-    // Role helpers
-    get isAdmin() {
-        const role = String(this.account?.role || '').toLowerCase();
-        return ['superadmin', 'admin', 'stockroomadmin'].includes(role);
+    openBreakdown(type: 'stock' | 'item' | 'borrow' | 'online') {
+        this.modalType = type;
+        this.showModal = true;
+
+        if (type === 'stock') {
+            this.modalTitle = 'Stock Requests by Department';
+            this.modalData = this.breakdowns.stock.map((b: any) => ({ name: b.itemType || 'Unknown', count: b.count }));
+        } else if (type === 'item') {
+            this.modalTitle = 'Item Requests by Department';
+            this.modalData = this.breakdowns.item.map((b: any) => ({ name: b.itemType || 'Unknown', count: b.count }));
+        } else if (type === 'borrow') {
+            this.modalTitle = 'Borrows by User';
+            this.modalData = this.breakdowns.borrow.map((b: any) => ({
+                name: b.requester ? `${b.requester.firstName} ${b.requester.lastName}` : 'Unknown',
+                count: b.count
+            }));
+        } else if (type === 'online') {
+            this.modalTitle = 'Online Users';
+            this.modalData = this.onlineUsersList;
+        }
+    }
+
+    closeModal() {
+        this.showModal = false;
     }
 }

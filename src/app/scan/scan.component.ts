@@ -1,9 +1,9 @@
-import { Component, OnDestroy, AfterViewInit, ViewChild, ElementRef, ChangeDetectorRef  } from '@angular/core';
+import { Component, OnDestroy, AfterViewInit, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { BrowserQRCodeReader } from '@zxing/library';
 import { first } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 
-import { QrService, RoomService, AlertService } from '@app/_services';
+import { QrService, RoomService, AlertService, AccountService } from '@app/_services';
 
 @Component({
   selector: 'app-scan',
@@ -25,6 +25,8 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
   batchQty = 1;
   batchRoomIdInput: number | null = null;
   batchActionType: 'release' | 'receive' = 'release';
+  claimedBy = '';
+  releasedBy = '';
 
   // update-status UI state
   openUpdateMenu = false;
@@ -37,7 +39,13 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
     private alert: AlertService,
     private cd: ChangeDetectorRef,
     private http: HttpClient,
-  ) {}
+    private accountService: AccountService
+  ) {
+    const user = this.accountService.accountValue;
+    if (user) {
+      this.releasedBy = `${user.firstName} ${user.lastName}`;
+    }
+  }
 
   async ngAfterViewInit() {
     // start after initial detection
@@ -65,7 +73,7 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
   }
 
   stopScanner() {
-    try { this.codeReader.reset(); } catch (e) {}
+    try { this.codeReader.reset(); } catch (e) { }
     this.scanning = false;
     this.cd.detectChanges();
   }
@@ -102,34 +110,34 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
     const payload = this.lastScannedItem?.payload || this.lastParsed || tryParseJson(this.lastResult) || { raw: this.lastResult };
 
     // unit-level QR
-    if (payload.unitId) {
+    if (this.isUnit()) {
       this.releaseUnit(payload);
       return;
     }
 
     // batch-level QR (inventory id)
     const inventoryId = payload.id || payload.inventoryId || payload.apparelInventoryId;
-      if (inventoryId) {
-        this.batchRoomIdInput = payload.roomId || null;
-        this.batchActionType = 'release';
-        this.showBatchQtyInput = true;
-        this.batchQty = 1;
-        return;
-      }
+    if (inventoryId) {
+      this.batchRoomIdInput = payload.roomId || null;
+      this.batchActionType = 'release';
+      this.showBatchQtyInput = true;
+      this.batchQty = 1;
+      return;
+    }
 
     this.alert.error('Scanned QR is not a recognizable unit or batch payload.');
   }
 
   onReceiveClicked() {
     const payload = this.lastScannedItem?.payload || this.lastParsed || tryParseJson(this.lastResult) || { raw: this.lastResult };
-  
+
     // unit-level QR => invoking receiveUnit isn't typical; prefer batch-level
-    if (payload.unitId) {
+    if (this.isUnit()) {
       // fallback: ask user to use receive form or implement unit-level receive if you want
       this.alert.error('Unit-level receive is not supported via QR. Scan a batch QR (inventory) instead.');
       return;
     }
-  
+
     // batch-level QR (inventory id)
     const inventoryId = payload.id || payload.inventoryId || payload.apparelInventoryId;
     if (inventoryId) {
@@ -139,34 +147,12 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
       this.batchQty = 1;
       return;
     }
-  
+
     this.alert.error('Scanned QR is not a recognizable batch payload.');
   }
 
-  private releaseUnit(payload: any) {
-    const unitId = payload.unitId;
-    if (!unitId) { this.alert.error('Unit ID not found in QR payload.'); return; }
-  
-    const stockroomType = (payload.itemType || payload.stockroomType || this.lastScannedItem?._detectedItemType || 'apparel').toString().toLowerCase();
-    const roomId = payload.roomId || this.batchRoomIdInput || null;
-    const actor = { actorId: /* optional: current user id if available */ null };
-  
-    // prefer roomService for apparel when roomId exists (keeps your existing flow)
-    if (stockroomType === 'apparel' && roomId) {
-      const releasePayload = { unitId: Number(unitId), ...actor };
-      this.roomService.releaseApparel(Number(roomId), releasePayload).pipe(first()).subscribe({
-        next: () => { this.alert.success('Unit released successfully.'); this.resetAfterAction(); setTimeout(()=>this.startScanner(), 300); },
-        error: (err: any) => { this.alert.error(err?.error?.message || err?.message || String(err)); }
-      });
-      return;
-    }
-  
-    // otherwise call qrService.releaseUnit -> backend wrapper dispatches to correct service
-    this.qrService.releaseUnit(stockroomType, Number(unitId), actor).pipe(first()).subscribe({
-      next: () => { this.alert.success('Unit released successfully.'); this.resetAfterAction(); setTimeout(()=>this.startScanner(), 300); },
-      error: (err: any) => { this.alert.error(err?.error?.message || err?.message || String(err)); }
-    });
-  }
+  // duplicate releaseUnit removed
+
 
   confirmBatchAction() {
     const payload = this.lastScannedItem?.payload || this.lastParsed || tryParseJson(this.lastResult) || { raw: this.lastResult };
@@ -174,9 +160,9 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
     if (!inventoryId) { this.alert.error('Inventory id not found in scanned QR payload.'); return; }
     const roomId = payload.roomId || this.batchRoomIdInput;
     if (!roomId) { this.alert.error('Room id required for batch operation.'); return; }
-  
+
     const stockroomType = (payload.itemType || payload.stockroomType || this.lastScannedItem?._detectedItemType || 'apparel').toString().toLowerCase();
-  
+
     // helper to get current user id (used as receivedBy). Tries multiple localStorage keys to match your app.
     const getCurrentUserId = (): number | null => {
       try {
@@ -186,102 +172,123 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
         return (u?.id || u?.accountId || u?.userId || null) ? Number(u.id || u.accountId || u.userId) : null;
       } catch (e) { return null; }
     };
-  
+
     const currentUserId = getCurrentUserId();
     if (this.batchActionType === 'release') {
+      const releaseData = {
+        claimedBy: this.claimedBy,
+        releasedBy: this.releasedBy,
+        quantity: Number(this.batchQty)
+      };
+
       // -- existing release behavior (keeps your callbacks style) --
       if (stockroomType === 'apparel') {
-        const body = { apparelInventoryId: Number(inventoryId), releaseApparelQuantity: Number(this.batchQty) };
+        const body = {
+          apparelInventoryId: Number(inventoryId),
+          releaseApparelQuantity: releaseData.quantity,
+          claimedBy: releaseData.claimedBy,
+          releasedBy: releaseData.releasedBy
+        };
         this.roomService.releaseApparel(Number(roomId), body).pipe(first()).subscribe({
-          next: () => { this.alert.success('Released successfully'); this.resetAfterAction(); setTimeout(()=>this.startScanner(), 300); },
+          next: () => { this.alert.success('Released successfully'); this.resetAfterAction(); setTimeout(() => this.startScanner(), 300); },
           error: (err) => { const msg = (err?.error?.message || err?.message || String(err)); this.alert.error(`Failed to release: ${msg}`); }
         });
         return;
       }
-  
-      if (['supply','admin-supply','adminsupply'].includes(stockroomType)) {
-        const body = { adminSupplyInventoryId: Number(inventoryId), releaseAdminSupplyQuantity: Number(this.batchQty) };
+
+      if (['supply', 'admin-supply', 'adminsupply'].includes(stockroomType)) {
+        const body = {
+          adminSupplyInventoryId: Number(inventoryId),
+          releaseAdminSupplyQuantity: releaseData.quantity,
+          claimedBy: releaseData.claimedBy,
+          releasedBy: releaseData.releasedBy
+        };
         this.roomService.releaseAdminSupply(Number(roomId), body).pipe(first()).subscribe({
-          next: () => { this.alert.success('Released successfully'); this.resetAfterAction(); setTimeout(()=>this.startScanner(), 300); },
+          next: () => { this.alert.success('Released successfully'); this.resetAfterAction(); setTimeout(() => this.startScanner(), 300); },
           error: (err) => { const msg = (err?.error?.message || err?.message || String(err)); this.alert.error(`Failed to release: ${msg}`); }
         });
         return;
       }
-  
+
       // fallback -> genitem / general
-      const body = { genItemInventoryId: Number(inventoryId), releaseGenItemQuantity: Number(this.batchQty) };
+      const body = {
+        genItemInventoryId: Number(inventoryId),
+        releaseGenItemQuantity: releaseData.quantity,
+        claimedBy: releaseData.claimedBy,
+        releasedBy: releaseData.releasedBy
+      };
       this.roomService.releaseGenItem(Number(roomId), body).pipe(first()).subscribe({
-        next: () => { this.alert.success('Released successfully'); this.resetAfterAction(); setTimeout(()=>this.startScanner(), 300); },
+        next: () => { this.alert.success('Released successfully'); this.resetAfterAction(); setTimeout(() => this.startScanner(), 300); },
         error: (err) => { const msg = (err?.error?.message || err?.message || String(err)); this.alert.error(`Failed to release: ${msg}`); }
       });
       return;
     }
-  
+
     // === receive path ===
     // Build a receive payload using the canonical fields from lastScannedItem.inventory when present,
     // otherwise fall back to scanned payload fields.
     const inv = this.lastScannedItem?.inventory || this.lastScannedItem?.batch || this.lastScannedItem || payload;
-  
+
     // Apparel receive
     if (stockroomType === 'apparel') {
       const body: any = {
-        apparelName:     inv.apparelName || inv.name || payload.apparelName || payload.name || '',
-        apparelLevel:    inv.apparelLevel || payload.apparelLevel || '',
-        apparelType:     inv.apparelType || payload.apparelType || '',
-        apparelFor:      inv.apparelFor || payload.apparelFor || '',
-        apparelSize:     inv.apparelSize || inv.size || payload.apparelSize || payload.size || '',
+        apparelName: inv.apparelName || inv.name || payload.apparelName || payload.name || '',
+        apparelLevel: inv.apparelLevel || payload.apparelLevel || '',
+        apparelType: inv.apparelType || payload.apparelType || '',
+        apparelFor: inv.apparelFor || payload.apparelFor || '',
+        apparelSize: inv.apparelSize || inv.size || payload.apparelSize || payload.size || '',
         apparelQuantity: Number(this.batchQty),
-        receivedFrom:    `QR:${(this.lastResult || '').slice(0,40)}`,
-        receivedBy:      currentUserId ?? 1,
-        notes:           payload.notes || null
+        receivedFrom: `QR:${(this.lastResult || '').slice(0, 40)}`,
+        receivedBy: currentUserId ?? 1,
+        notes: payload.notes || null
       };
-  
+
       if (!body.apparelName) { this.alert.error('Apparel name not found in QR payload'); return; }
-  
+
       this.roomService.receiveItem(Number(roomId), body).pipe(first()).subscribe({
-        next: () => { this.alert.success('Received apparel batch'); this.resetAfterAction(); setTimeout(()=>this.startScanner(), 300); },
+        next: () => { this.alert.success('Received apparel batch'); this.resetAfterAction(); setTimeout(() => this.startScanner(), 300); },
         error: (err) => { const msg = (err?.error?.message || err?.message || String(err)); this.alert.error(`Failed to receive: ${msg}`); }
       });
       return;
     }
-  
+
     // Admin supply receive
-    if (['supply','admin-supply','adminsupply'].includes(stockroomType)) {
+    if (['supply', 'admin-supply', 'adminsupply'].includes(stockroomType)) {
       const body: any = {
-        supplyName:     inv.supplyName || inv.name || payload.supplyName || payload.name || '',
-        supplyMeasure:  inv.supplyMeasure || payload.supplyMeasure || payload.measure || 'pcs',
+        supplyName: inv.supplyName || inv.name || payload.supplyName || payload.name || '',
+        supplyMeasure: inv.supplyMeasure || payload.supplyMeasure || payload.measure || 'pcs',
         supplyQuantity: Number(this.batchQty),
-        receivedFrom:   `QR:${(this.lastResult || '').slice(0,40)}`,
-        receivedBy:     currentUserId ?? 1,
-        notes:          payload.notes || null
+        receivedFrom: `QR:${(this.lastResult || '').slice(0, 40)}`,
+        receivedBy: currentUserId ?? 1,
+        notes: payload.notes || null
       };
-  
+
       if (!body.supplyName) { this.alert.error('Supply name not found in QR payload'); return; }
-  
+
       this.roomService.receiveItem(Number(roomId), body).pipe(first()).subscribe({
-        next: () => { this.alert.success('Received admin supply batch'); this.resetAfterAction(); setTimeout(()=>this.startScanner(), 300); },
+        next: () => { this.alert.success('Received admin supply batch'); this.resetAfterAction(); setTimeout(() => this.startScanner(), 300); },
         error: (err) => { const msg = (err?.error?.message || err?.message || String(err)); this.alert.error(`Failed to receive: ${msg}`); }
       });
       return;
     }
-  
+
     // Gen item receive (fallback)
     const body: any = {
-      genItemName:     inv.genItemName || inv.name || payload.genItemName || payload.name || 'unknown',
-      genItemSize:     inv.genItemSize || inv.size || payload.genItemSize || payload.size || '',
+      genItemName: inv.genItemName || inv.name || payload.genItemName || payload.name || 'unknown',
+      genItemSize: inv.genItemSize || inv.size || payload.genItemSize || payload.size || '',
       genItemQuantity: Number(this.batchQty),
-      genItemType:     (inv.genItemType || payload.genItemType || 'unknownType').toString(),
-      receivedFrom:    `QR:${(this.lastResult || '').slice(0,40)}`,
-      receivedBy:      currentUserId ?? 1,
-      notes:           payload.notes || null
+      genItemType: (inv.genItemType || payload.genItemType || 'unknownType').toString(),
+      receivedFrom: `QR:${(this.lastResult || '').slice(0, 40)}`,
+      receivedBy: currentUserId ?? 1,
+      notes: payload.notes || null
     };
-  
+
     // ensure genItemType is one of your allowed values ('it','maintenance','unknownType')
     const t = (body.genItemType || '').toLowerCase();
     body.genItemType = (t === 'it' || t === 'maintenance') ? t : 'unknownType';
-  
+
     this.roomService.receiveItem(Number(roomId), body).pipe(first()).subscribe({
-      next: () => { this.alert.success('Received general item batch'); this.resetAfterAction(); setTimeout(()=>this.startScanner(), 300); },
+      next: () => { this.alert.success('Received general item batch'); this.resetAfterAction(); setTimeout(() => this.startScanner(), 300); },
       error: (err) => { const msg = (err?.error?.message || err?.message || String(err)); this.alert.error(`Failed to receive: ${msg}`); }
     });
   }
@@ -291,7 +298,7 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
     this.batchQty = 1;
     this.batchRoomIdInput = null;
   }
-  
+
   resetAfterAction() {
     this.lastResult = null;
     this.lastParsed = null;
@@ -307,7 +314,7 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
   // New user action: restart scanning without leaving the view
   scanAgain() {
     this.resetAfterAction();
-    setTimeout(()=> this.startScanner(), 100);
+    setTimeout(() => this.startScanner(), 100);
   }
 
   // Friendly quantity extractor (defensive: many possible shapes)
@@ -328,93 +335,117 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
     return '-';
   }
 
-  // helpers used by update/status UI (left unchanged)
+  // helpers used by update/status UI
   extractUnitId() {
-    const p = this.lastScannedItem?.payload || this.lastParsed || tryParseJson(this.lastResult);
-    return p?.unitId || null;
+    return this.lastScannedItem?.unit?.id ||
+      this.lastScannedItem?.payload?.unitId ||
+      this.lastParsed?.unitId ||
+      null;
   }
+
   extractItemType() {
-    const p = this.lastScannedItem?.payload || this.lastParsed || tryParseJson(this.lastResult);
-    return p?.itemType || p?.type || null;
+    return this.lastScannedItem?.payload?.itemType ||
+      this.lastScannedItem?.type ||
+      this.lastScannedItem?.itemType ||
+      this.lastParsed?.type ||
+      this.lastParsed?.itemType ||
+      'apparel'; // default to apparel
   }
+
   extractRoomId() {
-    const p = this.lastScannedItem?.payload || this.lastParsed || tryParseJson(this.lastResult);
-    return p?.roomId || null;
+    return this.lastScannedItem?.payload?.roomId ||
+      this.lastScannedItem?.roomId ||
+      this.lastParsed?.roomId ||
+      null;
+  }
+
+  extractSku() {
+    return this.lastScannedItem?.payload?.sku ||
+      this.lastScannedItem?.sku ||
+      this.lastScannedItem?.inventory?.sku ||
+      this.lastParsed?.sku ||
+      '-';
   }
 
   isUnit(): boolean {
     // lastScannedItem.unit exists or parsed payload has unitId
     const payload = this.lastScannedItem?.payload || this.lastParsed || tryParseJson(this.lastResult);
-    return !!(this.lastScannedItem?.unit || payload?.unitId);
+    return !!(this.lastScannedItem?.unit || payload?.unitId || this.extractUnitId());
   }
-  
-  // onWorkingClicked() {
-  //   const unitId = this.extractUnitId();
-  //   if (!unitId) { this.alert.error('Unit id not found in QR payload.'); return; }
-  //   const stockroomType = (this.extractItemType() || this.lastScannedItem?._detectedItemType || 'apparel').toString().toLowerCase();
-  
-  //   this.qrService.updateUnitStatus(stockroomType, Number(unitId), { status: 'working' }).pipe(first()).subscribe({
-  //     next: () => { this.alert.success('Unit marked as working'); this.resetAfterAction(); setTimeout(()=>this.startScanner(),300); },
-  //     error: (err: any) => { this.alert.error(err?.error?.message || err?.message || 'Failed to update status'); }
-  //   });
-  // }
-  
-  // onDamageClicked() {
-  //   const unitId = this.extractUnitId();
-  //   if (!unitId) { this.alert.error('Unit id not found in QR payload.'); return; }
-  //   const stockroomType = (this.extractItemType() || this.lastScannedItem?._detectedItemType || 'apparel').toString().toLowerCase();
-  
-  //   this.qrService.updateUnitStatus(stockroomType, Number(unitId), { status: 'damaged' }).pipe(first()).subscribe({
-  //     next: () => { this.alert.success('Unit marked as damaged'); this.resetAfterAction(); setTimeout(()=>this.startScanner(),300); },
-  //     error: (err: any) => { this.alert.error(err?.error?.message || err?.message || 'Failed to update status'); }
-  //   });
-  // }
 
   onWorkingClicked() {
     const unitId = this.extractUnitId();
     if (!unitId) { this.alert.error('Unit id not found in QR payload.'); return; }
-  
-    const stockroomType = (this.extractItemType() || this.lastScannedItem?._detectedItemType || 'apparel').toString().toLowerCase();
+
+    const stockroomType = (this.extractItemType() || 'apparel').toString().toLowerCase();
     const roomId = this.extractRoomId() || this.batchRoomIdInput || null;
-  
+
     // If we're scanning an apparel unit and we have a room context, use roomService
     if (stockroomType === 'apparel' && roomId) {
       this.roomService.updateApparelUnit(Number(roomId), Number(unitId), { status: 'working' }).pipe(first()).subscribe({
-        next: (updated: any) => { this.alert.success('Unit marked as working'); this.resetAfterAction(); setTimeout(()=>this.startScanner(), 300); },
+        next: (updated: any) => { this.alert.success('Unit marked as working'); this.resetAfterAction(); setTimeout(() => this.startScanner(), 300); },
         error: (err: any) => { this.alert.error(err?.error?.message || err?.message || 'Failed to update status'); }
       });
       return;
     }
-  
+
     // fallback: use generic QR endpoint for other types or when no roomId
     this.qrService.updateUnitStatus(stockroomType, Number(unitId), { status: 'working' }).pipe(first()).subscribe({
-      next: () => { this.alert.success('Unit marked as working'); this.resetAfterAction(); setTimeout(()=>this.startScanner(),300); },
+      next: () => { this.alert.success('Unit marked as working'); this.resetAfterAction(); setTimeout(() => this.startScanner(), 300); },
       error: (err: any) => { this.alert.error(err?.error?.message || err?.message || 'Failed to update status'); }
     });
   }
-  
+
   // replace the existing onDamageClicked() in src/app/scan/scan.component.ts with this:
   onDamageClicked() {
     const unitId = this.extractUnitId();
     if (!unitId) { this.alert.error('Unit id not found in QR payload.'); return; }
-  
-    const stockroomType = (this.extractItemType() || this.lastScannedItem?._detectedItemType || 'apparel').toString().toLowerCase();
+
+    const stockroomType = (this.extractItemType() || 'apparel').toString().toLowerCase();
     const roomId = this.extractRoomId() || this.batchRoomIdInput || null;
-  
+
     // NOTE: apparel model uses 'damage' as the enum value (not 'damaged'), so map it when using roomService.
     // Use the room-scoped update when roomId exists.
     if (stockroomType === 'apparel' && roomId) {
       this.roomService.updateApparelUnit(Number(roomId), Number(unitId), { status: 'damage' }).pipe(first()).subscribe({
-        next: (updated: any) => { this.alert.success('Unit marked as damaged'); this.resetAfterAction(); setTimeout(()=>this.startScanner(), 300); },
+        next: (updated: any) => { this.alert.success('Unit marked as damaged'); this.resetAfterAction(); setTimeout(() => this.startScanner(), 300); },
         error: (err: any) => { this.alert.error(err?.error?.message || err?.message || 'Failed to update status'); }
       });
       return;
     }
-  
+
     // fallback: use generic QR endpoint (keeps existing behavior)
     this.qrService.updateUnitStatus(stockroomType, Number(unitId), { status: 'damaged' }).pipe(first()).subscribe({
-      next: () => { this.alert.success('Unit marked as damaged'); this.resetAfterAction(); setTimeout(()=>this.startScanner(),300); },
+      next: () => { this.alert.success('Unit marked as damaged'); this.resetAfterAction(); setTimeout(() => this.startScanner(), 300); },
       error: (err: any) => { this.alert.error(err?.error?.message || err?.message || 'Failed to update status'); }
+    });
+  }
+
+  // Updated Release Unit to use extractors
+  private releaseUnit(payload: any) {
+    const unitId = this.extractUnitId();
+    if (!unitId) { this.alert.error('Unit ID not found in QR payload.'); return; }
+
+    const stockroomType = (this.extractItemType() || 'apparel').toString().toLowerCase();
+    const roomId = this.extractRoomId() || this.batchRoomIdInput || null;
+    const actor = {
+      actorId: /* optional: current user id if available */ null
+    };
+
+    // prefer roomService for apparel when roomId exists (keeps your existing flow)
+    if (stockroomType === 'apparel' && roomId) {
+      const releasePayload = { unitId: Number(unitId), ...actor };
+      this.roomService.releaseApparel(Number(roomId), releasePayload).pipe(first()).subscribe({
+        next: () => { this.alert.success('Unit released successfully.'); this.resetAfterAction(); setTimeout(() => this.startScanner(), 300); },
+        error: (err: any) => { this.alert.error(err?.error?.message || err?.message || String(err)); }
+      });
+      return;
+    }
+
+    // otherwise call qrService.releaseUnit -> backend wrapper dispatches to correct service
+    this.qrService.releaseUnit(stockroomType, Number(unitId), actor).pipe(first()).subscribe({
+      next: () => { this.alert.success('Unit released successfully.'); this.resetAfterAction(); setTimeout(() => this.startScanner(), 300); },
+      error: (err: any) => { this.alert.error(err?.error?.message || err?.message || String(err)); }
     });
   }
 }

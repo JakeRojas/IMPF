@@ -15,43 +15,128 @@
 
         <!-- Statistics Stats -->
         <div class="row g-3 g-md-4 mb-4 mb-md-5">
-            <div class="col-6 col-md-2">
+            <!-- Stock Requests -->
+            <div class="col-12 col-md-6 col-lg-3" *ngIf="showStockCard">
                 <div class="card shadow-sm border-0 border-top border-4 border-primary h-100 transition-hover">
-                    <div class="card-body text-center p-3">
-                        <div class="text-muted fw-bold text-uppercase x-small">Stock Requests</div>
-                        <div class="h2 mb-0 mt-2 text-primary">{{stockCount}}</div>
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="text-muted fw-bold text-uppercase x-small">Stock Requests</div>
+                            <button class="btn btn-sm btn-link p-0 text-decoration-none"
+                                (click)="openBreakdown('stock')">View</button>
+                        </div>
+                        <div class="d-flex justify-content-between text-center mt-3">
+                            <div>
+                                <div class="h4 mb-0 text-primary">{{stockCount}}</div>
+                                <small class="text-muted x-small">Today</small>
+                            </div>
+                            <div class="vr mx-2"></div>
+                            <div>
+                                <div class="h4 mb-0 text-primary">{{lastWeekStats?.stockRequests || 0}}</div>
+                                <small class="text-muted x-small">Week</small>
+                            </div>
+                            <div class="vr mx-2"></div>
+                            <div>
+                                <div class="h4 mb-0 text-primary">{{lastMonthStats?.stockRequests || 0}}</div>
+                                <small class="text-muted x-small">Month</small>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-6 col-md-2">
+
+            <!-- Item Requests -->
+            <div class="col-12 col-md-6 col-lg-3" *ngIf="showItemCard">
                 <div class="card shadow-sm border-0 border-top border-4 border-success h-100 transition-hover">
-                    <div class="card-body text-center p-3">
-                        <div class="text-muted fw-bold text-uppercase x-small">Item Requests</div>
-                        <div class="h2 mb-0 mt-2 text-success">{{itemCount}}</div>
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="text-muted fw-bold text-uppercase x-small">Item Requests</div>
+                            <button class="btn btn-sm btn-link p-0 text-decoration-none"
+                                (click)="openBreakdown('item')">View</button>
+                        </div>
+                        <div class="d-flex justify-content-between text-center mt-3">
+                            <div>
+                                <div class="h4 mb-0 text-success">{{itemCount}}</div>
+                                <small class="text-muted x-small">Today</small>
+                            </div>
+                            <div class="vr mx-2"></div>
+                            <div>
+                                <div class="h4 mb-0 text-success">{{lastWeekStats?.itemRequests || 0}}</div>
+                                <small class="text-muted x-small">Week</small>
+                            </div>
+                            <div class="vr mx-2"></div>
+                            <div>
+                                <div class="h4 mb-0 text-success">{{lastMonthStats?.itemRequests || 0}}</div>
+                                <small class="text-muted x-small">Month</small>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-6 col-md-2">
+
+            <!-- Transfers -->
+            <div class="col-12 col-md-6 col-lg-3" *ngIf="showTransferCard">
                 <div class="card shadow-sm border-0 border-top border-4 border-warning h-100 transition-hover">
                     <div class="card-body text-center p-3">
                         <div class="text-muted fw-bold text-uppercase x-small">Transfers</div>
-                        <div class="h2 mb-0 mt-2 text-warning">{{transferCount}}</div>
+                        <div class="d-flex justify-content-between text-center mt-3">
+                            <div>
+                                <div class="h4 mb-0 text-warning">{{transferCount}}</div>
+                                <small class="text-muted x-small">Today</small>
+                            </div>
+                            <div class="vr mx-2"></div>
+                            <div>
+                                <div class="h4 mb-0 text-warning">{{lastWeekStats?.transfers || 0}}</div>
+                                <small class="text-muted x-small">Week</small>
+                            </div>
+                            <div class="vr mx-2"></div>
+                            <div>
+                                <div class="h4 mb-0 text-warning">{{lastMonthStats?.transfers || 0}}</div>
+                                <small class="text-muted x-small">Month</small>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-6 col-md-2">
+
+            <!-- Borrows -->
+            <div class="col-12 col-md-6 col-lg-3" *ngIf="showBorrowCard">
                 <div class="card shadow-sm border-0 border-top border-4 border-info h-100 transition-hover">
-                    <div class="card-body text-center p-3">
-                        <div class="text-muted fw-bold text-uppercase x-small">Borrows</div>
-                        <div class="h2 mb-0 mt-2 text-info">{{borrowCount}}</div>
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="text-muted fw-bold text-uppercase x-small">Borrows</div>
+                            <button class="btn btn-sm btn-link p-0 text-decoration-none"
+                                (click)="openBreakdown('borrow')">View</button>
+                        </div>
+                        <div class="d-flex justify-content-between text-center mt-3">
+                            <div>
+                                <div class="h4 mb-0 text-info">{{borrowCount}}</div>
+                                <small class="text-muted x-small">Today</small>
+                            </div>
+                            <div class="vr mx-2"></div>
+                            <div>
+                                <div class="h4 mb-0 text-info">{{lastWeekStats?.borrows || 0}}</div>
+                                <small class="text-muted x-small">Week</small>
+                            </div>
+                            <div class="vr mx-2"></div>
+                            <div>
+                                <div class="h4 mb-0 text-info">{{lastMonthStats?.borrows || 0}}</div>
+                                <small class="text-muted x-small">Month</small>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-md-4">
+
+            <!-- Online Users -->
+            <div class="col-12 col-md-6 col-lg-3" *ngIf="showOnlineUsersCard">
                 <div
                     class="card shadow-sm border-0 bg-dark text-white h-100 transition-hover overflow-hidden position-relative">
                     <div class="card-body d-flex flex-column justify-content-center p-3">
-                        <div class="opacity-75 fw-bold text-uppercase small">Online Users (Today)</div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="opacity-75 fw-bold text-uppercase small">Online Users (Realtime)</div>
+                            <button class="btn btn-sm btn-link p-0 text-decoration-none text-info"
+                                (click)="openBreakdown('online')">View</button>
+                        </div>
                         <div class="h1 mb-0 mt-2 fw-bold text-info">{{onlineUsers}}</div>
                         <div class="position-absolute end-0 bottom-0 p-3 opacity-25">
                             <span class="display-1">👥</span>
@@ -62,7 +147,7 @@
         </div>
 
         <!-- Weekly Statistics Chart -->
-        <div class="row mb-5" *ngIf="isAdmin">
+        <div class="row mb-5" *ngIf="showWeeklyStats">
             <div class="col-12">
                 <div class="card shadow-sm border-0">
                     <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
@@ -89,22 +174,22 @@
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-3">
-                            <a routerLink="/requests/stock-request/create"
+                            <a *ngIf="showStockCard" routerLink="/req-stock/create"
                                 class="btn btn-outline-primary text-start p-3 d-flex align-items-center">
                                 <span class="me-auto">New Stock Request</span>
                                 <span class="h5 mb-0">→</span>
                             </a>
-                            <a routerLink="/requests/item-request/create"
+                            <a routerLink="/req-item/create"
                                 class="btn btn-outline-success text-start p-3 d-flex align-items-center">
                                 <span class="me-auto">New Item Request</span>
                                 <span class="h5 mb-0">→</span>
                             </a>
-                            <a routerLink="/borrows/create"
+                            <a routerLink="/borrow/create"
                                 class="btn btn-outline-info text-start p-3 d-flex align-items-center">
                                 <span class="me-auto">New Borrow Request</span>
                                 <span class="h5 mb-0">→</span>
                             </a>
-                            <a *ngIf="isAdmin" routerLink="/admin/accounts"
+                            <a *ngIf="showStockCard" routerLink="/admin/accounts"
                                 class="btn btn-outline-dark text-start p-3 d-flex align-items-center">
                                 <span class="me-auto">Manage Users</span>
                                 <span class="h5 mb-0">→</span>
@@ -120,11 +205,11 @@
             </div>
 
             <!-- Recent Activity -->
-            <div class="col-lg-8">
+            <div class="col-lg-8" *ngIf="showRecentActivity">
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-header bg-white border-0 pt-4 d-flex justify-content-between align-items-center">
                         <h5 class="card-title fw-bold m-0">Recent Activity</h5>
-                        <a routerLink="/admin/manage-logs" class="text-decoration-none small" *ngIf="isAdmin">View
+                        <a routerLink="/admin/manage-logs" class="text-decoration-none small" *ngIf="showStockCard">View
                             All</a>
                     </div>
                     <div class="card-body p-0">
@@ -202,6 +287,44 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div *ngIf="showModal" class="modal fade show d-block" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title fw-bold">{{ modalTitle }}</h5>
+                <button type="button" class="btn-close" (click)="closeModal()"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="list-group list-group-flush">
+                    <ng-container *ngIf="modalType !== 'online'">
+                        <div *ngFor="let item of modalData"
+                            class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ item.name }}</span>
+                            <span class="badge bg-primary rounded-pill">{{ item.count }}</span>
+                        </div>
+                        <div *ngIf="modalData.length === 0" class="p-4 text-center text-muted">No data available.</div>
+                    </ng-container>
+
+                    <ng-container *ngIf="modalType === 'online'">
+                        <div *ngFor="let user of modalData" class="list-group-item">
+                            <div class="d-flex align-items-center">
+                                <div class="fw-bold">{{ user.firstName }} {{ user.lastName }}</div>
+                                <span class="ms-auto badge bg-success">Online</span>
+                            </div>
+                            <div class="small text-muted">{{ user.email }} | {{ user.role }}</div>
+                        </div>
+                        <div *ngIf="modalData.length === 0" class="p-4 text-center text-muted">No users online.</div>
+                    </ng-container>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0">
+                <button type="button" class="btn btn-secondary" (click)="closeModal()">Close</button>
             </div>
         </div>
     </div>

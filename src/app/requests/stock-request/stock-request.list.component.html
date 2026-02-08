@@ -7,9 +7,10 @@
             <li class="breadcrumb-item active">Stock Request List</li>
           </ol>
         </nav>
-        <!-- <button class="btn btn-primary shadow-sm d-flex align-items-center gap-2" (click)="create()">
+        <button *ngIf="isStockroom()" class="btn btn-primary shadow-sm d-flex align-items-center gap-2"
+          (click)="create()">
           <i class="bi bi-plus-lg"></i>Create Request
-        </button> -->
+        </button>
       </div>
 
       <div class="row g-2 align-items-end">
