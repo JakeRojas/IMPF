@@ -19,15 +19,15 @@ export class AdminSupplyReceiveComponent implements OnInit {
   currentUserId: number | null = null;
 
   supplyMeasures: Option[] = [
-    { value: 'pc',      label: 'pc/s' },
-    { value: 'box',     label: 'box/s' },
-    { value: 'bottle',  label: 'bottle/s' },
-    { value: 'pack',    label: 'pack/s' },
-    { value: 'ream',    label: 'ream/s' },
-    { value: 'meter',   label: 'meter/s' },
-    { value: 'roll',    label: 'roll/s' },
-    { value: 'gallon',  label: 'gallon/s' },
-    { value: 'unit',    label: 'unit/s' }
+    { value: 'pc', label: 'pc/s' },
+    { value: 'box', label: 'box/s' },
+    { value: 'bottle', label: 'bottle/s' },
+    { value: 'pack', label: 'pack/s' },
+    { value: 'ream', label: 'ream/s' },
+    { value: 'meter', label: 'meter/s' },
+    { value: 'roll', label: 'roll/s' },
+    { value: 'gallon', label: 'gallon/s' },
+    { value: 'unit', label: 'unit/s' }
   ];
 
   constructor(
@@ -37,7 +37,7 @@ export class AdminSupplyReceiveComponent implements OnInit {
     private roomService: RoomService,
     private alert: AlertService,
     private accountService: AccountService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.roomId = this.findRoomId(this.route);
@@ -96,12 +96,12 @@ export class AdminSupplyReceiveComponent implements OnInit {
 
   private buildForm() {
     this.receiveForm = this.fb.group({
-      supplyName:       ['', Validators.required],
-      supplyQuantity:   [1, [Validators.required, Validators.min(1)]],
-      supplyMeasure:    [this.supplyMeasures[0].value, Validators.required],
-      receivedFrom:     ['', Validators.required],
-      receivedBy:       [null, Validators.required],
-      notes:            ['']
+      supplyName: ['', Validators.required],
+      supplyQuantity: [1, [Validators.required, Validators.min(1)]],
+      supplyMeasure: [this.supplyMeasures[0].value, Validators.required],
+      receivedFrom: ['', Validators.required],
+      receivedBy: [null, Validators.required],
+      notes: ['']
     });
   }
 
@@ -114,7 +114,7 @@ export class AdminSupplyReceiveComponent implements OnInit {
       next: () => {
         this.alert.success('Received admin supply successfully');
         this.submitting = false;
-        this.router.navigate(['../', '..', 'inventory', 'supply'], { relativeTo: this.route });
+        this.router.navigate(['list'], { relativeTo: this.route });
       },
       error: (e) => { this.alert.error(e); this.submitting = false; }
     });

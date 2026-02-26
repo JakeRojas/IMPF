@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { RoomService, AlertService } from '@app/_services';
+import { RoomService, AlertService, AccountService } from '@app/_services';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
 
@@ -13,13 +13,17 @@ export class ApparelReleaseComponent implements OnInit {
   releaseForm!: FormGroup;
   submitting = false;
 
+  currentUserName: string | null = null;
+  currentUserId: number | null = null;
+
   constructor(
     private route: ActivatedRoute,
     public router: Router,
     private fb: FormBuilder,
     private roomService: RoomService,
-    private alert: AlertService
-  ) {}
+    private alert: AlertService,
+    private accountService: AccountService
+  ) { }
 
   ngOnInit(): void {
     this.roomId = this.findRoomId(this.route);
@@ -31,7 +35,21 @@ export class ApparelReleaseComponent implements OnInit {
       remarks: ['']
     });
 
+    this.tryFillCurrentUser();
     this.loadInventory();
+  }
+
+  private tryFillCurrentUser() {
+    const user = this.accountService.accountValue;
+    if (user) {
+      const name = user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.email || '');
+      this.currentUserName = name;
+      this.currentUserId = user.AccountId ? +user.AccountId : null;
+
+      if (name) {
+        this.releaseForm.patchValue({ releasedBy: name });
+      }
+    }
   }
 
   private findRoomId(route: ActivatedRoute): number {
@@ -60,7 +78,7 @@ export class ApparelReleaseComponent implements OnInit {
       next: () => {
         this.alert.success('Released successfully');
         this.submitting = false;
-        this.router.navigate(['../', '..', 'inventory', 'apparel'], { relativeTo: this.route });
+        this.router.navigate(['list'], { relativeTo: this.route });
       },
       error: (e) => { this.alert.error(e); this.submitting = false; }
     });

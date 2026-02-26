@@ -21,7 +21,7 @@ export class GenItemReceiveComponent implements OnInit {
   // ENUM-like option lists — replace values with the exact enum values backend expects
 
   genItemTypes: Option[] = [
-    { value: 'it',          label: 'IT Dept.' },
+    { value: 'it', label: 'IT Dept.' },
     { value: 'maintenance', label: 'Maintenance Dept.' },
     { value: 'unknownType', label: 'Unknown' },
   ];
@@ -33,7 +33,7 @@ export class GenItemReceiveComponent implements OnInit {
     private roomService: RoomService,
     private alert: AlertService,
     private accountService: AccountService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.roomId = this.findRoomId(this.route);
@@ -101,13 +101,13 @@ export class GenItemReceiveComponent implements OnInit {
   private buildForm() {
     //const currentUserId = this.getCurrentUserId;
     this.receiveForm = this.fb.group({
-      genItemName:      ['', Validators.required],
-      genItemSize:      ['', Validators.required],
-      genItemQuantity:  [1, [Validators.required, Validators.min(1)]],
-      genItemType:      [this.genItemTypes[0].value, Validators.required],
-      receivedFrom:     ['', Validators.required],
-      receivedBy:       [null, Validators.required],
-      notes:            ['']
+      genItemName: ['', Validators.required],
+      genItemSize: ['', Validators.required],
+      genItemQuantity: [1, [Validators.required, Validators.min(1)]],
+      genItemType: [this.genItemTypes[0].value, Validators.required],
+      receivedFrom: ['', Validators.required],
+      receivedBy: [null, Validators.required],
+      notes: ['']
     });
   }
 
@@ -120,7 +120,7 @@ export class GenItemReceiveComponent implements OnInit {
       next: () => {
         this.alert.success('Received general items successfully');
         this.submitting = false;
-        this.router.navigate(['../', '..', 'inventory', 'general'], { relativeTo: this.route });
+        this.router.navigate(['list'], { relativeTo: this.route });
       },
       error: (e) => { this.alert.error(e); this.submitting = false; }
     });

@@ -8,12 +8,14 @@
       <select class="form-select" formControlName="adminSupplyInventoryId">
         <option value="" disabled>Select item to release</option>
         <option *ngFor="let it of inventory" [value]="(it.adminSupplyInventoryId)">
-          {{ it.supplyName }} 
+          {{ it.supplyName }}
           <span *ngIf="it.supplyMeasure"> ({{ it.supplyMeasure }})</span>
-          - Qty: {{ it.totalQuantity ??  0 }}
+          - Qty: {{ it.totalQuantity ?? 0 }}
         </option>
       </select>
-      <div *ngIf="releaseForm.get('adminSupplyInventoryId')?.touched && releaseForm.get('adminSupplyInventoryId')?.invalid" class="text-danger small">
+      <div
+        *ngIf="releaseForm.get('adminSupplyInventoryId')?.touched && releaseForm.get('adminSupplyInventoryId')?.invalid"
+        class="text-danger small">
         Please choose an item.
       </div>
     </div>
@@ -22,7 +24,8 @@
       <div class="col-md-3 mb-2">
         <label class="form-label">Quantity</label>
         <input type="number" class="form-control" formControlName="releaseQuantity" min="1" />
-        <div *ngIf="releaseForm.get('releaseQuantity')?.touched && releaseForm.get('releaseQuantity')?.invalid" class="text-danger small">
+        <div *ngIf="releaseForm.get('releaseQuantity')?.touched && releaseForm.get('releaseQuantity')?.invalid"
+          class="text-danger small">
           Enter a valid quantity (min 1).
         </div>
       </div>
@@ -30,15 +33,18 @@
       <div class="col-md-4 mb-2">
         <label class="form-label">Claimed By</label>
         <input class="form-control" formControlName="claimedBy" placeholder="Name of claimant" />
-        <div *ngIf="releaseForm.get('claimedBy')?.touched && releaseForm.get('claimedBy')?.invalid" class="text-danger small">
+        <div *ngIf="releaseForm.get('claimedBy')?.touched && releaseForm.get('claimedBy')?.invalid"
+          class="text-danger small">
           Claimed by is required.
         </div>
       </div>
 
       <div class="col-md-5 mb-2">
         <label class="form-label">Released By</label>
-        <input class="form-control" formControlName="releasedBy" placeholder="Your name or account id" />
-        <div *ngIf="releaseForm.get('releasedBy')?.touched && releaseForm.get('releasedBy')?.invalid" class="text-danger small">
+        <input class="form-control" formControlName="releasedBy" [readOnly]="!!currentUserName"
+          placeholder="Your name" />
+        <div *ngIf="releaseForm.get('releasedBy')?.touched && releaseForm.get('releasedBy')?.invalid"
+          class="text-danger small">
           Released by is required.
         </div>
       </div>
@@ -55,7 +61,8 @@
         <span *ngIf="submitting">Releasing...</span>
       </button>
 
-      <button type="button" class="btn btn-secondary ms-2" (click)="router.navigate(['../', '..', 'inventory', 'supply'])" [disabled]="submitting">
+      <button type="button" class="btn btn-secondary ms-2"
+        (click)="router.navigate(['../', '..', 'inventory', 'supply'])" [disabled]="submitting">
         Cancel
       </button>
     </div>
@@ -75,9 +82,9 @@
       </thead>
       <tbody>
         <tr *ngFor="let it of inventory">
-          <td>{{ it.supplyName  }}</td>
+          <td>{{ it.supplyName }}</td>
           <td>{{ it.supplyMeasure || '-' }}</td>
-          <td>{{ it.totalQuantity ??  0 }}</td>
+          <td>{{ it.totalQuantity ?? 0 }}</td>
           <td>{{ it.createdAt ? (it.createdAt | date:'short') : '-' }}</td>
         </tr>
       </tbody>

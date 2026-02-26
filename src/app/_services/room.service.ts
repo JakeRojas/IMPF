@@ -46,22 +46,40 @@ export class RoomService {
   getApparelInventory(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/apparel-inventory`); }
   getReceivedBatchApparels(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/receive-apparels`); }
   getReleasedBatchApparels(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/release-apparels`); }
-  getApparelUnits(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/apparels`); }
+  getApparelUnits(roomId: number, page?: number, limit?: number) {
+    const params: any = {};
+    if (page) params.page = page;
+    if (limit) params.limit = limit;
+    return this.http.get<any>(`${this.baseUrl}/${roomId}/apparels`, { params });
+  }
 
   // ADMIN / SUPPLY
   getAdminSupplyInventory(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/supply-inventory`); }
   getReceivedBatchAdminSupply(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/receive-supply`); }
   getReleasedBatchAdminSupply(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/release-supply`); }
-  getAdminSupplyUnits(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/supply`); }
+  getAdminSupplyUnits(roomId: number, page?: number, limit?: number) {
+    const params: any = {};
+    if (page) params.page = page;
+    if (limit) params.limit = limit;
+    return this.http.get<any>(`${this.baseUrl}/${roomId}/supply`, { params });
+  }
 
   // GENERAL / ITEMS
   getGenItemInventory(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/items-inventory`); }
   getReceivedBatchGenItem(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/receive-items`); }
   getReleasedBatchGenItem(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/release-items`); }
-  getGenItemUnits(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/items`); }
+  getGenItemUnits(roomId: number, page?: number, limit?: number) {
+    const params: any = {};
+    if (page) params.page = page;
+    if (limit) params.limit = limit;
+    return this.http.get<any>(`${this.baseUrl}/${roomId}/items`, { params });
+  }
 
-  getAllUnits(roomId: number) {
-    return this.http.get<any>(`${this.baseUrl}/${roomId}/all-units`);
+  getAllUnits(roomId: number, page?: number, limit?: number) {
+    const params: any = {};
+    if (page) params.page = page;
+    if (limit) params.limit = limit;
+    return this.http.get<any>(`${this.baseUrl}/${roomId}/all-units`, { params });
   }
 
   // ------------- Room-scoped QR endpoints (return PNG blobs) -------------

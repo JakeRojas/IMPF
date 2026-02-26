@@ -1,7 +1,8 @@
 <div class="units-list-wrapper mt-2">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h5 class="fw-bold mb-0 text-dark">
-      <i class="bi bi-pencil-square text-primary me-2"></i>Admin Supply Units
+      <i class="bi bi-pencil-square text-primary me-2"></i>Admin Supply Units <span class="badge bg-primary ms-2">{{
+        totalUnitsCount }} Units</span>
     </h5>
 
     <div class="actions d-flex gap-2">
@@ -34,6 +35,7 @@
             <th class="py-3">Unit ID</th>
             <th class="py-3">Status</th>
             <th class="py-3">Description</th>
+            <th class="py-3">QR Status</th>
             <th class="py-3 text-center">Qty</th>
             <th class="py-3">Assigned To</th>
             <th class="py-3 text-end px-4">Actions</th>
@@ -76,6 +78,12 @@
                   placeholder="Add description..." />
               </div>
             </td>
+            <td>
+              <span *ngIf="u.qrStatus" class="badge rounded-pill px-2 py-1 bg-info-subtle text-info">
+                <i class="bi bi-check-circle-fill me-1"></i>
+                Generated
+              </span>
+            </td>
             <td class="text-center fw-bold">{{ u.quantity ?? u.totalQuantity ?? 0 }}</td>
             <td>
               <div class="d-flex align-items-center">
@@ -116,6 +124,26 @@
     <i class="bi bi-inbox-fill text-muted opacity-25" style="font-size: 4rem;"></i>
     <h5 class="mt-3 fw-bold text-dark">No Units Found</h5>
     <p class="text-muted small">No admin supply units have been recorded in this room yet.</p>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top"
+    *ngIf="totalPages > 1 && !loading">
+    <div class="small text-muted">
+      Showing {{ (page - 1) * limit + 1 }} to {{ (page * limit) > total ? total : (page * limit) }} of {{ total }}
+    </div>
+    <nav aria-label="Page navigation">
+      <ul class="pagination pagination-sm mb-0">
+        <li class="page-item" [class.disabled]="page === 1">
+          <button class="page-link" (click)="onPageChange(page - 1)">Prev</button>
+        </li>
+        <li class="page-item" *ngFor="let p of range(1, totalPages)" [class.active]="page === p">
+          <button class="page-link" (click)="onPageChange(p)">{{ p }}</button>
+        </li>
+        <li class="page-item" [class.disabled]="page === totalPages">
+          <button class="page-link" (click)="onPageChange(page + 1)">Next</button>
+        </li>
+      </ul>
+    </nav>
   </div>
 </div>
 

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute }     from '@angular/router';
-import { first }              from 'rxjs/operators';
+import { ActivatedRoute } from '@angular/router';
+import { first } from 'rxjs/operators';
 import { RoomService, AlertService, QrService } from '@app/_services';
 
 @Component({
@@ -16,7 +16,7 @@ export class AdminSupplyInventoryListComponent implements OnInit {
     private roomService: RoomService,
     private alert: AlertService,
     private qrService: QrService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.roomId = this.findRoomId(this.route);
@@ -55,7 +55,7 @@ export class AdminSupplyInventoryListComponent implements OnInit {
     if (!Number.isFinite(this.roomId)) { this.alert.error('Invalid room'); return; }
     // stockroomType for this list is 'supply' (example). Adjust for other inventory views.
     const stockroomType = 'supply'; // change to 'apparel' or 'genitem' where appropriate
-  
+
     this.qrService.downloadAllPdf(stockroomType, this.roomId).pipe(first()).subscribe({
       next: (blob: Blob) => {
         const url = window.URL.createObjectURL(blob);
@@ -67,6 +67,7 @@ export class AdminSupplyInventoryListComponent implements OnInit {
         a.remove();
         window.URL.revokeObjectURL(url);
         this.alert.success('PDF downloaded');
+        this.loadInventory();
       },
       error: (err) => {
         console.error('generateAllQr error', err);
@@ -80,7 +81,7 @@ export class AdminSupplyInventoryListComponent implements OnInit {
     // determine correct stockroomType and id field for this view
     const stockroomType = 'supply'; // change as appropriate per list
     const inventoryId = i.adminSupplyInventoryId;
-  
+
     this.qrService.getBatchQr(stockroomType, inventoryId).pipe(first()).subscribe({
       next: (blob: Blob) => {
         // download the blob
@@ -92,15 +93,10 @@ export class AdminSupplyInventoryListComponent implements OnInit {
         a.click();
         a.remove();
         URL.revokeObjectURL(url);
-  
-        // Mark item as generated in UI
-        i.qrStatus = true;
-  
-        // Optional: show confirmation and/or refresh from server to sync state
+
+        // Reload inventory from server to sync state
+        this.loadInventory();
         this.alert.success('QR downloaded and marked generated');
-  
-        // OPTIONAL: if you prefer to get canonical value from server:
-        // this.load(); // reload items from API
       },
       error: err => {
         const msg = err?.error?.message || err?.message || 'Failed to download QR';

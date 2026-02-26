@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { RoomService, AlertService } from '@app/_services';
+import { RoomService, AlertService, AccountService } from '@app/_services';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
 
@@ -13,13 +13,17 @@ export class GenItemReleaseComponent implements OnInit {
   releaseForm!: FormGroup;
   submitting = false;
 
+  currentUserName: string | null = null;
+  currentUserId: number | null = null;
+
   constructor(
     private route: ActivatedRoute,
     public router: Router,
     private fb: FormBuilder,
     private roomService: RoomService,
-    private alert: AlertService
-  ) {}
+    private alert: AlertService,
+    private accountService: AccountService
+  ) { }
 
   ngOnInit(): void {
     this.roomId = this.findRoomId(this.route);
@@ -31,7 +35,21 @@ export class GenItemReleaseComponent implements OnInit {
       remarks: ['']
     });
 
+    this.tryFillCurrentUser();
     this.loadInventory();
+  }
+
+  private tryFillCurrentUser() {
+    const user = this.accountService.accountValue;
+    if (user) {
+      const name = user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.email || '');
+      this.currentUserName = name;
+      this.currentUserId = user.AccountId ? +user.AccountId : null;
+
+      if (name) {
+        this.releaseForm.patchValue({ releasedBy: name });
+      }
+    }
   }
 
   private findRoomId(route: ActivatedRoute): number {
@@ -68,17 +86,17 @@ export class GenItemReleaseComponent implements OnInit {
   submit() {
     if (this.releaseForm.invalid) { this.alert.error('Please complete the form'); return; }
     this.submitting = true;
-  
+
     // copy the form value so we can safely modify
     const payload: any = { ...this.releaseForm.value };
-  
+
     // numeric coercions (backend expects numbers)
     if (payload.releaseQuantity != null) payload.releaseQuantity = Number(payload.releaseQuantity);
     if (payload.genItemInventoryId != null) payload.genItemInventoryId = Number(payload.genItemInventoryId);
-  
+
     // map remarks -> notes (backend uses notes)
     if (payload.remarks && !payload.notes) payload.notes = payload.remarks;
-  
+
     // --- IMPORTANT: attach the genItemType from the selected inventory row ---
     const selectedInv = this.inventory.find(it => (it.genItemInventoryId ?? it.id) === payload.genItemInventoryId);
     if (selectedInv && selectedInv.genItemType) {
@@ -88,12 +106,12 @@ export class GenItemReleaseComponent implements OnInit {
       // payload.genItemType = payload.genItemType || 'other';
       // Or simply allow backend validation to reject if type is required.
     }
-  
+
     this.roomService.releaseGenItem(this.roomId, payload).pipe(first()).subscribe({
       next: () => {
         this.alert.success('Released successfully');
         this.submitting = false;
-        this.router.navigate(['./', '.', 'inventory', 'general'], { relativeTo: this.route });
+        this.router.navigate(['list'], { relativeTo: this.route });
       },
       error: (e) => { this.alert.error(e); this.submitting = false; }
     });

@@ -37,7 +37,7 @@
 
       <div class="col-md-5 mb-2">
         <label class="form-label">Released By</label>
-        <input class="form-control" formControlName="releasedBy" placeholder="Your name or account id" />
+        <input class="form-control" formControlName="releasedBy" [readOnly]="!!currentUserName" placeholder="Your name" />
         <div *ngIf="releaseForm.get('releasedBy')?.touched && releaseForm.get('releasedBy')?.invalid" class="text-danger small">
           Released by is required.
         </div>

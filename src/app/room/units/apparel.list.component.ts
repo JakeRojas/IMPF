@@ -11,6 +11,16 @@ export class ApparelUnitListComponent implements OnInit {
   units: any[] = [];
   loading = false;
 
+  get totalUnitsCount(): number {
+    return this.total || 0;
+  }
+
+  // Pagination
+  page = 1;
+  limit = 10;
+  total = 0;
+  totalPages = 0;
+
   constructor(
     private route: ActivatedRoute,
     private roomService: RoomService,
@@ -36,14 +46,31 @@ export class ApparelUnitListComponent implements OnInit {
 
   loadUnits() {
     this.loading = true;
-    this.roomService.getApparelUnits(this.roomId).pipe(first()).subscribe({
-      next: (res: any[]) => {
-        this.units = res || [];
+    this.roomService.getApparelUnits(this.roomId, this.page, this.limit).pipe(first()).subscribe({
+      next: (res: any) => {
+        if (res.data) {
+          this.units = res.data;
+          this.total = res.meta.total;
+          this.totalPages = res.meta.totalPages;
+        } else {
+          this.units = res || [];
+          this.total = this.units.length;
+          this.totalPages = 1;
+        }
         this.selection.clear();
         this.loading = false;
       },
       error: (err) => { this.loading = false; this.alert.error(err); }
     });
+  }
+
+  onPageChange(p: number) {
+    this.page = p;
+    this.loadUnits();
+  }
+
+  range(start: number, end: number): number[] {
+    return [...Array(end - start + 1).keys()].map(i => i + start);
   }
 
   generateAllUnitsQr() {
@@ -61,6 +88,7 @@ export class ApparelUnitListComponent implements OnInit {
         a.remove();
         URL.revokeObjectURL(url);
         this.alert.success('Units PDF downloaded');
+        this.loadUnits();
       },
       error: (err) => {
         console.error('generateAllUnitsQr error', err);
@@ -111,6 +139,7 @@ export class ApparelUnitListComponent implements OnInit {
         a.remove();
         URL.revokeObjectURL(url);
         this.alert.success('Unit QR downloaded');
+        this.loadUnits();
       },
       error: (err) => {
         console.error('downloadUnitQr error', err);
@@ -159,6 +188,7 @@ export class ApparelUnitListComponent implements OnInit {
         a.remove();
         URL.revokeObjectURL(url);
         this.alert.success('Selected Units PDF downloaded');
+        this.loadUnits();
       },
       error: (err) => {
         console.error('generateSelectedQr error', err);
