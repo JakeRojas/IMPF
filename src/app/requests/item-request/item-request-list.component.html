@@ -7,6 +7,9 @@
             <li class="breadcrumb-item active">Item Request List</li>
           </ol>
         </nav>
+        <button class="btn btn-primary btn-sm shadow-sm" *ngIf="isTeacher() || isSuperAdmin()" (click)="create()">
+          <i class="bi bi-plus-lg me-1"></i> Create Request
+        </button>
       </div>
 
       <div class="row g-2 align-items-end">
