@@ -35,7 +35,7 @@ export class HomeComponent implements OnInit {
     get showItemCard() { return true; } // All roles
     get showTransferCard() { return ['superadmin', 'admin', 'stockroomadmin'].includes(this.role); }
     get showBorrowCard() { return true; } // All roles
-    get showOnlineUsersCard() { return ['superadmin'].includes(this.role); }
+    get showOnlineUsersCard() { return ['superadmin', 'admin'].includes(this.role); }
     get showWeeklyStats() { return true; }
     get showRecentActivity() { return true; }
 

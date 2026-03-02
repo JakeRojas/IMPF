@@ -271,3 +271,63 @@ body {
     font-size: 0.9rem !important;
   }
 }
+
+/* SEARCH ENGINE STYLES (ERPNext inspired) */
+.search-results-container {
+  background: white;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-radius: 12px !important;
+  max-height: 450px;
+  overflow: hidden;
+  z-index: 9999 !important;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 10px;
+
+    &:hover {
+      background: #cbd5e1;
+    }
+  }
+}
+
+.search-icon-wrapper {
+  transition: all 0.2s ease;
+}
+
+.list-group-item-action:hover {
+  background-color: #f1f5f9 !important;
+
+  .search-icon-wrapper {
+    background-color: white !important;
+    transform: scale(1.05);
+  }
+}
+
+.bg-primary-subtle {
+  background-color: #cfe2ff;
+}
+
+.bg-success-subtle {
+  background-color: #d1e7dd;
+}
+
+.bg-warning-subtle {
+  background-color: #fff3cd;
+}
+
+.bg-info-subtle {
+  background-color: #cff4fc;
+}
+
+.max-vh-50 {
+  max-height: 50vh !important;
+}

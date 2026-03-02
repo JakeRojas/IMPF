@@ -121,8 +121,60 @@
           <router-outlet name="subnav"></router-outlet>
         </div>
 
+        <div class="d-none d-md-flex align-items-center flex-grow-1 mx-4">
+          <div class="position-relative w-100" style="max-width: 600px;">
+            <div class="input-group input-group-sm rounded-pill overflow-hidden border">
+              <span class="input-group-text bg-white border-0 ps-3">
+                <i class="bi bi-search text-muted"></i>
+              </span>
+              <input type="text" #searchInput class="form-control border-0 py-2 shadow-none"
+                placeholder="Search (Ctrl + G)" (input)="onSearch($event)" [(ngModel)]="searchQuery"
+                (focus)="onSearch($event)">
+              <button *ngIf="searchQuery" class="btn bg-white border-0 pe-3"
+                (click)="searchQuery = ''; showSearchResults = false">
+                <i class="bi bi-x-lg text-muted small"></i>
+              </button>
+            </div>
+
+            <!-- Search Results Dropdown -->
+            <div *ngIf="showSearchResults"
+              class="search-results-container position-absolute w-100 mt-1 shadow-lg border rounded-3 overflow-hidden"
+              style="top: 100%; left: 0; z-index: 1100; max-height: 400px; background: white;">
+              <div class="list-group list-group-flush overflow-auto" style="max-height: 400px;">
+                <div *ngIf="isSearching" class="list-group-item p-3 text-center">
+                  <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                  <span class="text-muted small">Searching...</span>
+                </div>
+                <div *ngIf="!isSearching && searchResults.length === 0"
+                  class="list-group-item p-3 text-center text-muted small">
+                  No results found for "{{searchQuery}}"
+                </div>
+                <button *ngFor="let result of searchResults" (click)="navigateTo(result.route)"
+                  class="list-group-item list-group-item-action d-flex align-items-center p-2 border-0 transition-hover">
+                  <div
+                    class="search-icon-wrapper rounded-3 bg-light p-2 me-2 d-flex align-items-center justify-content-center"
+                    style="width: 36px; height: 36px;">
+                    <i class="bi" [ngClass]="result.icon || getIconClass(result.type)" style="font-size: 1rem;"></i>
+                  </div>
+                  <div class="flex-grow-1 text-truncate">
+                    <div class="fw-bold text-dark small">{{result.title}}</div>
+                    <div class="text-muted xx-small text-truncate">{{result.description}}</div>
+                  </div>
+                  <div class="ms-1">
+                    <span class="badge rounded-pill" style="font-size: 0.6rem;" [ngClass]="{
+                      'bg-primary-subtle text-primary': result.type === 'nav',
+                      'bg-success-subtle text-success': result.type === 'action',
+                      'bg-warning-subtle text-warning': result.type === 'data'
+                    }">{{result.type | uppercase}}</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="d-flex align-items-center">
-          <span class="text-muted small me-3 text-truncate" style="max-width: 200px;">Logged in as:
+          <span class="text-muted small me-3 text-truncate d-none d-lg-inline" style="max-width: 200px;">Logged in as:
             <strong>{{account.firstName}}</strong></span>
           <div
             class="avatar-circle-sm bg-primary text-white d-flex align-items-center justify-content-center fw-bold shadow-sm"
