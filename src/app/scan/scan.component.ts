@@ -1,6 +1,7 @@
 import { Component, OnDestroy, AfterViewInit, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { BrowserQRCodeReader } from '@zxing/library';
 import { first } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 
 import { QrService, RoomService, AlertService, AccountService, StockRequestService, TransferService } from '@app/_services';
@@ -130,19 +131,20 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
   onReleaseClicked() {
     const payload = this.lastScannedItem?.payload || this.lastParsed || tryParseJson(this.lastResult) || { raw: this.lastResult };
 
-    // unit-level QR
     if (this.isUnit()) {
-      this.releaseUnit(payload);
+      const claimedBy = prompt('Enter the name of the person claiming this item:');
+      if (!claimedBy) return;
+      this.releaseUnit(payload, claimedBy);
       return;
     }
 
-    // batch-level QR (inventory id)
     const inventoryId = payload.id || payload.inventoryId || payload.apparelInventoryId;
     if (inventoryId) {
       this.batchRoomIdInput = payload.roomId || null;
       this.batchActionType = 'release';
       this.showBatchQtyInput = true;
       this.batchQty = 1;
+      this.cd.detectChanges();
       return;
     }
 
@@ -462,25 +464,54 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
 
   // helpers used by update/status UI
   extractUnitId() {
-    return this.lastScannedItem?.unit?.id ||
+    const unit = this.lastScannedItem?.unit || this.lastScannedItem?.payload?.unit;
+    return unit?.genItemId || unit?.adminSupplyId || unit?.apparelId || unit?.id ||
       this.lastScannedItem?.payload?.unitId ||
       this.lastParsed?.unitId ||
+      this.lastScannedItem?.unitId ||
       null;
   }
 
   extractItemType() {
-    return this.lastScannedItem?.payload?.itemType ||
-      this.lastScannedItem?.type ||
-      this.lastScannedItem?.itemType ||
-      this.lastParsed?.type ||
-      this.lastParsed?.itemType ||
-      'apparel'; // default to apparel
+    const payload = this.lastScannedItem?.payload || this.lastParsed || {};
+    const unit = this.lastScannedItem?.unit || payload.unit || {};
+
+    // check possible type fields
+    const cand = [
+      payload.stockroomType,
+      payload.itemType,
+      payload.type,
+      payload._detectedItemType, // Backend detection!
+      unit.itemType,
+      unit.genItemType, // Canonical GenItem type!
+      unit.type,
+      this.lastScannedItem?.type,
+      this._detectedItemTypeFromPayload(payload)
+    ];
+
+    for (const c of cand) {
+      if (c) return String(c).toLowerCase();
+    }
+
+    return 'apparel'; // default to apparel
+  }
+
+  private _detectedItemTypeFromPayload(p: any): string | null {
+    if (!p) return null;
+    if (p.unitId || p.inventoryId) {
+      if (p.apparelId || p.apparelInventoryId || p.apparelName) return 'apparel';
+      if (p.adminSupplyId || p.adminSupplyInventoryId || p.supplyName) return 'supply';
+      if (p.genItemId || p.genItemInventoryId || p.genItemName) return 'genitem';
+    }
+    return null;
   }
 
   extractRoomId() {
-    return this.lastScannedItem?.payload?.roomId ||
+    return this.lastScannedItem?.unit?.roomId ||
+      this.lastScannedItem?.payload?.roomId ||
       this.lastScannedItem?.roomId ||
       this.lastParsed?.roomId ||
+      this.lastScannedItem?.inventory?.roomId ||
       null;
   }
 
@@ -547,28 +578,61 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
   }
 
   // Updated Release Unit to use extractors
-  private releaseUnit(payload: any) {
+  private releaseUnit(payload: any, claimedBy: string) {
     const unitId = this.extractUnitId();
     if (!unitId) { this.alert.error('Unit ID not found in QR payload.'); return; }
 
     const stockroomType = (this.extractItemType() || 'apparel').toString().toLowerCase();
-    const roomId = this.extractRoomId() || this.batchRoomIdInput || null;
-    const actor = {
-      actorId: /* optional: current user id if available */ null
+    const roomId = this.extractRoomId() || this.batchRoomIdInput || this.lastScannedItem?.unit?.roomId || null;
+
+    const user = this.accountService.accountValue;
+    const releasePayload: any = {
+      unitId: Number(unitId),
+      claimedBy: claimedBy,
+      releasedBy: user ? `${user.firstName} ${user.lastName}` : 'Scanner User',
+      releaseQuantity: 1
     };
 
-    // prefer roomService for apparel when roomId exists (keeps your existing flow)
-    if (stockroomType === 'apparel' && roomId) {
-      const releasePayload = { unitId: Number(unitId), ...actor };
-      this.roomService.releaseApparel(Number(roomId), releasePayload).pipe(first()).subscribe({
+    // If we have inventory ID from scanned item, include it
+    const inventoryId = this.lastScannedItem?.unit?.apparelInventoryId ||
+      this.lastScannedItem?.unit?.adminSupplyInventoryId ||
+      this.lastScannedItem?.unit?.genItemInventoryId ||
+      payload.apparelInventoryId || payload.adminSupplyInventoryId || payload.genItemInventoryId ||
+      payload.inventoryId || payload.id ||
+      payload.batchId; // QR payloads use batchId!
+
+    if (inventoryId) {
+      if (stockroomType === 'apparel') releasePayload.apparelInventoryId = inventoryId;
+      if (['supply', 'admin-supply', 'adminsupply'].includes(stockroomType)) releasePayload.adminSupplyInventoryId = inventoryId;
+      if (['genitem', 'general', 'it', 'maintenance'].includes(stockroomType)) releasePayload.genItemInventoryId = inventoryId;
+    }
+
+    // prefer roomService when roomId exists (handles inventory decrement and unit destruction)
+    if (roomId) {
+      let obs: Observable<any>;
+      if (stockroomType === 'apparel') {
+        releasePayload.releaseApparelQuantity = 1;
+        obs = this.roomService.releaseApparel(Number(roomId), releasePayload);
+      } else if (['supply', 'admin-supply', 'adminsupply'].includes(stockroomType)) {
+        releasePayload.releaseAdminSupplyQuantity = 1;
+        obs = this.roomService.releaseAdminSupply(Number(roomId), releasePayload);
+      } else {
+        releasePayload.releaseItemQuantity = 1;
+        // Normalize genItemType for backend ENUM ('it', 'maintenance', 'unknownType')
+        const rawType = (this.lastScannedItem?.unit?.genItemType || stockroomType || '').toLowerCase();
+        releasePayload.genItemType = ['it', 'maintenance'].includes(rawType) ? rawType : 'unknownType';
+        obs = this.roomService.releaseGenItem(Number(roomId), releasePayload);
+      }
+
+      obs.pipe(first()).subscribe({
         next: () => { this.alert.success('Unit released successfully.'); this.resetAfterAction(); setTimeout(() => this.startScanner(), 300); },
         error: (err: any) => { this.alert.error(err?.error?.message || err?.message || String(err)); }
       });
       return;
     }
 
-    // otherwise call qrService.releaseUnit -> backend wrapper dispatches to correct service
-    this.qrService.releaseUnit(stockroomType, Number(unitId), actor).pipe(first()).subscribe({
+    // otherwise call qrService.releaseUnit (fallback)
+    this.qrService.releaseUnit(stockroomType, Number(unitId), { actorId: user?.AccountId, claimedBy }).pipe(first()).subscribe({
       next: () => { this.alert.success('Unit released successfully.'); this.resetAfterAction(); setTimeout(() => this.startScanner(), 300); },
       error: (err: any) => { this.alert.error(err?.error?.message || err?.message || String(err)); }
     });
