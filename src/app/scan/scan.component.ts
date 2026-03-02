@@ -3,7 +3,7 @@ import { BrowserQRCodeReader } from '@zxing/library';
 import { first } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 
-import { QrService, RoomService, AlertService, AccountService } from '@app/_services';
+import { QrService, RoomService, AlertService, AccountService, StockRequestService, TransferService } from '@app/_services';
 
 @Component({
   selector: 'app-scan',
@@ -27,6 +27,24 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
   batchActionType: 'release' | 'receive' = 'release';
   claimedBy = '';
   releasedBy = '';
+  rooms: any[] = [];
+
+  // stock-request UI state
+  showStockRequestForm = false;
+  stockRequestData: any = {
+    requesterRoomId: '',
+    quantity: 1,
+    note: ''
+  };
+
+  // transfer UI state
+  showTransferForm = false;
+  transferData: any = {
+    fromRoomId: '',
+    toRoomId: '',
+    quantity: 1,
+    note: ''
+  };
 
   // update-status UI state
   openUpdateMenu = false;
@@ -39,8 +57,11 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
     private alert: AlertService,
     private cd: ChangeDetectorRef,
     private http: HttpClient,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private stockRequestService: StockRequestService,
+    private transferService: TransferService
   ) {
+    this.roomService.getRooms().pipe(first()).subscribe(rooms => this.rooms = rooms);
     const user = this.accountService.accountValue;
     if (user) {
       this.releasedBy = `${user.firstName} ${user.lastName}`;
@@ -149,6 +170,108 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
     }
 
     this.alert.error('Scanned QR is not a recognizable batch payload.');
+  }
+
+  onStockRequestClicked() {
+    const payload = this.lastScannedItem?.payload || this.lastParsed || tryParseJson(this.lastResult) || { raw: this.lastResult };
+    const inventoryId = payload.id || payload.inventoryId || payload.apparelInventoryId;
+
+    if (!inventoryId) {
+      this.alert.error('Inventory id not found in scanned QR payload.');
+      return;
+    }
+
+    this.stockRequestData = {
+      requesterRoomId: payload.roomId || '',
+      quantity: 1,
+      note: ''
+    };
+    this.showStockRequestForm = true;
+  }
+
+  confirmStockRequest() {
+    const payload = this.lastScannedItem?.payload || this.lastParsed || tryParseJson(this.lastResult) || { raw: this.lastResult };
+    const inventoryId = payload.id || payload.inventoryId || payload.apparelInventoryId;
+    const itemType = this.extractItemType();
+
+    if (!this.stockRequestData.requesterRoomId) { this.alert.error('Requester Room is required.'); return; }
+    if (!this.stockRequestData.quantity || this.stockRequestData.quantity < 1) { this.alert.error('Valid quantity is required.'); return; }
+
+    const body = {
+      requesterRoomId: Number(this.stockRequestData.requesterRoomId),
+      itemId: Number(inventoryId),
+      quantity: Number(this.stockRequestData.quantity),
+      note: this.stockRequestData.note
+    };
+
+    this.stockRequestService.create(body).pipe(first()).subscribe({
+      next: () => {
+        this.alert.success('Stock request created successfully');
+        this.resetAfterAction();
+        setTimeout(() => this.startScanner(), 300);
+      },
+      error: (err) => {
+        const msg = (err?.error?.message || err?.message || String(err));
+        this.alert.error(`Failed to create stock request: ${msg}`);
+      }
+    });
+  }
+
+  cancelStockRequest() {
+    this.showStockRequestForm = false;
+  }
+
+  onTransferClicked() {
+    const payload = this.lastScannedItem?.payload || this.lastParsed || tryParseJson(this.lastResult) || { raw: this.lastResult };
+    const inventoryId = payload.id || payload.inventoryId || payload.apparelInventoryId;
+
+    if (!inventoryId) {
+      this.alert.error('Inventory id not found in scanned QR payload.');
+      return;
+    }
+
+    this.transferData = {
+      fromRoomId: payload.roomId || '',
+      toRoomId: '',
+      quantity: 1,
+      note: ''
+    };
+    this.showTransferForm = true;
+  }
+
+  confirmTransfer() {
+    const payload = this.lastScannedItem?.payload || this.lastParsed || tryParseJson(this.lastResult) || { raw: this.lastResult };
+    const inventoryId = payload.id || payload.inventoryId || payload.apparelInventoryId;
+    const itemType = this.extractItemType();
+
+    if (!this.transferData.fromRoomId) { this.alert.error('From Room is required.'); return; }
+    if (!this.transferData.toRoomId) { this.alert.error('To Room is required.'); return; }
+    if (this.transferData.fromRoomId === this.transferData.toRoomId) { this.alert.error('From and To rooms must be different.'); return; }
+    if (!this.transferData.quantity || this.transferData.quantity < 1) { this.alert.error('Valid quantity is required.'); return; }
+
+    const body = {
+      fromRoomId: Number(this.transferData.fromRoomId),
+      toRoomId: Number(this.transferData.toRoomId),
+      itemId: Number(inventoryId),
+      quantity: Number(this.transferData.quantity),
+      note: this.transferData.note
+    };
+
+    this.transferService.create(body).pipe(first()).subscribe({
+      next: () => {
+        this.alert.success('Transfer created successfully');
+        this.resetAfterAction();
+        setTimeout(() => this.startScanner(), 300);
+      },
+      error: (err) => {
+        const msg = (err?.error?.message || err?.message || String(err));
+        this.alert.error(`Failed to create transfer: ${msg}`);
+      }
+    });
+  }
+
+  cancelTransfer() {
+    this.showTransferForm = false;
   }
 
   // duplicate releaseUnit removed
@@ -304,6 +427,8 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
     this.lastParsed = null;
     this.lastScannedItem = null;
     this.showBatchQtyInput = false;
+    this.showStockRequestForm = false;
+    this.showTransferForm = false;
     this.batchQty = 1;
     this.batchRoomIdInput = null;
     this.openUpdateMenu = false;

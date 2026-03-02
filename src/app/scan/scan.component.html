@@ -59,7 +59,8 @@
       </div>
 
       <!-- Result Card -->
-      <div *ngIf="lastResult && !showBatchQtyInput" class="animate__animated animate__fadeInUp">
+      <div *ngIf="lastResult && !showBatchQtyInput && !showStockRequestForm && !showTransferForm"
+        class="animate__animated animate__fadeInUp">
         <div *ngIf="lastScannedItem; else rawView">
 
           <!-- Header: Name & ID -->
@@ -125,12 +126,18 @@
           </ng-container>
 
           <ng-template #batchBtns>
-            <div class="d-flex gap-2">
+            <div class="d-flex flex-wrap gap-2">
               <button class="btn btn-success flex-grow-1" (click)="onReceiveClicked()">
                 <i class="bi bi-box-arrow-in-down me-1"></i> Receive
               </button>
               <button class="btn btn-danger flex-grow-1" (click)="onReleaseClicked()">
                 <i class="bi bi-box-arrow-right me-1"></i> Release
+              </button>
+              <button class="btn btn-info flex-grow-1 text-white" (click)="onStockRequestClicked()">
+                <i class="bi bi-file-earmark-plus me-1"></i> Stock Request
+              </button>
+              <button class="btn btn-primary flex-grow-1" (click)="onTransferClicked()">
+                <i class="bi bi-arrow-left-right me-1"></i> Transfer
               </button>
             </div>
           </ng-template>
@@ -154,62 +161,125 @@
     </div>
 
     <!-- Batch Input Form -->
-    <div *ngIf="showBatchQtyInput" class="animate__animated animate__fadeIn">
+    <div *ngIf="showBatchQtyInput || showStockRequestForm || showTransferForm"
+      class="animate__animated animate__fadeIn">
       <div class="card border-0 shadow-sm">
         <div class="card-body">
           <h5 class="fw-bold mb-3 d-flex align-items-center">
-            <i class="bi me-2"
-              [ngClass]="batchActionType === 'receive' ? 'bi-box-arrow-in-down text-success' : 'bi-box-arrow-right text-danger'"></i>
-            {{ batchActionType === 'receive' ? 'Receive Batch' : 'Release Batch' }}
+            <i class="bi me-2" [ngClass]="{
+                'bi-box-arrow-in-down text-success': batchActionType === 'receive' && showBatchQtyInput,
+                'bi-box-arrow-right text-danger': batchActionType === 'release' && showBatchQtyInput,
+                'bi-file-earmark-plus text-info': showStockRequestForm,
+                'bi-arrow-left-right text-primary': showTransferForm
+              }"></i>
+            {{ showStockRequestForm ? 'Stock Request' : (showTransferForm ? 'Transfer' : (batchActionType === 'receive'
+            ?
+            'Receive Batch' : 'Release Batch')) }}
           </h5>
 
+          <!-- Item Context Info -->
           <div class="alert alert-light border mb-3">
             <div class="d-flex justify-content-between">
               <div>
                 <div class="small text-muted text-uppercase fw-bold">Item</div>
-                <div class="fw-bold text-dark">{{ lastParsed?.name || lastParsed?.apparelName || 'Unknown Item' }}
-                </div>
+                <div class="fw-bold text-dark">{{ lastScannedItem?.unit?.apparelName ||
+                  lastScannedItem?.inventory?.apparelName || lastParsed?.name || lastParsed?.apparelName || 'Unknown
+                  Item' }}</div>
               </div>
               <div class="text-end">
                 <div class="small text-muted text-uppercase fw-bold">Ref/SKU</div>
                 <div class="fw-bold text-dark">{{ extractSku() }}</div>
               </div>
             </div>
-            <div class="mt-2">
-              <div class="small text-muted text-uppercase fw-bold">Type</div>
-              <div class="text-dark">{{ extractItemType() | titlecase }}</div>
-            </div>
           </div>
 
-          <div class="mb-3">
-            <label class="form-label small text-muted fw-bold">Quantity</label>
-            <input type="number" class="form-control form-control-lg fw-bold text-center" [(ngModel)]="batchQty" min="1"
-              placeholder="0" />
-          </div>
-
-          <div *ngIf="batchActionType === 'release'">
+          <!-- Stock Request Form Fields -->
+          <ng-container *ngIf="showStockRequestForm">
             <div class="mb-3">
-              <label class="form-label small text-muted fw-bold">Claimed By</label>
-              <input type="text" class="form-control" [(ngModel)]="claimedBy" placeholder="Name of claimer" />
+              <label class="form-label small text-muted fw-bold">Requester Room</label>
+              <select class="form-select" [(ngModel)]="stockRequestData.requesterRoomId">
+                <option value="" disabled>Select Room</option>
+                <option *ngFor="let rm of rooms" [value]="rm.roomId">{{ rm.roomName }}</option>
+              </select>
             </div>
             <div class="mb-3">
-              <label class="form-label small text-muted fw-bold">Released By</label>
-              <input type="text" class="form-control" [(ngModel)]="releasedBy" readonly />
+              <label class="form-label small text-muted fw-bold">Quantity</label>
+              <input type="number" class="form-control" [(ngModel)]="stockRequestData.quantity" min="1" />
             </div>
-          </div>
+            <div class="mb-3">
+              <label class="form-label small text-muted fw-bold">Note (Optional)</label>
+              <textarea class="form-control" [(ngModel)]="stockRequestData.note" rows="2"
+                placeholder="Add details..."></textarea>
+            </div>
+            <div class="d-grid gap-2">
+              <button class="btn btn-info text-white" (click)="confirmStockRequest()">Confirm Stock Request</button>
+              <button class="btn btn-light border" (click)="cancelStockRequest()">Cancel</button>
+            </div>
+          </ng-container>
 
-          <div class="mb-3" *ngIf="!lastParsed?.roomId">
-            <label class="form-label small text-muted fw-bold">Room ID</label>
-            <input type="number" class="form-control" [(ngModel)]="batchRoomIdInput" placeholder="Enter Room ID" />
-          </div>
+          <!-- Transfer Form Fields -->
+          <ng-container *ngIf="showTransferForm">
+            <div class="mb-3">
+              <label class="form-label small text-muted fw-bold">From Room</label>
+              <select class="form-select" [(ngModel)]="transferData.fromRoomId">
+                <option value="" disabled>Select From Room</option>
+                <option *ngFor="let rm of rooms" [value]="rm.roomId">{{ rm.roomName }}</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small text-muted fw-bold">To Room</label>
+              <select class="form-select" [(ngModel)]="transferData.toRoomId">
+                <option value="" disabled>Select To Room</option>
+                <option *ngFor="let rm of rooms" [value]="rm.roomId">{{ rm.roomName }}</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small text-muted fw-bold">Quantity</label>
+              <input type="number" class="form-control" [(ngModel)]="transferData.quantity" min="1" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label small text-muted fw-bold">Note (Optional)</label>
+              <textarea class="form-control" [(ngModel)]="transferData.note" rows="2"
+                placeholder="Add details..."></textarea>
+            </div>
+            <div class="d-grid gap-2">
+              <button class="btn btn-primary" (click)="confirmTransfer()">Confirm Transfer</button>
+              <button class="btn btn-light border" (click)="cancelTransfer()">Cancel</button>
+            </div>
+          </ng-container>
 
-          <div class="d-grid gap-2">
-            <button class="btn btn-lg" [ngClass]="batchActionType === 'receive' ? 'btn-success' : 'btn-danger'"
-              (click)="confirmBatchAction()">
-              Confirm {{ batchActionType | titlecase }}
-            </button>
-            <button class="btn btn-light border" (click)="cancelBatchAction()">Cancel</button>
-          </div>
+          <!-- Legacy Batch Receive/Release Form -->
+          <ng-container *ngIf="showBatchQtyInput">
+            <div class="mb-3">
+              <label class="form-label small text-muted fw-bold">Quantity</label>
+              <input type="number" class="form-control form-control-lg fw-bold text-center" [(ngModel)]="batchQty"
+                min="1" placeholder="0" />
+            </div>
+
+            <div *ngIf="batchActionType === 'release'">
+              <div class="mb-3">
+                <label class="form-label small text-muted fw-bold">Claimed By</label>
+                <input type="text" class="form-control" [(ngModel)]="claimedBy" placeholder="Name of claimer" />
+              </div>
+              <div class="mb-3">
+                <label class="form-label small text-muted fw-bold">Released By</label>
+                <input type="text" class="form-control" [(ngModel)]="releasedBy" readonly />
+              </div>
+            </div>
+
+            <div class="mb-3" *ngIf="!lastParsed?.roomId">
+              <label class="form-label small text-muted fw-bold">Room ID</label>
+              <input type="number" class="form-control" [(ngModel)]="batchRoomIdInput" placeholder="Enter Room ID" />
+            </div>
+
+            <div class="d-grid gap-2">
+              <button class="btn btn-lg" [ngClass]="batchActionType === 'receive' ? 'btn-success' : 'btn-danger'"
+                (click)="confirmBatchAction()">
+                Confirm {{ batchActionType | titlecase }}
+              </button>
+              <button class="btn btn-light border" (click)="cancelBatchAction()">Cancel</button>
+            </div>
+          </ng-container>
         </div>
       </div>
     </div>
