@@ -43,7 +43,7 @@
 
                         <div class="mb-3 mt-3">
                             <label class="form-label fw-bold small text-secondary">Email Address</label>
-                            <input type="text" formControlName="email" class="form-control"
+                            <input type="text" formControlName="email" class="form-control" readonly
                                 [ngClass]="{ 'is-invalid': submitted && f.email.errors }" />
                             <div *ngIf="submitted && f.email.errors" class="invalid-feedback">
                                 <div *ngIf="f.email.errors.required">Email is required</div>

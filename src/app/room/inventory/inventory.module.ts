@@ -25,4 +25,4 @@ import { GenItemInventoryListComponent } from './gen-item-inventory-list.compone
     GenItemInventoryListComponent
   ]
 })
-export class InventoryModule {}
+export class InventoryModule { }

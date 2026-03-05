@@ -12,7 +12,7 @@ const routes: Routes = [
     component: LayoutComponent,
     children: [
       { path: 'apparel', component: ApparelInventoryListComponent },
-      { path: 'supply',  component: AdminSupplyInventoryListComponent },
+      { path: 'supply', component: AdminSupplyInventoryListComponent },
       { path: 'general', component: GenItemInventoryListComponent },
     ]
   }
@@ -22,4 +22,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class InventoryRoutingModule {}
+export class InventoryRoutingModule { }

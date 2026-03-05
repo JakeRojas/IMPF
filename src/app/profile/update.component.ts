@@ -47,7 +47,8 @@ export class UpdateComponent implements OnInit {
         }
 
         this.submitting = true;
-        this.accountService.update(this.account.AccountId!, this.form.value)
+        const accountId = (this.account as any).accountId || this.account.AccountId;
+        this.accountService.update(accountId, this.form.value)
             .pipe(first())
             .subscribe({
                 next: () => {
@@ -64,7 +65,8 @@ export class UpdateComponent implements OnInit {
     onDelete() {
         if (confirm('Are you sure?')) {
             this.deleting = true;
-            this.accountService.delete(this.account.AccountId!)
+            const accountId = (this.account as any).accountId || this.account.AccountId;
+            this.accountService.delete(accountId)
                 .pipe(first())
                 .subscribe(() => {
                     this.alertService.success('Account deleted successfully', { keepAfterRouteChange: true });

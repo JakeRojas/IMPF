@@ -9,15 +9,16 @@ import { AdminSupplyReceivedListComponent } from './admin-supply/received-list.c
 import { GenItemReceivedListComponent } from './gen-item/received-list.component';
 
 const routes: Routes = [
-  { path: '', component: LayoutComponent,
+  {
+    path: '', component: LayoutComponent,
     children: [
       { path: '', redirectTo: 'apparel', pathMatch: 'full' },
       { path: 'apparel', component: ApparelReceiveComponent },
       { path: 'apparel/list', component: ApparelReceivedListComponent },
-      { path: 'supply',  component: AdminSupplyReceiveComponent },
-      { path: 'supply/list',  component: AdminSupplyReceivedListComponent },
+      { path: 'supply', component: AdminSupplyReceiveComponent },
+      { path: 'supply/list', component: AdminSupplyReceivedListComponent },
       { path: 'general', component: GenItemReceiveComponent },
-      { path: 'general/list',  component: GenItemReceivedListComponent },
+      { path: 'general/list', component: GenItemReceivedListComponent },
     ]
   }
 ];
@@ -26,4 +27,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class ReceiveRoutingModule {}
+export class ReceiveRoutingModule { }

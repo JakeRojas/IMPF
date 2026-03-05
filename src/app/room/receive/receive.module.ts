@@ -16,9 +16,9 @@ import { GenItemReceivedListComponent } from './gen-item/received-list.component
 
 @NgModule({
   imports: [
-    CommonModule, 
-    FormsModule, 
-    ReactiveFormsModule, 
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
     ReceiveRoutingModule
   ],
   declarations: [
@@ -33,4 +33,4 @@ import { GenItemReceivedListComponent } from './gen-item/received-list.component
     GenItemReceivedListComponent
   ]
 })
-export class ReceiveModule {}
+export class ReceiveModule { }

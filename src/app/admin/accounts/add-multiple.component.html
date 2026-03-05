@@ -1,0 +1,77 @@
+<h2>Create Multiple Accounts</h2>
+<p class="text-muted">Enter multiple emails to create many accounts at once with the same role and password. Users can edit their names later in their profile.</p>
+
+<form *ngIf="!loading" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="row">
+        <div class="mb-3 col-12 col-md-8">
+            <label class="form-label">Emails</label>
+            <textarea formControlName="emails" class="form-control" rows="5"
+                placeholder="user1@example.com, user2@example.com&#10;user3@example.com"
+                [ngClass]="{ 'is-invalid': submitted && f.emails.errors }"></textarea>
+            <div class="form-text">Separate emails using commas or new lines.</div>
+            <div *ngIf="submitted && f.emails.errors" class="invalid-feedback">
+                <div *ngIf="f.emails.errors.required">At least one email is required</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="mb-3 col-6 col-md-4">
+            <label class="form-label">Role for all</label>
+            <select formControlName="role" class="form-select" [ngClass]="{ 'is-invalid': submitted && f.role.errors }">
+                <option value="user">User</option>
+                <option value="teacher">Teacher</option>
+                <option value="stockroomAdmin">Stock Admin</option>
+                <option value="admin">Admin</option>
+                <option value="superAdmin">SuperAdmin</option>
+            </select>
+            <div *ngIf="submitted && f.role.errors" class="invalid-feedback">
+                <div *ngIf="f.role.errors.required">Role is required</div>
+            </div>
+        </div>
+        <div class="mb-3 col-6 col-md-4">
+            <label class="form-label">Status for all</label>
+            <select formControlName="status" class="form-select"
+                [ngClass]="{ 'is-invalid': submitted && f.status.errors }">
+                <option value="active">Active</option>
+                <option value="deactivated">Deactivated</option>
+            </select>
+            <div *ngIf="submitted && f.status.errors" class="invalid-feedback">
+                <div *ngIf="f.status.errors.required">Status is required</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="mb-3 col-6 col-md-4">
+            <label class="form-label">Password for all</label>
+            <input type="password" formControlName="password" class="form-control"
+                [ngClass]="{ 'is-invalid': submitted && f.password.errors }" />
+            <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
+                <div *ngIf="f.password.errors.required">Password is required</div>
+                <div *ngIf="f.password.errors.minlength">Password must be at least 6 characters</div>
+            </div>
+        </div>
+        <div class="mb-3 col-6 col-md-4">
+            <label class="form-label">Confirm Password</label>
+            <input type="password" formControlName="confirmPassword" class="form-control"
+                [ngClass]="{ 'is-invalid': submitted && f.confirmPassword.errors }" />
+            <div *ngIf="submitted && f.confirmPassword.errors" class="invalid-feedback">
+                <div *ngIf="f.confirmPassword.errors.required">Confirm Password is required</div>
+                <div *ngIf="f.confirmPassword.errors.mustMatch">Passwords must match</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-3 mt-4">
+        <button type="submit" [disabled]="submitting" class="btn btn-primary">
+            <span *ngIf="submitting" class="spinner-border spinner-border-sm me-1"></span>
+            Create Accounts
+        </button>
+        <a routerLink="/admin/accounts" class="btn btn-link">Cancel</a>
+    </div>
+</form>
+
+<div *ngIf="loading" class="text-center m-5">
+    <span class="spinner-border spinner-border-lg align-center"></span>
+</div>

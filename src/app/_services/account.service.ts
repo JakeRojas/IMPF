@@ -103,21 +103,29 @@ export class AccountService {
     create(params: any) {
         return this.http.post(`${baseUrl}/create-user`, params, { withCredentials: true });
     }
+    createArray(params: any[]) {
+        return this.http.post(`${baseUrl}/create-array`, params, { withCredentials: true });
+    }
     update(AccountId: number, params: any) {
         return this.http.put(`${baseUrl}/${AccountId}`, params)
-            .pipe(map((account: any) => {
-                if (account.AccountId === this.accountValue?.AccountId) {
-                    account = { ...this.accountValue, ...account };
-                    this.accountSubject.next(account);
-                    localStorage.setItem('account', JSON.stringify(account));
+            .pipe(map((res: any) => {
+                let updatedAccount = res.account || res;
+                const returnedId = updatedAccount.accountId || updatedAccount.AccountId || updatedAccount.id;
+                const currentId = (this.accountValue as any)?.accountId || this.accountValue?.AccountId || (this.accountValue as any)?.id;
+
+                if (returnedId === currentId) {
+                    updatedAccount = { ...this.accountValue, ...updatedAccount };
+                    this.accountSubject.next(updatedAccount);
+                    localStorage.setItem('account', JSON.stringify(updatedAccount));
                 }
-                return account;
+                return res;
             }));
     }
     delete(AccountId: number) {
         return this.http.delete(`${baseUrl}/${AccountId}`)
             .pipe(finalize(() => {
-                if (AccountId === this.accountValue?.AccountId)
+                const currentId = (this.accountValue as any)?.accountId || this.accountValue?.AccountId || (this.accountValue as any)?.id;
+                if (AccountId === currentId)
                     this.logout();
             }));
     }

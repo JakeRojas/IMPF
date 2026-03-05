@@ -1,26 +1,26 @@
-import { NgModule     } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { 
-  ReactiveFormsModule, 
-  FormsModule 
+import {
+  ReactiveFormsModule,
+  FormsModule
 } from '@angular/forms';
 
 import { ReleaseRoutingModule } from './release-routing.module';
-import { LayoutComponent      } from './layout.component';
+import { LayoutComponent } from './layout.component';
 
-import { ApparelReleaseComponent      } from './apparel/release.component';
-import { AdminSupplyReleaseComponent  } from './admin-supply/release.component';
-import { GenItemReleaseComponent      } from './gen-item/release.component';
+import { ApparelReleaseComponent } from './apparel/release.component';
+import { AdminSupplyReleaseComponent } from './admin-supply/release.component';
+import { GenItemReleaseComponent } from './gen-item/release.component';
 
-import { ApparelReleasedListComponent     } from './apparel/release-list.component';
+import { ApparelReleasedListComponent } from './apparel/release-list.component';
 import { AdminSupplyReleasedListComponent } from './admin-supply/release-list.component';
 import { GenItemReleasedListComponent } from './gen-item/release-list.component';
 
 @NgModule({
   imports: [
-    CommonModule, 
-    FormsModule, 
-    ReactiveFormsModule, 
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
     ReleaseRoutingModule
   ],
   declarations: [
@@ -35,4 +35,4 @@ import { GenItemReleasedListComponent } from './gen-item/release-list.component'
     GenItemReleasedListComponent
   ]
 })
-export class ReleaseModule {}
+export class ReleaseModule { }
