@@ -21,7 +21,6 @@ export class GenItemReceiveComponent implements OnInit {
   // ENUM-like option lists — replace values with the exact enum values backend expects
 
   genItemTypes: Option[] = [
-    { value: 'it', label: 'IT Dept.' },
     { value: 'maintenance', label: 'Maintenance Dept.' },
     { value: 'unknownType', label: 'Unknown' },
   ];

@@ -10,6 +10,7 @@ import { LayoutComponent } from './layout.component';
 import { ApparelUnitListComponent } from './apparel.list.component';
 import { AdminSupplyUnitListComponent } from './admin-supply.list.component';
 import { GenItemUnitListComponent } from './gen-item.list.component';
+import { ItUnitListComponent } from './it.list.component';
 
 @NgModule({
     imports: [
@@ -23,7 +24,8 @@ import { GenItemUnitListComponent } from './gen-item.list.component';
         LayoutComponent,
         ApparelUnitListComponent,
         AdminSupplyUnitListComponent,
-        GenItemUnitListComponent
+        GenItemUnitListComponent,
+        ItUnitListComponent
     ]
 })
 export class UnitModule { }

@@ -9,6 +9,7 @@ import { LayoutComponent } from './layout.component';
 import { ApparelInventoryListComponent } from './apparel-inventory-list.component';
 import { AdminSupplyInventoryListComponent } from './admin-supply-inventory-list.component';
 import { GenItemInventoryListComponent } from './gen-item-inventory-list.component';
+import { ItInventoryListComponent } from './it-inventory-list.component';
 
 @NgModule({
   imports: [
@@ -22,7 +23,8 @@ import { GenItemInventoryListComponent } from './gen-item-inventory-list.compone
     LayoutComponent,
     ApparelInventoryListComponent,
     AdminSupplyInventoryListComponent,
-    GenItemInventoryListComponent
+    GenItemInventoryListComponent,
+    ItInventoryListComponent
   ]
 })
 export class InventoryModule { }

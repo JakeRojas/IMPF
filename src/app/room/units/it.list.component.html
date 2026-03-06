@@ -1,0 +1,205 @@
+<div class="units-list-wrapper mt-2">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0 text-dark">
+            <i class="bi bi-laptop text-primary me-2"></i>IT Units <span class="badge bg-primary ms-2">{{
+                totalUnitsCount }} Units</span>
+        </h5>
+
+        <div class="actions d-flex gap-2">
+            <button class="btn btn-primary btn-sm shadow-sm px-3" (click)="generateAllUnitsQr()"
+                [disabled]="loading || units.length === 0">
+                <i class="bi bi-file-earmark-pdf me-1"></i> Generate All (PDF)
+            </button>
+            <button class="btn btn-outline-primary btn-sm shadow-sm px-3" (click)="generateSelectedQr()"
+                [disabled]="selection.size === 0">
+                <i class="bi bi-qr-code me-1"></i> Generate Selected ({{ selection.size }})
+            </button>
+        </div>
+    </div>
+
+    <div *ngIf="loading" class="text-center py-5">
+        <div class="spinner-border text-primary border-3" role="status"></div>
+        <p class="text-muted mt-2 small fw-bold">Loading units...</p>
+    </div>
+
+    <div class="card border-0 shadow-sm overflow-hidden" *ngIf="!loading && units.length">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="px-4 py-3" style="width: 40px;">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" [checked]="allSelected"
+                                    (change)="toggleSelectAll()" />
+                            </div>
+                        </th>
+                        <th class="py-3">Unit Info / ID</th>
+                        <th class="py-3">Status</th>
+                        <th class="py-3">Description</th>
+                        <th class="py-3">QR Status</th>
+                        <th class="py-3">Last Updated</th>
+                        <th class="py-3 text-end px-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let u of units" [class.table-active]="isSelected(u)">
+                        <td class="px-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" [checked]="isSelected(u)"
+                                    (change)="toggleSelection(u)" />
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="fw-bold text-primary">#{{ u.itId || u.id }}</span>
+                                <div class="fw-semibold text-dark">{{u.ItInventory?.itName || 'Unknown IT Item'}}</div>
+                            </div>
+                            <div class="extra-small text-muted mt-1">
+                                Ref: {{ u.receiveItId || u.itInventoryId || '—' }} • {{u.ItInventory?.itBrand}}
+                                {{u.ItInventory?.itModel}}
+                            </div>
+                        </td>
+                        <td>
+                            <div *ngIf="!u.editing">
+                                <span class="badge rounded-pill px-3 py-1 fw-semibold" [ngClass]="{
+                  'bg-success-subtle text-success': u.status === 'good',
+                  'bg-warning-subtle text-warning': u.status === 'working',
+                  'bg-danger-subtle text-danger': u.status === 'damage'
+                }">
+                                    {{ u.status | titlecase }}
+                                </span>
+                            </div>
+                            <div *ngIf="u.editing">
+                                <select class="form-select form-select-sm border-primary" [(ngModel)]="u.status">
+                                    <option value="good">Good</option>
+                                    <option value="working">Working</option>
+                                    <option value="damage">Damage</option>
+                                </select>
+                            </div>
+                        </td>
+                        <td>
+                            <div *ngIf="!u.editing" class="small text-dark text-truncate" style="max-width: 200px;"
+                                [title]="u.description || ''">
+                                {{ u.description || '—' }}
+                            </div>
+                            <div *ngIf="u.editing">
+                                <input class="form-control form-control-sm border-primary" [(ngModel)]="u.description"
+                                    placeholder="Add description..." />
+                            </div>
+                        </td>
+                        <td>
+                            <span *ngIf="u.qrStatus" class="badge rounded-pill px-2 py-1 bg-info-subtle text-info">
+                                <i class="bi bi-check-circle-fill me-1"></i>
+                                Generated
+                            </span>
+                            <span *ngIf="!u.qrStatus" class="badge rounded-pill px-2 py-1 bg-light text-muted border">
+                                Pending
+                            </span>
+                        </td>
+                        <td class="small text-muted">
+                            {{ (u.updatedAt || u.createdAt) | date:'mediumDate' }}
+                        </td>
+                        <td class="text-end px-4">
+                            <div class="btn-group btn-group-sm rounded shadow-sm overflow-hidden" *ngIf="!u.editing">
+                                <button class="btn btn-white border-end" (click)="startEdit(u)" title="Edit Unit">
+                                    <i class="bi bi-pencil-square text-primary"></i>
+                                </button>
+                                <button class="btn btn-white" (click)="downloadUnitQr(u)" title="Download QR">
+                                    <i class="bi bi-qr-code text-dark"></i>
+                                </button>
+                            </div>
+
+                            <div class="btn-group btn-group-sm shadow-sm" *ngIf="u.editing">
+                                <button class="btn btn-success px-3" (click)="saveUnit(u)">
+                                    <i class="bi bi-check-lg"></i>
+                                </button>
+                                <button class="btn btn-secondary px-3" (click)="cancelEdit(u)">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="text-center py-5 bg-white rounded-4 shadow-sm" *ngIf="!loading && units.length === 0">
+        <i class="bi bi-laptop text-muted opacity-25" style="font-size: 4rem;"></i>
+        <h5 class="mt-3 fw-bold text-dark">No IT Units Found</h5>
+        <p class="text-muted small">No IT units have been recorded in this room yet.</p>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top"
+        *ngIf="totalPages > 1 && !loading">
+        <div class="small text-muted">
+            Showing {{ units.length }} of {{ total }} units
+        </div>
+        <nav>
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item" [class.disabled]="page === 1">
+                    <button class="page-link border-0 rounded-pill px-3 mx-1"
+                        (click)="onPageChange(page - 1)">Prev</button>
+                </li>
+                <li class="page-item" *ngFor="let p of range(1, totalPages)" [class.active]="page === p">
+                    <button class="page-link border-0 rounded-circle mx-1" (click)="onPageChange(p)">{{ p }}</button>
+                </li>
+                <li class="page-item" [class.disabled]="page === totalPages">
+                    <button class="page-link border-0 rounded-pill px-3 mx-1"
+                        (click)="onPageChange(page + 1)">Next</button>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<style>
+    .btn-white {
+        background: white;
+        border: 1px solid #dee2e6;
+        color: #475569;
+    }
+
+    .btn-white:hover {
+        background: #f8fafc;
+        color: #0f172a;
+    }
+
+    .table-active {
+        background-color: rgba(59, 130, 246, 0.04) !important;
+    }
+
+    .extra-small {
+        font-size: 0.7rem;
+    }
+
+    .bg-success-subtle {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+
+    .bg-warning-subtle {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+
+    .bg-danger-subtle {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+
+    .bg-info-subtle {
+        background-color: #e0f2fe;
+        color: #075985;
+    }
+
+    .pagination .page-link {
+        background: #f8fafc;
+        color: #475569;
+    }
+
+    .pagination .page-item.active .page-link {
+        background: #3b82f6 !important;
+        color: white !important;
+    }
+</style>

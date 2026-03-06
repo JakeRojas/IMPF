@@ -5,6 +5,7 @@ import { LayoutComponent } from './layout.component';
 import { ApparelUnitListComponent } from './apparel.list.component';
 import { AdminSupplyUnitListComponent } from './admin-supply.list.component';
 import { GenItemUnitListComponent } from './gen-item.list.component';
+import { ItUnitListComponent } from './it.list.component';
 
 const routes: Routes = [
   {
@@ -13,6 +14,8 @@ const routes: Routes = [
       { path: 'apparel', component: ApparelUnitListComponent },
       { path: 'supply', component: AdminSupplyUnitListComponent },
       { path: 'general', component: GenItemUnitListComponent },
+      { path: 'it', component: ItUnitListComponent },
+      { path: 'maintenance', component: GenItemUnitListComponent },
     ]
   }
 ];

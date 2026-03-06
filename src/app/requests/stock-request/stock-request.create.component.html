@@ -85,7 +85,8 @@
         </div>
 
         <!-- General Fields (default) -->
-        <div *ngIf="!selectedRoomType || (selectedRoomType !== 'apparel' && selectedRoomType !== 'supply')"
+        <div
+          *ngIf="!selectedRoomType || (selectedRoomType !== 'apparel' && selectedRoomType !== 'supply' && selectedRoomType !== 'it')"
           class="row g-2">
           <div class="col-md-6">
             <label class="form-label small">Type</label>
@@ -97,6 +98,29 @@
             <label class="form-label small">Size (Optional)</label>
             <input type="text" class="form-control form-control-sm" formControlName="genItemSize"
               placeholder="e.g. Large" />
+          </div>
+        </div>
+
+        <!-- IT Fields -->
+        <div *ngIf="selectedRoomType === 'it'" class="row g-2">
+          <div class="col-md-6">
+            <label class="form-label small">Model (Optional)</label>
+            <input type="text" class="form-control form-control-sm" formControlName="itModel"
+              placeholder="e.g. ThinkPad X1" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small">Brand (Optional)</label>
+            <input type="text" class="form-control form-control-sm" formControlName="itBrand"
+              placeholder="e.g. Lenovo" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small">Size/Spec (Optional)</label>
+            <input type="text" class="form-control form-control-sm" formControlName="itSize"
+              placeholder="e.g. 14-inch" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small">Serial Number (Optional)</label>
+            <input type="text" class="form-control form-control-sm" formControlName="itSerialNumber" />
           </div>
         </div>
       </div>

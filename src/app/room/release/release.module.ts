@@ -15,6 +15,8 @@ import { GenItemReleaseComponent } from './gen-item/release.component';
 import { ApparelReleasedListComponent } from './apparel/release-list.component';
 import { AdminSupplyReleasedListComponent } from './admin-supply/release-list.component';
 import { GenItemReleasedListComponent } from './gen-item/release-list.component';
+import { ItReleaseComponent } from './it/release.component';
+import { ItReleasedListComponent } from './it/release-list.component';
 
 @NgModule({
   imports: [
@@ -32,7 +34,9 @@ import { GenItemReleasedListComponent } from './gen-item/release-list.component'
 
     ApparelReleasedListComponent,
     AdminSupplyReleasedListComponent,
-    GenItemReleasedListComponent
+    GenItemReleasedListComponent,
+    ItReleaseComponent,
+    ItReleasedListComponent
   ]
 })
 export class ReleaseModule { }

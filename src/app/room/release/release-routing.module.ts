@@ -13,6 +13,8 @@ import { GenItemReleaseComponent } from './gen-item/release.component';
 import { ApparelReleasedListComponent } from './apparel/release-list.component';
 import { AdminSupplyReleasedListComponent } from './admin-supply/release-list.component';
 import { GenItemReleasedListComponent } from './gen-item/release-list.component';
+import { ItReleaseComponent } from './it/release.component';
+import { ItReleasedListComponent } from './it/release-list.component';
 
 const routes: Routes = [
   {
@@ -24,6 +26,10 @@ const routes: Routes = [
       { path: 'supply/list', component: AdminSupplyReleasedListComponent },
       { path: 'general', component: GenItemReleaseComponent },
       { path: 'general/list', component: GenItemReleasedListComponent },
+      { path: 'it', component: ItReleaseComponent },
+      { path: 'it/list', component: ItReleasedListComponent },
+      { path: 'maintenance', component: GenItemReleaseComponent },
+      { path: 'maintenance/list', component: GenItemReleasedListComponent },
     ]
   }
 ];

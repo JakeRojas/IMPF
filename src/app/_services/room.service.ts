@@ -75,6 +75,28 @@ export class RoomService {
     return this.http.get<any>(`${this.baseUrl}/${roomId}/items`, { params });
   }
 
+  // IT
+  receiveIt(roomId: number, payload: any): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/${roomId}/receive/it`, payload);
+  }
+  getItInventory(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/it-inventory`); }
+  getItUnits(roomId: number, page?: number, limit?: number) {
+    const params: any = {};
+    if (page) params.page = page;
+    if (limit) params.limit = limit;
+    return this.http.get<any>(`${this.baseUrl}/${roomId}/it`, { params });
+  }
+  getReceivedBatchIt(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/receive-it`); }
+  getReleasedBatchIt(roomId: number) { return this.http.get<any>(`${this.baseUrl}/${roomId}/release-it`); }
+  releaseIt(roomId: number, payload: any): Observable<any> {
+    const body: any = { ...payload };
+    body.releaseItemQuantity = Number(body.releaseQuantity ?? body.releaseItemQuantity ?? 0);
+    if (body.remarks && !body.notes) body.notes = body.remarks;
+    delete body.releaseQuantity;
+    delete body.remarks;
+    return this.http.post<any>(`${this.baseUrl}/${roomId}/release/it`, body);
+  }
+
   getAllUnits(roomId: number, page?: number, limit?: number) {
     const params: any = {};
     if (page) params.page = page;
@@ -197,5 +219,9 @@ export class RoomService {
 
   updateGenItemUnit(roomId: number, unitId: number, payload: { description?: string, status?: string }) {
     return this.http.put<any>(`${this.baseUrl}/${roomId}/genitem/unit/${unitId}`, payload);
+  }
+
+  updateItUnit(roomId: number, unitId: number, payload: { description?: string, status?: string }) {
+    return this.http.put<any>(`${this.baseUrl}/${roomId}/it/unit/${unitId}`, payload);
   }
 }

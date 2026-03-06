@@ -49,8 +49,9 @@
         <option [ngValue]="null">-- Select stockroom type --</option>
         <option value="apparel">Apparel</option>
         <option value="supply">Supply</option>
-        <option value="general">IT</option>
-        <option value="general">Maintenance</option>
+        <option value="it">IT</option>
+        <option value="maintenance">Maintenance</option>
+        <option value="general">General</option>
       </select>
       <div *ngIf="submitted && f.stockroomType.errors" class="invalid-feedback d-block">
         <div *ngIf="f.stockroomType.errors.required">Stockroom type is required when room is a stockroom</div>

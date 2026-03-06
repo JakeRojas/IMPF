@@ -46,6 +46,8 @@ export class RoomViewComponent implements OnInit {
     const t = (room.stockroomType || '').toLowerCase();
     if (t === 'apparel') return 'apparel';
     if (t === 'supply') return 'supply';
+    if (t === 'it') return 'it';
+    if (t === 'maintenance') return 'maintenance';
     return 'general';
   }
 }

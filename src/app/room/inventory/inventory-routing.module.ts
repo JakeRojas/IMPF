@@ -5,6 +5,7 @@ import { LayoutComponent } from './layout.component';
 import { ApparelInventoryListComponent } from './apparel-inventory-list.component';
 import { AdminSupplyInventoryListComponent } from './admin-supply-inventory-list.component';
 import { GenItemInventoryListComponent } from './gen-item-inventory-list.component';
+import { ItInventoryListComponent } from './it-inventory-list.component';
 
 const routes: Routes = [
   {
@@ -14,6 +15,8 @@ const routes: Routes = [
       { path: 'apparel', component: ApparelInventoryListComponent },
       { path: 'supply', component: AdminSupplyInventoryListComponent },
       { path: 'general', component: GenItemInventoryListComponent },
+      { path: 'it', component: ItInventoryListComponent },
+      { path: 'maintenance', component: GenItemInventoryListComponent },
     ]
   }
 ];

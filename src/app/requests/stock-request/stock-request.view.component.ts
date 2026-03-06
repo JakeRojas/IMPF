@@ -134,6 +134,12 @@ export class StockRequestViewComponent implements OnInit {
       } else if (type.includes('supply')) {
         rows.push({ label: 'Item Name', value: inv.supplyName || inv.name });
         rows.push({ label: 'Measurement', value: inv.supplyMeasure });
+      } else if (type.includes('it')) {
+        rows.push({ label: 'Item Name', value: inv.itName || inv.name });
+        rows.push({ label: 'Model', value: inv.itModel });
+        rows.push({ label: 'Brand', value: inv.itBrand });
+        rows.push({ label: 'Size/Spec', value: inv.itSize });
+        rows.push({ label: 'Serial Number', value: inv.itSerialNumber });
       } else {
         rows.push({ label: 'Item Name', value: inv.genItemName || inv.name });
         rows.push({ label: 'Specific Type', value: inv.genItemType || type });
@@ -141,7 +147,7 @@ export class StockRequestViewComponent implements OnInit {
       }
 
       rows.push({ label: 'Current Inventory Stock', value: inv.totalQuantity ?? inv.supplyQuantity ?? inv.quantity ?? '0' });
-      rows.push({ label: 'Database ID', value: inv.apparelInventoryId || inv.adminSupplyInventoryId || inv.genItemInventoryId || inv.id });
+      rows.push({ label: 'Database ID', value: inv.apparelInventoryId || inv.adminSupplyInventoryId || inv.genItemInventoryId || inv.itInventoryId || inv.id });
 
       return rows;
     }
@@ -181,7 +187,7 @@ export class StockRequestViewComponent implements OnInit {
     if (!k) return k;
     // Special cleanup for common keys
     let filtered = k;
-    const prefixes = ['apparel', 'genitem', 'item', 'supply', 'admin'];
+    const prefixes = ['apparel', 'genitem', 'item', 'supply', 'admin', 'it'];
     prefixes.forEach(p => {
       if (filtered.toLowerCase().startsWith(p)) {
         filtered = filtered.substring(p.length);

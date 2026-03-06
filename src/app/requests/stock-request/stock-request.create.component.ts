@@ -23,7 +23,7 @@ export class StockRequestCreateComponent implements OnInit, OnDestroy {
   apparelFors = ['boys', 'girls'];
   apparelSizes = ['2', '4', '6', '8', '10', '12', '14', '16', '18', '20', 'xs', 's', 'm', 'l', 'xl', '2xl', '3xl'];
   supplyMeasures = ['pc', 'box', 'bottle', 'pack', 'ream', 'meter', 'roll', 'gallon', 'unit', 'educ', 'teachers'];
-  genItemTypes = ['it', 'maintenance', 'unknownType'];
+  genItemTypes = ['maintenance', 'unknownType'];
 
   private destroy$ = new Subject<void>();
 
@@ -49,7 +49,11 @@ export class StockRequestCreateComponent implements OnInit, OnDestroy {
       apparelSize: ['m'],
       supplyMeasure: ['pc'],
       genItemType: ['unknownType'],
-      genItemSize: ['']
+      genItemSize: [''],
+      itSerialNumber: [''],
+      itModel: [''],
+      itBrand: [''],
+      itSize: ['']
     });
 
     // Listen to itemId changes
@@ -174,6 +178,11 @@ export class StockRequestCreateComponent implements OnInit, OnDestroy {
         details.apparelSize = v.apparelSize;
       } else if (this.selectedRoomType === 'supply') {
         details.supplyMeasure = v.supplyMeasure;
+      } else if (this.selectedRoomType === 'it') {
+        details.itSerialNumber = v.itSerialNumber;
+        details.itModel = v.itModel;
+        details.itBrand = v.itBrand;
+        details.itSize = v.itSize;
       } else {
         details.genItemType = v.genItemType;
         details.genItemSize = v.genItemSize;
