@@ -139,6 +139,22 @@ export class StockRequestListComponent implements OnInit {
     });
   }
 
-  isAdmin() { return this.account?.role === 'superAdmin' && this.account?.role === 'admin'; }
-  isStockroom() { return this.account?.role === 'stockroomAdmin' }
+  isAdmin() {
+    return this.account?.role === 'superAdmin' || this.account?.role === 'admin';
+  }
+
+  isStockroom() {
+    return this.account?.role === 'stockroomAdmin' || this.account?.role === 'superAdmin';
+  }
+
+  isRequester(r: any) {
+    if (!r || !this.account) return false;
+    // Check both potential id field names
+    const reqAccountId = r.accountId || r.Account?.accountId;
+    return Number(reqAccountId) === Number(this.account.accountId);
+  }
+
+  canFulfill(r: any) {
+    return this.isRequester(r) && r.status === 'approved';
+  }
 }

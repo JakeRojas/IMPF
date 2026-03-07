@@ -93,13 +93,21 @@ export class StockRequestViewComponent implements OnInit {
   }
 
   fulfill() {
-    if (!confirm('Fulfill?')) return;
+    if (!confirm('Confirm fulfillment and receipt of these items?')) return;
     this.sr.fulfill(this.id)
       .pipe(first())
       .subscribe(() => {
-        this.alert.success('Fulfilled');
+        this.alert.success('Request fulfilled successfully');
         this.load();
       }, e => this.alert.error(this._errToString(e)));
+  }
+
+  isRequester() {
+    return this.request && this.account && Number(this.request.accountId) === Number(this.account.accountId);
+  }
+
+  canFulfill() {
+    return this.isRequester() && this.request?.status === 'approved';
   }
 
   isAdmin() { return this.account?.role === 'superAdmin' || this.account?.role === 'admin'; }
@@ -125,22 +133,23 @@ export class StockRequestViewComponent implements OnInit {
       const inv: any = ri.inventory;
       const type = (ri.type || '').toLowerCase();
 
-      if (type.includes('apparel')) {
+      if (type === 'apparel') {
         rows.push({ label: 'Item Name', value: inv.apparelName || inv.name });
         rows.push({ label: 'Level/Department', value: inv.apparelLevel });
         rows.push({ label: 'Apparel Type', value: inv.apparelType });
         rows.push({ label: 'For', value: inv.apparelFor });
         rows.push({ label: 'Size', value: inv.apparelSize });
-      } else if (type.includes('supply')) {
+      } else if (type === 'supply' || type === 'admin supply') {
         rows.push({ label: 'Item Name', value: inv.supplyName || inv.name });
         rows.push({ label: 'Measurement', value: inv.supplyMeasure });
-      } else if (type.includes('it')) {
+      } else if (type === 'it') {
         rows.push({ label: 'Item Name', value: inv.itName || inv.name });
         rows.push({ label: 'Model', value: inv.itModel });
         rows.push({ label: 'Brand', value: inv.itBrand });
         rows.push({ label: 'Size/Spec', value: inv.itSize });
         rows.push({ label: 'Serial Number', value: inv.itSerialNumber });
       } else {
+        // Maintenance, general, etc. (GenItem)
         rows.push({ label: 'Item Name', value: inv.genItemName || inv.name });
         rows.push({ label: 'Specific Type', value: inv.genItemType || type });
         rows.push({ label: 'Size/Spec', value: inv.genItemSize });

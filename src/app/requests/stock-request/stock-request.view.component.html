@@ -79,9 +79,8 @@
               <i class="bi bi-x-circle me-1"></i> Disapprove
             </button>
           </ng-container>
-          <button *ngIf="isStockroom() && request.status === 'approved'" class="btn btn-primary px-4 shadow-sm"
-            (click)="fulfill()">
-            <i class="bi bi-box-seam me-1"></i> Fulfill Request
+          <button *ngIf="canFulfill()" class="btn btn-primary px-4 shadow-sm" (click)="fulfill()">
+            <i class="bi bi-box-seam me-1"></i> Fulfill & Confirm Receipt
           </button>
         </div>
       </div>

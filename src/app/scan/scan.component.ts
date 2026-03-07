@@ -176,12 +176,15 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
 
   onStockRequestClicked() {
     const payload = this.lastScannedItem?.payload || this.lastParsed || tryParseJson(this.lastResult) || { raw: this.lastResult };
-    const inventoryId = payload.id || payload.inventoryId || payload.apparelInventoryId;
+    const inv = this.lastScannedItem?.inventory || this.lastScannedItem?.batch;
+    const inventoryId = payload.inventoryId || payload.id || payload.apparelInventoryId ||
+      (inv && (inv.apparelInventoryId || inv.adminSupplyInventoryId || inv.genItemInventoryId || inv.itInventoryId || inv.id));
 
     if (!inventoryId) {
-      this.alert.error('Inventory id not found in scanned QR payload.');
+      this.errorMsg = 'Inventory id not found in scanned QR payload.';
       return;
     }
+    this.errorMsg = null;
 
     this.stockRequestData = {
       requesterRoomId: payload.roomId || '',
@@ -193,44 +196,54 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
 
   confirmStockRequest() {
     const payload = this.lastScannedItem?.payload || this.lastParsed || tryParseJson(this.lastResult) || { raw: this.lastResult };
-    const inventoryId = payload.id || payload.inventoryId || payload.apparelInventoryId;
+    const inv = this.lastScannedItem?.inventory || this.lastScannedItem?.batch;
+    const inventoryId = payload.inventoryId || payload.id || payload.apparelInventoryId ||
+      (inv && (inv.apparelInventoryId || inv.adminSupplyInventoryId || inv.genItemInventoryId || inv.itInventoryId || inv.id));
     const itemType = this.extractItemType();
 
-    if (!this.stockRequestData.requesterRoomId) { this.alert.error('Requester Room is required.'); return; }
-    if (!this.stockRequestData.quantity || this.stockRequestData.quantity < 1) { this.alert.error('Valid quantity is required.'); return; }
+    if (!inventoryId) { this.errorMsg = 'Inventory ID not found in scanned QR — please re-scan.'; return; }
+    if (!this.stockRequestData.requesterRoomId) { this.errorMsg = 'Requester Room is required.'; return; }
+    if (!this.stockRequestData.quantity || this.stockRequestData.quantity < 1) { this.errorMsg = 'Valid quantity is required.'; return; }
 
-    const body = {
+    const body: any = {
       requesterRoomId: Number(this.stockRequestData.requesterRoomId),
       itemId: Number(inventoryId),
       quantity: Number(this.stockRequestData.quantity),
       note: this.stockRequestData.note
     };
 
+    if (itemType) body.itemType = itemType;
+
     this.stockRequestService.create(body).pipe(first()).subscribe({
       next: () => {
         this.alert.success('Stock request created successfully');
+        this.errorMsg = null;
         this.resetAfterAction();
         setTimeout(() => this.startScanner(), 300);
       },
       error: (err) => {
         const msg = (err?.error?.message || err?.message || String(err));
-        this.alert.error(`Failed to create stock request: ${msg}`);
+        this.errorMsg = `Failed to create stock request: ${msg}`;
       }
     });
   }
 
   cancelStockRequest() {
     this.showStockRequestForm = false;
+    this.errorMsg = null;
   }
 
   onTransferClicked() {
     const payload = this.lastScannedItem?.payload || this.lastParsed || tryParseJson(this.lastResult) || { raw: this.lastResult };
-    const inventoryId = payload.id || payload.inventoryId || payload.apparelInventoryId;
+    const inv = this.lastScannedItem?.inventory || this.lastScannedItem?.batch;
+    const inventoryId = payload.inventoryId || payload.id || payload.apparelInventoryId ||
+      (inv && (inv.apparelInventoryId || inv.adminSupplyInventoryId || inv.genItemInventoryId || inv.itInventoryId || inv.id));
 
     if (!inventoryId) {
-      this.alert.error('Inventory id not found in scanned QR payload.');
+      this.errorMsg = 'Inventory id not found in scanned QR payload.';
       return;
     }
+    this.errorMsg = null;
 
     this.transferData = {
       fromRoomId: payload.roomId || '',
@@ -243,15 +256,17 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
 
   confirmTransfer() {
     const payload = this.lastScannedItem?.payload || this.lastParsed || tryParseJson(this.lastResult) || { raw: this.lastResult };
-    const inventoryId = payload.id || payload.inventoryId || payload.apparelInventoryId;
+    const inv = this.lastScannedItem?.inventory || this.lastScannedItem?.batch;
+    const inventoryId = payload.inventoryId || payload.id || payload.apparelInventoryId ||
+      (inv && (inv.apparelInventoryId || inv.adminSupplyInventoryId || inv.genItemInventoryId || inv.itInventoryId || inv.id));
     const itemType = this.extractItemType();
 
-    if (!this.transferData.fromRoomId) { this.alert.error('From Room is required.'); return; }
-    if (!this.transferData.toRoomId) { this.alert.error('To Room is required.'); return; }
-    if (this.transferData.fromRoomId === this.transferData.toRoomId) { this.alert.error('From and To rooms must be different.'); return; }
-    if (!this.transferData.quantity || this.transferData.quantity < 1) { this.alert.error('Valid quantity is required.'); return; }
+    if (!this.transferData.fromRoomId) { this.errorMsg = 'From Room is required.'; return; }
+    if (!this.transferData.toRoomId) { this.errorMsg = 'To Room is required.'; return; }
+    if (this.transferData.fromRoomId === this.transferData.toRoomId) { this.errorMsg = 'From and To rooms must be different.'; return; }
+    if (!this.transferData.quantity || this.transferData.quantity < 1) { this.errorMsg = 'Valid quantity is required.'; return; }
 
-    const body = {
+    const body: any = {
       fromRoomId: Number(this.transferData.fromRoomId),
       toRoomId: Number(this.transferData.toRoomId),
       itemId: Number(inventoryId),
@@ -259,21 +274,25 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
       note: this.transferData.note
     };
 
+    if (itemType) body.itemType = itemType;
+
     this.transferService.create(body).pipe(first()).subscribe({
       next: () => {
         this.alert.success('Transfer created successfully');
+        this.errorMsg = null;
         this.resetAfterAction();
         setTimeout(() => this.startScanner(), 300);
       },
       error: (err) => {
         const msg = (err?.error?.message || err?.message || String(err));
-        this.alert.error(`Failed to create transfer: ${msg}`);
+        this.errorMsg = `Failed to create transfer: ${msg}`;
       }
     });
   }
 
   cancelTransfer() {
     this.showTransferForm = false;
+    this.errorMsg = null;
   }
 
   // duplicate releaseUnit removed

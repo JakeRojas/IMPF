@@ -114,8 +114,8 @@
                 <i class="bi bi-x-lg"></i>
               </button>
 
-              <button *ngIf="isStockroom() && r.status === 'approved'" class="btn btn-sm btn-danger ms-1"
-                (click)="fulfill(r)" title="Fulfill">
+              <button *ngIf="canFulfill(r)" class="btn btn-sm btn-danger ms-1" (click)="fulfill(r)"
+                title="Fulfill & Confirm Receipt">
                 <i class="bi bi-box-seam"></i>
               </button>
             </div>
@@ -183,7 +183,7 @@
           </button>
         </ng-container>
 
-        <button *ngIf="isStockroom() && r.status === 'approved'" class="btn btn-sm btn-danger col" (click)="fulfill(r)">
+        <button *ngIf="canFulfill(r)" class="btn btn-sm btn-danger col" (click)="fulfill(r)">
           <i class="bi bi-box-seam me-1"></i> Fulfill
         </button>
       </div>

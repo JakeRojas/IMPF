@@ -69,9 +69,16 @@ export class StockRequestCreateComponent implements OnInit, OnDestroy {
       this.form.get('itemId')!.setValue(null);
 
       const foundRoom = this.rooms.find(r => r.roomId == id);
-      // 'stockroomType' exists on room model
-      this.selectedRoomType = foundRoom ? (foundRoom.stockroomType || '').toLowerCase() : null;
+      let sType = foundRoom ? (foundRoom.stockroomType || '').toLowerCase() : null;
 
+      // [ENHANCED] Differentiate IT from Maintenance if both share "general" stockroomType
+      if (sType === 'general' && foundRoom?.roomName?.toUpperCase().includes('IT')) {
+        sType = 'it';
+      } else if (sType === 'general' && foundRoom?.roomName?.toUpperCase().includes('MAINTENANCE')) {
+        sType = 'maintenance';
+      }
+
+      this.selectedRoomType = sType;
       this.updateDynamicValidators();
 
       if (!id) return;
