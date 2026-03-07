@@ -416,6 +416,29 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
+    // IT receive
+    if (stockroomType === 'it') {
+      const body: any = {
+        itName: inv.itName || inv.name || payload.itName || payload.name || '',
+        itBrand: inv.itBrand || payload.itBrand || '',
+        itModel: inv.itModel || payload.itModel || '',
+        itSerialNumber: inv.itSerialNumber || payload.itSerialNumber || '',
+        itSize: inv.itSize || inv.size || payload.itSize || payload.size || '',
+        itQuantity: Number(this.batchQty),
+        receivedFrom: `QR:${(this.lastResult || '').slice(0, 40)}`,
+        receivedBy: currentUserId ?? 1,
+        notes: payload.notes || null
+      };
+
+      if (!body.itName) { this.alert.error('IT item name not found in QR payload'); return; }
+
+      this.roomService.receiveItem(Number(roomId), body).pipe(first()).subscribe({
+        next: () => { this.alert.success('Received IT batch'); this.resetAfterAction(); setTimeout(() => this.startScanner(), 300); },
+        error: (err) => { const msg = (err?.error?.message || err?.message || String(err)); this.alert.error(`Failed to receive: ${msg}`); }
+      });
+      return;
+    }
+
     // Gen item receive (fallback)
     const body: any = {
       genItemName: inv.genItemName || inv.name || payload.genItemName || payload.name || 'unknown',

@@ -149,4 +149,32 @@ export class ItemRequestListComponent implements OnInit {
   isStockroomAdmin() { return this.account?.role === 'stockroomAdmin' || this.account?.role === 'admin' || this.account?.role === 'superAdmin'; }
   isTeacher() { return this.account?.role === 'teacher' || this.account?.role === 'roomInCharge' || this.account?.role === 'user'; }
   isSuperAdmin() { return this.account?.role === 'superAdmin'; }
+
+  canAccept(r: any) {
+    if (!r) return false;
+    if (r.status !== 'pending') return false;
+    if (this.isSuperAdmin() || this.account?.role === 'admin') return true;
+    const ric = r.requestToRoom?.roomInCharge || r.requestToRoom?.room_in_charge;
+    return Number(this.account?.accountId) === Number(ric);
+  }
+
+  canDecline(r: any) {
+    return this.canAccept(r);
+  }
+
+  canRelease(r: any) {
+    if (!r) return false;
+    if (r.status !== 'accepted') return false;
+    if (this.isSuperAdmin() || this.account?.role === 'admin') return true;
+    const ric = r.requestToRoom?.roomInCharge || r.requestToRoom?.room_in_charge;
+    return Number(this.account?.accountId) === Number(ric);
+  }
+
+  canFulfill(r: any) {
+    if (!r) return false;
+    if (r.status !== 'released') return false;
+    if (this.isSuperAdmin() || this.account?.role === 'admin') return true;
+    const requesterId = r.accountId || r.Account?.accountId;
+    return Number(this.account?.accountId) === Number(requesterId);
+  }
 }

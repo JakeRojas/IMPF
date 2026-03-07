@@ -71,7 +71,7 @@ export class ItemRequestViewComponent implements OnInit {
     const ri = item.requestedItem;
     if (ri && ri.inventory) {
       const inv = ri.inventory;
-      return inv.apparelName || inv.supplyName || inv.genItemName || inv.name || ('Item #' + item.itemId);
+      return inv.itName || inv.apparelName || inv.supplyName || inv.genItemName || inv.name || ('Item #' + item.itemId);
     }
     return 'Item #' + item.itemId;
   }
@@ -183,6 +183,12 @@ export class ItemRequestViewComponent implements OnInit {
       } else if (type.includes('supply')) {
         rows.push({ label: 'Item Name', value: inv.supplyName || inv.name });
         rows.push({ label: 'Measurement', value: inv.supplyMeasure });
+      } else if (type === 'it') {
+        rows.push({ label: 'Item Name', value: inv.itName || inv.name });
+        rows.push({ label: 'Brand', value: inv.itBrand });
+        rows.push({ label: 'Model', value: inv.itModel });
+        rows.push({ label: 'Serial Number', value: inv.itSerialNumber });
+        rows.push({ label: 'Size/Spec', value: inv.itSize });
       } else {
         rows.push({ label: 'Item Name', value: inv.genItemName || inv.name });
         rows.push({ label: 'Item Type', value: inv.genItemType || type });

@@ -37,6 +37,8 @@ export class RoomService {
       return this.http.post<any>(`${this.baseUrl}/${roomId}/receive/apparel`, payload);
     } else if (payload.supplyName) {
       return this.http.post<any>(`${this.baseUrl}/${roomId}/receive/supply`, payload);
+    } else if (payload.itName) {
+      return this.http.post<any>(`${this.baseUrl}/${roomId}/receive/it`, payload);
     } else {
       return this.http.post<any>(`${this.baseUrl}/${roomId}/receive/item`, payload);
     }

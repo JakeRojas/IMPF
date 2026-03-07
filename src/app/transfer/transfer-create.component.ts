@@ -11,7 +11,8 @@ export class TransferCreateComponent implements OnInit, OnDestroy {
   form!: FormGroup;
 
   fromRooms: any[] = [];   // rooms current user is in charge of
-  toRooms: any[] = [];     // rooms with roomType stockroom/substockroom
+  toRooms: any[] = [];     // rooms with roomType stockroom/substockroom (filtered)
+  allStockRooms: any[] = []; // unfiltered list of all stockrooms
   items: any[] = [];
 
   loading = false;
@@ -40,13 +41,32 @@ export class TransferCreateComponent implements OnInit, OnDestroy {
     this.loadFromRooms();
     this.loadToRooms();
 
-    // when fromRoom changes, reset items and load items for that room
+    // when fromRoom changes, reset items and load items for that room.
+    // Also filter toRooms to match stockroomType.
     this.form.get('fromRoomId')!.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(id => {
       this.items = [];
       this.form.get('itemId')!.setValue(null);
+      this.form.get('toRoomId')!.setValue(null);
       this.maxItemQty = 0;
-      if (!id) return;
+
+      if (!id) {
+        this.toRooms = [];
+        return;
+      }
+
       this.loadItemsForRoom(Number(id));
+
+      // Filter toRooms based on fromRoom's stockroomType
+      const selectedFromRoom = this.fromRooms.find(r => Number(r.roomId) === Number(id));
+      if (selectedFromRoom) {
+        const sType = String(selectedFromRoom.stockroomType || '').toLowerCase();
+        this.toRooms = this.allStockRooms.filter(r =>
+          String(r.stockroomType || '').toLowerCase() === sType &&
+          Number(r.roomId) !== Number(id)
+        );
+      } else {
+        this.toRooms = [];
+      }
     });
 
     // when itemId changes, set max quantity
@@ -88,12 +108,17 @@ export class TransferCreateComponent implements OnInit, OnDestroy {
     // support Observable or Promise
     if ((getAll as any).pipe) {
       (getAll as any).pipe(first()).subscribe({
-        next: (res: any[]) => { this.toRooms = this.filterStockRooms(res || []); this.loading = false; },
+        next: (res: any[]) => {
+          this.allStockRooms = this.filterStockRooms(res || []);
+          this.toRooms = []; // start empty until fromRoom is selected
+          this.loading = false;
+        },
         error: (err: any) => { this.loading = false; this.alert.error(this.errToString(err)); }
       });
     } else {
       Promise.resolve(getAll).then((res: any[]) => {
-        this.toRooms = this.filterStockRooms(res || []);
+        this.allStockRooms = this.filterStockRooms(res || []);
+        this.toRooms = [];
         this.loading = false;
       }).catch((err: any) => { this.loading = false; this.alert.error(this.errToString(err)); });
     }
@@ -101,7 +126,7 @@ export class TransferCreateComponent implements OnInit, OnDestroy {
 
   private filterStockRooms(list: any[]) {
     return (list || []).filter(r => {
-      const rt = String((r?.roomType ?? '')).toLowerCase();
+      const rt = String((r?.roomType ?? r?.room_type ?? '')).toLowerCase();
       return rt === 'stockroom' || rt === 'substockroom';
     });
   }

@@ -127,20 +127,12 @@ export class TransferListComponent implements OnInit {
     const status = String(t.status || '').toLowerCase();
     if (!['pending', 'in_transfer'].includes(status)) return false;
 
-    // 3. Admin OR Room-in-Charge can accept
-    const rawRole = acct.role ?? acct.roles ?? acct.roleName ?? '';
-    const adminRoles = ['superadmin', 'admin', 'stockroomadmin', 'super_admin'];
+    // 3. User must be SuperAdmin OR the roomInCharge of the destination room
+    const rawRole = String(acct.role || '').toLowerCase();
+    if (rawRole === 'superadmin') return true;
 
-    let isAdmin = false;
-    if (Array.isArray(rawRole)) {
-      isAdmin = rawRole.map((r: any) => String(r).toLowerCase()).some((r: string) => adminRoles.includes(r));
-    } else {
-      isAdmin = adminRoles.includes(String(rawRole).toLowerCase());
-    }
-    if (isAdmin) return true;
-
-    const roomInCharge = t.toRoom?.roomInCharge ?? t.toRoomId;
-    return String(acct.accountId) === String(roomInCharge);
+    const roomInCharge = t.toRoom?.roomInCharge || t.toRoom?.room_in_charge;
+    return Number(acct.accountId) === Number(roomInCharge);
   }
 
   canReceive(t: Transfer): boolean {
@@ -149,7 +141,9 @@ export class TransferListComponent implements OnInit {
     if (String(t.status || '').toLowerCase() !== 'transfer_accepted') return false;
 
     const acct = this.account || {};
-    // 2. MUST only show to the one who accepted the transfer
-    return String(acct.accountId) === String(t.acceptedBy);
+    const rawRole = String(acct.role || '').toLowerCase();
+
+    // 2. ONLY show to the one who accepted the transfer OR a SuperAdmin
+    return String(acct.accountId) === String(t.acceptedBy) || rawRole === 'superadmin';
   }
 }

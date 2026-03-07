@@ -111,21 +111,17 @@
                 <i class="bi bi-eye"></i>
               </button>
 
-              <button *ngIf="isStockroomAdmin() && r.status === 'pending'" class="btn btn-sm btn-success"
-                (click)="accept(r)" title="Accept">
+              <button *ngIf="canAccept(r)" class="btn btn-sm btn-success" (click)="accept(r)" title="Accept">
                 <i class="bi bi-check-lg"></i>
               </button>
-              <button *ngIf="isStockroomAdmin() && r.status === 'pending'" class="btn btn-sm btn-warning"
-                (click)="decline(r)" title="Decline">
+              <button *ngIf="canDecline(r)" class="btn btn-sm btn-warning" (click)="decline(r)" title="Decline">
                 <i class="bi bi-x-lg"></i>
               </button>
-              <button *ngIf="isStockroomAdmin() && r.status === 'accepted'" class="btn btn-sm btn-secondary"
-                (click)="release(r)" title="Release Items">
+              <button *ngIf="canRelease(r)" class="btn btn-sm btn-secondary" (click)="release(r)" title="Release Items">
                 <i class="bi bi-box-arrow-right"></i>
               </button>
 
-              <button *ngIf="isTeacher() && r.status === 'released'" class="btn btn-sm btn-danger" (click)="fulfill(r)"
-                title="Fulfill">
+              <button *ngIf="canFulfill(r)" class="btn btn-sm btn-danger" (click)="fulfill(r)" title="Fulfill">
                 <i class="bi bi-check2-all"></i>
               </button>
             </div>
@@ -182,16 +178,14 @@
         <div class="d-grid gap-2">
           <button class="btn btn-sm btn-outline-primary" (click)="view(r)">View Details</button>
 
-          <div class="d-flex gap-2" *ngIf="isStockroomAdmin() && r.status === 'pending'">
+          <div class="d-flex gap-2" *ngIf="canAccept(r)">
             <button class="btn btn-sm btn-success flex-grow-1" (click)="accept(r)">Accept</button>
             <button class="btn btn-sm btn-warning flex-grow-1" (click)="decline(r)">Decline</button>
           </div>
 
-          <button *ngIf="isStockroomAdmin() && r.status === 'accepted'" class="btn btn-sm btn-secondary"
-            (click)="release(r)">Release Items</button>
+          <button *ngIf="canRelease(r)" class="btn btn-sm btn-secondary" (click)="release(r)">Release Items</button>
 
-          <button *ngIf="isTeacher() && r.status === 'released'" class="btn btn-sm btn-danger"
-            (click)="fulfill(r)">Fulfill Request</button>
+          <button *ngIf="canFulfill(r)" class="btn btn-sm btn-danger" (click)="fulfill(r)">Fulfill Request</button>
         </div>
       </div>
     </div>
