@@ -29,7 +29,7 @@ export class BorrowCreateComponent implements OnInit {
   ) {
     this.form = this.fb.group({
       roomId: [null, Validators.required],
-      items: this.fb.array([ this.createItemGroup() ])
+      items: this.fb.array([this.createItemGroup()])
     });
   }
 
@@ -81,6 +81,9 @@ export class BorrowCreateComponent implements OnInit {
         // reset each itemId control (so user must reselect appropriate item from the new room)
         this.items.controls.forEach(g => g.get('itemId')?.setValue(null));
         this.loadingItems = false;
+        if (this.itemsOptions.length === 0) {
+          this.alert.warn('No items found in this room.');
+        }
       },
       error: (err) => { this.loadingItems = false; this.alert.error(err); }
     });
@@ -89,53 +92,59 @@ export class BorrowCreateComponent implements OnInit {
   // Build the array of payloads and send one request per item (like item-request)
   submit() {
     if (this.form.invalid) {
-      this.alert.error('Please complete the form');
+      console.warn('Form is invalid! Values:', this.form.value);
+      this.alert.error('Please complete the form (Check room, items, and quantities)');
       return;
     }
-  
+
     const roomId = +this.form.value.roomId;
     if (!Number.isFinite(roomId) || roomId <= 0) { this.alert.error('Invalid room'); return; }
-  
+
     // Read items from the form (each itemId may be null at this point)
-    const items = this.form.value.items as Array<{ itemId: number | null, quantity: any, note?: string }>;
-  
-    // Build payloads (itemId kept as null when not selected)
-    const payloads = items.map(it => ({
-      roomId,
-      itemId: it.itemId != null ? +it.itemId : null,
-      quantity: it.quantity != null ? +it.quantity : 1,
-      note: it.note || ''
-    }));
-  
-    // Validate — first check for null/invalid values (narrow the union)
-    for (const p of payloads) {
-      if (p.itemId == null || !Number.isFinite(p.itemId) || p.itemId <= 0) {
-        this.alert.error('Every item must be selected');
-        return;
-      }
-      if (!Number.isFinite(p.quantity) || p.quantity <= 0) {
-        this.alert.error('Quantity must be >= 1');
-        return;
-      }
+    const items = this.form.value.items as Array<{ itemId: any, quantity: any, note?: string }>;
+
+    console.log('Building payloads for items:', items);
+    try {
+      const payloads = items.map(it => {
+        if (!it.itemId) throw new Error('One or more items are not selected');
+        const parts = String(it.itemId).split('|');
+        const itemType = parts[0] || null;
+        const itemId = parts[1] ? Number(parts[1]) : null;
+
+        if (!itemId || isNaN(itemId)) throw new Error('Invalid item selected');
+
+        return {
+          roomId,
+          itemId,
+          itemType,
+          quantity: it.quantity != null ? Number(it.quantity) : 1,
+          note: it.note || ''
+        };
+      });
+
+      console.log('Payloads prepared:', payloads);
+      if (payloads.length === 0) throw new Error('No items to borrow');
+
+      this.submitting = true;
+      const calls = payloads.map(p => this.borrowService.create(p));
+      forkJoin(calls).pipe(first()).subscribe({
+        next: () => {
+          this.alert.success('Borrow request(s) created');
+          this.submitting = false;
+          this.router.navigate(['/borrow']);
+        },
+        error: (err) => {
+          this.submitting = false;
+          console.error('Server error during borrow create:', err);
+          const msg = err.error?.message || err.message || JSON.stringify(err);
+          this.alert.error('Server error: ' + msg);
+        }
+      });
+    } catch (err: any) {
+      this.submitting = false;
+      console.error('Validation error before submit:', err);
+      this.alert.error(err.message || err);
     }
-  
-    // At this point each p.itemId is guaranteed to be a number > 0.
-    // Create safe payloads with non-null assertion for the HTTP calls.
-    const safePayloads = payloads.map(p => ({ ...p, itemId: p.itemId! }));
-  
-    this.submitting = true;
-    const calls = safePayloads.map(p => this.borrowService.create(p));
-    forkJoin(calls).pipe(first()).subscribe({
-      next: () => {
-        this.alert.success('Borrow request(s) created');
-        this.submitting = false;
-        this.router.navigate(['/borrow']);
-      },
-      error: (err) => {
-        this.submitting = false;
-        this.alert.error(err);
-      }
-    });
   }
-  
+
 }

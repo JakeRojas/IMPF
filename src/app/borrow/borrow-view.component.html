@@ -73,6 +73,10 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light text-muted small uppercase">
                         <tr>
+                            <th width="40">
+                                <input type="checkbox" class="form-check-input" (change)="toggleAll($event)"
+                                    [checked]="allSelected()">
+                            </th>
                             <th>ID</th>
                             <th>Item Name</th>
                             <th>Type</th>
@@ -82,8 +86,12 @@
                     </thead>
                     <tbody>
                         <tr *ngFor="let s of siblings">
+                            <td>
+                                <input type="checkbox" class="form-check-input" (change)="toggleSelection(s.borrowId)"
+                                    [checked]="isSelected(s.borrowId)">
+                            </td>
                             <td class="text-muted font-monospace small">#{{ s.borrowId }}</td>
-                            <td class="fw-bold">{{ s.item?.name ?? s.itemName ?? s.itemType | titlecase }}</td>
+                            <td class="fw-bold">{{ s.itemName || s.item?.name || s.itemType }}</td>
                             <td class="small text-muted">{{ s.itemType | titlecase }}</td>
                             <td><span class="badge bg-light text-dark border">{{ s.quantity ?? 1 }}</span></td>
                             <td>
@@ -108,33 +116,37 @@
                 </button>
 
                 <ng-container *ngIf="showApproveDecline()">
-                    <button class="btn btn-success px-4 rounded-pill fw-bold shadow hover-up" (click)="approve()">
-                        <i class="bi bi-check-lg me-1"></i> Approve {{ (siblings.length > 1) ? 'All' : '' }}
-                    </button>
-                    <button class="btn btn-danger px-4 rounded-pill fw-bold shadow hover-up" (click)="decline()">
-                        <i class="bi bi-x-lg me-1"></i> Decline {{ (siblings.length > 1) ? 'All' : '' }}
-                    </button>
+                    <button class="btn btn-success px-4 rounded-pill fw-bold shadow hover-up" (click)="approve()"
+                        [disabled]="selectedIds.size === 0">
+                        <i class="bi bi-check-lg me-1"></i> Approve {{ (selectedIds.size > 0 && selectedIds.size <
+                            siblings.length) ? '(' + selectedIds.size + ')' : 'All' }} </button>
+                            <button class="btn btn-danger px-4 rounded-pill fw-bold shadow hover-up" (click)="decline()"
+                                [disabled]="selectedIds.size === 0">
+                                <i class="bi bi-x-lg me-1"></i> Decline {{ (selectedIds.size > 0 && selectedIds.size <
+                                    siblings.length) ? '(' + selectedIds.size + ')' : 'All' }} </button>
                 </ng-container>
 
                 <ng-container *ngIf="showAcquireCancel()">
-                    <button class="btn btn-primary px-4 rounded-pill fw-bold shadow hover-up" (click)="acquire()">
-                        <i class="bi bi-box-arrow-in-down me-1"></i> Confirm Acquire {{ (siblings.length > 1) ? 'All' :
-                        '' }}
-                    </button>
-                    <button class="btn btn-outline-danger px-4 rounded-pill fw-bold hover-up" (click)="cancel()">
-                        <i class="bi bi-slash-circle me-1"></i> Cancel {{ (siblings.length > 1) ? 'All' : '' }}
-                    </button>
+                    <button class="btn btn-primary px-4 rounded-pill fw-bold shadow hover-up" (click)="acquire()"
+                        [disabled]="selectedIds.size === 0">
+                        <i class="bi bi-box-arrow-in-down me-1"></i> Confirm Acquire {{ (selectedIds.size > 0 &&
+                        selectedIds.size < siblings.length) ? '(' + selectedIds.size + ')' : 'All' }} </button>
+                            <button class="btn btn-outline-danger px-4 rounded-pill fw-bold hover-up" (click)="cancel()"
+                                [disabled]="selectedIds.size === 0">
+                                <i class="bi bi-slash-circle me-1"></i> Cancel {{ (selectedIds.size > 0 &&
+                                selectedIds.size < siblings.length) ? '(' + selectedIds.size + ')' : 'All' }} </button>
                 </ng-container>
 
                 <button *ngIf="showReturnButton()" class="btn btn-warning px-4 rounded-pill fw-bold shadow hover-up"
-                    (click)="markReturn()">
-                    <i class="bi bi-arrow-return-left me-1"></i> Mark Return {{ (siblings.length > 1) ? 'All' : '' }}
-                </button>
+                    (click)="markReturn()" [disabled]="selectedIds.size === 0">
+                    <i class="bi bi-arrow-return-left me-1"></i> Mark Return {{ (selectedIds.size > 0 &&
+                    selectedIds.size < siblings.length) ? '(' + selectedIds.size + ')' : 'All' }} </button>
 
-                <button *ngIf="showAcceptReturn()" class="btn btn-dark px-4 rounded-pill fw-bold shadow hover-up"
-                    (click)="acceptReturned()">
-                    <i class="bi bi-check-circle-fill me-1"></i> Accept Return {{ (siblings.length > 1) ? 'All' : '' }}
-                </button>
+                        <button *ngIf="showAcceptReturn()"
+                            class="btn btn-dark px-4 rounded-pill fw-bold shadow hover-up" (click)="acceptReturned()"
+                            [disabled]="selectedIds.size === 0">
+                            <i class="bi bi-check-circle-fill me-1"></i> Accept Return {{ (selectedIds.size > 0 &&
+                            selectedIds.size < siblings.length) ? '(' + selectedIds.size + ')' : 'All' }} </button>
 
             </div>
         </div>

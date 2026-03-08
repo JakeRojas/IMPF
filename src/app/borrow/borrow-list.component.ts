@@ -18,7 +18,7 @@ export class BorrowListComponent implements OnInit {
 
   // Pagination
   page = 1;
-  limit = 20; // Increased limit to ensure we get enough items to group
+  limit = 50; // Increased limit to ensure we get enough items to group
   total = 0;
   totalPages = 0;
 

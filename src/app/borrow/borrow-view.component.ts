@@ -11,6 +11,7 @@ import { forkJoin } from 'rxjs';
 export class BorrowViewComponent implements OnInit {
     borrow: any = null;
     siblings: any[] = [];
+    selectedIds = new Set<number>();
     loading = false;
     account: any = null;
 
@@ -80,6 +81,7 @@ export class BorrowViewComponent implements OnInit {
     loadSiblings(anchor: any) {
         if (!anchor || !anchor.createdAt) {
             this.siblings = [anchor];
+            this.selectedIds = new Set([Number(anchor.borrowId)]);
             this.loading = false;
             return;
         }
@@ -113,14 +115,43 @@ export class BorrowViewComponent implements OnInit {
                     this.siblings.push(anchor);
                 }
 
+                // Default select all
+                this.selectedIds = new Set(this.siblings.map(s => Number(s.borrowId)));
                 this.loading = false;
             },
             error: () => {
                 // Fallback to just showing the single item
                 this.siblings = [anchor];
+                this.selectedIds = new Set([Number(anchor.borrowId)]);
                 this.loading = false;
             }
         });
+    }
+
+    // Selection helper methods
+    toggleSelection(id: number | string) {
+        const nid = Number(id);
+        if (this.selectedIds.has(nid)) {
+            this.selectedIds.delete(nid);
+        } else {
+            this.selectedIds.add(nid);
+        }
+    }
+
+    isSelected(id: number | string): boolean {
+        return this.selectedIds.has(Number(id));
+    }
+
+    toggleAll(event: any) {
+        if (event.target.checked) {
+            this.siblings.forEach(s => this.selectedIds.add(Number(s.borrowId)));
+        } else {
+            this.selectedIds.clear();
+        }
+    }
+
+    allSelected(): boolean {
+        return this.siblings.length > 0 && this.selectedIds.size === this.siblings.length;
     }
 
     private myAccountId(): string {
@@ -175,67 +206,97 @@ export class BorrowViewComponent implements OnInit {
     }
 
     private getIds(): number[] {
-        return this.siblings.map(s => Number(s.borrowId ?? s.id)).filter(id => !isNaN(id));
+        // Return only selected IDs
+        return Array.from(this.selectedIds).filter(id => !isNaN(id));
     }
 
     approve() {
-        if (!confirm(`Approve ${this.siblings.length > 1 ? 'all ' + this.siblings.length + ' items' : 'this borrow request'}?`)) return;
         const ids = this.getIds();
+        if (ids.length === 0) return;
+        if (!confirm(`Approve ${ids.length > 1 ? ids.length + ' items' : 'this borrow request'}?`)) return;
         this.loading = true;
         forkJoin(ids.map(id => this.borrowService.approve(id))).pipe(first()).subscribe({
-            next: () => { this.alert.success('Approved'); this.loadBorrow(this.borrow.borrowId); },
+            next: () => {
+                this.alert.success('Approved');
+                this.selectedIds.clear();
+                this.loadBorrow(this.borrow.borrowId);
+            },
             error: e => { this.alert.error(e?.message ?? e); this.loading = false; }
         });
     }
 
     decline() {
-        const reason = prompt('Reason for declining (optional):') || undefined;
-        if (!confirm(`Decline ${this.siblings.length > 1 ? 'all ' + this.siblings.length + ' items' : 'this borrow request'}?`)) return;
         const ids = this.getIds();
-        if (!ids.length) return;
+        if (ids.length === 0) return;
+        const reason = prompt('Reason for declining (optional):') || undefined;
+        if (!confirm(`Decline ${ids.length > 1 ? ids.length + ' items' : 'this borrow request'}?`)) return;
         this.loading = true;
         forkJoin(ids.map(id => this.borrowService.decline(id, reason))).pipe(first()).subscribe({
-            next: () => { this.alert.success('Declined'); this.loadBorrow(this.borrow.borrowId); },
+            next: () => {
+                this.alert.success('Declined');
+                this.selectedIds.clear();
+                this.loadBorrow(this.borrow.borrowId);
+            },
             error: e => { this.alert.error(e?.message ?? e); this.loading = false; }
         });
     }
 
     acquire() {
-        if (!confirm('Mark as acquired?')) return;
         const ids = this.getIds();
+        if (ids.length === 0) return;
+        if (!confirm(`Mark ${ids.length > 1 ? ids.length + ' items' : 'item'} as acquired?`)) return;
         this.loading = true;
         forkJoin(ids.map(id => this.borrowService.acquire(id))).pipe(first()).subscribe({
-            next: () => { this.alert.success('Marked as acquired'); this.loadBorrow(this.borrow.borrowId); },
+            next: () => {
+                this.alert.success('Marked as acquired');
+                this.selectedIds.clear();
+                this.loadBorrow(this.borrow.borrowId);
+            },
             error: e => { this.alert.error(e?.message ?? e); this.loading = false; }
         });
     }
 
     cancel() {
-        if (!confirm('Cancel request?')) return;
         const ids = this.getIds();
+        if (ids.length === 0) return;
+        if (!confirm(`Cancel ${ids.length > 1 ? ids.length + ' item requests' : 'request'}?`)) return;
         this.loading = true;
         forkJoin(ids.map(id => this.borrowService.cancel(id))).pipe(first()).subscribe({
-            next: () => { this.alert.success('Cancelled'); this.loadBorrow(this.borrow.borrowId); },
+            next: () => {
+                this.alert.success('Cancelled');
+                this.selectedIds.clear();
+                this.loadBorrow(this.borrow.borrowId);
+            },
             error: e => { this.alert.error(e?.message ?? e); this.loading = false; }
         });
     }
 
     markReturn() {
-        if (!confirm('Mark as returned?')) return;
         const ids = this.getIds();
+        if (ids.length === 0) return;
+        if (!confirm(`Mark ${ids.length > 1 ? ids.length + ' items' : 'item'} as returned?`)) return;
         this.loading = true;
         forkJoin(ids.map(id => this.borrowService.markReturn(id))).pipe(first()).subscribe({
-            next: () => { this.alert.success('Return initiated'); this.loadBorrow(this.borrow.borrowId); },
+            next: () => {
+                this.alert.success('Return initiated');
+                this.selectedIds.clear();
+                this.loadBorrow(this.borrow.borrowId);
+            },
             error: e => { this.alert.error(e?.message ?? e); this.loading = false; }
         });
     }
 
     acceptReturned() {
-        if (!confirm('Accept returned items?')) return;
         const ids = this.getIds();
+        if (ids.length === 0) return;
+        if (!confirm(`Accept ${ids.length > 1 ? ids.length + ' returned items' : 'returned item'}?`)) return;
         this.loading = true;
         forkJoin(ids.map(id => this.borrowService.acceptReturn(id))).pipe(first()).subscribe({
-            next: () => { this.alert.success('Return accepted'); this.loadBorrow(this.borrow.borrowId); },
+            next: () => {
+                this.alert.success('Return accepted');
+                this.selectedIds.clear();
+                this.loadBorrow(this.borrow.borrowId);
+            },
             error: e => { this.alert.error(e?.message ?? e); this.loading = false; }
         });
     }

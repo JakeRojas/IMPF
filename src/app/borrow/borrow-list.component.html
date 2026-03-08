@@ -46,8 +46,10 @@
             <option value="apparel">Apparel</option>
             <option value="supply">Admin Supply</option>
             <option value="genItem">General Item</option>
+            <option value="it">IT Item</option>
           </select>
         </div>
+
 
         <!-- Date Range -->
         <div class="col-6 col-md-2">
@@ -107,7 +109,7 @@
             <!-- IF SINGLE ITEM -->
             <ng-template #singleItem>
               <div class="text-capitalize small fw-semibold">
-                {{ g.items[0].item?.name ?? g.items[0].itemName ?? g.items[0].itemType }}
+                {{ g.items[0].itemName || g.items[0].item?.name || g.items[0].itemType }}
               </div>
               <div class="text-muted extra-small">Qty: {{ g.items[0].quantity ?? 1 }}</div>
               <div *ngIf="g.items[0].note" class="text-muted extra-small fst-italic">"{{ g.items[0].note }}"</div>
@@ -208,7 +210,7 @@
               </span>
             </div>
             <ng-template #singleItemMobile>
-              <span class="text-capitalize fw-semibold">{{ g.items[0].item?.name ?? g.items[0].itemName ??
+              <span class="text-capitalize fw-semibold">{{ g.items[0].itemName || g.items[0].item?.name ||
                 g.items[0].itemType }}</span>
               <span class="ms-2 text-muted small">(Qty: {{ g.items[0].quantity ?? 1 }})</span>
             </ng-template>

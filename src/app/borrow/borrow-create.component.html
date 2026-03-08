@@ -10,7 +10,7 @@
 </div>
 
 <h4>Create Borrow</h4>
-  
+
 <form [formGroup]="form" (ngSubmit)="submit()">
   <div class="mb-3">
     <label class="form-label">Room</label>
@@ -28,9 +28,10 @@
           <label class="form-label">Item</label>
           <select class="form-select" formControlName="itemId">
             <option [ngValue]="null">-- select item (from room) --</option>
-            <option *ngFor="let opt of itemsOptions" [value]="opt.id || opt.inventoryId || opt.apparelInventoryId || opt.receiveGenItemId || opt.genItemId">
-              {{ opt.genItemName || opt.apparelName || opt.supplyName || opt.name || opt.receiveGenItemId || ('#' + (opt.id || opt.inventoryId)) }}
-              — (qty: {{ opt.totalQuantity ?? opt.quantity ?? opt.availableQty ?? 0 }})
+            <option *ngFor="let opt of itemsOptions" [ngValue]="opt.itemType + '|' + opt.inventoryId">
+              {{ opt.name || opt.itName || opt.genItemName || opt.apparelName || opt.supplyName || ('#' +
+              opt.inventoryId) }}
+              — (qty: {{ opt.totalQuantity ?? opt.quantity ?? 0 }})
             </option>
           </select>
         </div>
@@ -46,7 +47,8 @@
         </div>
 
         <div class="col-md-1 d-grid">
-          <button type="button" class="btn btn-outline-danger" (click)="removeItem(i)" [disabled]="items.length===1">−</button>
+          <button type="button" class="btn btn-outline-danger" (click)="removeItem(i)"
+            [disabled]="items.length===1">−</button>
         </div>
       </div>
     </div>
