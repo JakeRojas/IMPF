@@ -162,7 +162,7 @@ export class TransferCreateComponent implements OnInit, OnDestroy {
       next: () => {
         this.alert.success('Transfer created');
         // adjust route to your transfers list route if different
-        this.router.navigate(['/transfer']);
+        this.router.navigate(['/transfers']);
       },
       error: e => this.alert.error(this.errToString(e))
     });

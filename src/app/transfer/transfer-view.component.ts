@@ -125,4 +125,25 @@ export class TransferViewComponent implements OnInit {
   back() {
     this.router.navigate(['/transfers']);
   }
+
+  getItemName(): string {
+    if (!this.transfer) return '';
+
+    const itemType = String(this.transfer.itemType || '').toLowerCase();
+    
+    if (itemType === 'apparel' && this.transfer.ApparelInventory?.apparelName) {
+      return this.transfer.ApparelInventory.apparelName;
+    }
+    if ((itemType === 'supply' || itemType.includes('supply')) && this.transfer.AdminSupplyInventory?.supplyName) {
+      return this.transfer.AdminSupplyInventory.supplyName;
+    }
+    if ((itemType === 'genitem' || itemType === 'general' || itemType === 'maintenance') && this.transfer.GenItemInventory?.genItemName) {
+      return this.transfer.GenItemInventory.genItemName;
+    }
+    if (itemType === 'it' && this.transfer.ItInventory?.itName) {
+      return this.transfer.ItInventory.itName;
+    }
+    
+    return this.transfer.itemType || 'Unknown Item';
+  }
 }

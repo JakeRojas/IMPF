@@ -15,7 +15,7 @@
                         [ngClass]="{ 'is-invalid': releaseForm.get('itInventoryId')?.touched && releaseForm.get('itInventoryId')?.invalid }">
                         <option [ngValue]="null">-- Select IT Item --</option>
                         <option *ngFor="let it of inventory" [ngValue]="it.itInventoryId">
-                            {{it.itName}} ({{it.itBrand}} - {{it.itModel}}) - Pk: {{it.itInventoryId}}
+                            {{it.itName}} ({{it.itBrand}} - {{it.itModel}})
                         </option>
                     </select>
                     <div *ngIf="inventory.length === 0" class="form-text text-danger">No IT items available for this
@@ -42,6 +42,7 @@
                 <div class="col-md-6">
                     <label class="form-label fw-semibold mb-1">Released By (Authorized Personnel)</label>
                     <input type="text" formControlName="releasedBy" class="form-control" placeholder="Staff identifier"
+                        readonly
                         [ngClass]="{ 'is-invalid': releaseForm.get('releasedBy')?.touched && releaseForm.get('releasedBy')?.invalid }">
                     <div class="invalid-feedback">Authorized released by is required</div>
                 </div>

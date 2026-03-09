@@ -1,4 +1,5 @@
 ﻿import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import {
     AccountService,
     StockRequestService,
@@ -57,7 +58,8 @@ export class HomeComponent implements OnInit {
         private itemService: ItemRequestService,
         private transferService: TransferService,
         private borrowService: BorrowService,
-        private statsService: StatsService
+        private statsService: StatsService,
+        private router: Router
     ) { }
 
     ngOnInit() {
@@ -210,5 +212,9 @@ export class HomeComponent implements OnInit {
 
     closeModal() {
         this.showModal = false;
+    }
+
+    viewTransfers() {
+        this.router.navigate(['/transfers']);
     }
 }
