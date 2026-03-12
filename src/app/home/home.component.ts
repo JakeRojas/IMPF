@@ -38,7 +38,7 @@ export class HomeComponent implements OnInit {
     get showBorrowCard() { return true; } // All roles
     get showOnlineUsersCard() { return ['superadmin', 'admin'].includes(this.role); }
     get showWeeklyStats() { return true; }
-    get showRecentActivity() { return true; }
+    get showRecentActivity() { return ['superadmin'].includes(this.role); }
 
     get role() { return String(this.account?.role || '').toLowerCase(); }
 
