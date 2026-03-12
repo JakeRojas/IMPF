@@ -189,7 +189,7 @@ export class RoomService {
     // normalize fields the backend expects
     const body: any = { ...payload };          // spread payload
     // ensure numeric
-    body.releaseItemQuantity = Number(body.releaseQuantity ?? body.releaseItemQuantity ?? 0);
+    body.releaseItemQuantity = Number(body.releaseQuantity ?? body.releaseItemQuantity ?? body.releaseGenItemQuantity ?? 0);
     // map UI remarks -> backend notes
     if (body.remarks && !body.notes) body.notes = body.remarks;
     // remove redundant fields if you like

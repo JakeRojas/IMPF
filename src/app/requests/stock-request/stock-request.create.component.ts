@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { first, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -32,7 +32,8 @@ export class StockRequestCreateComponent implements OnInit, OnDestroy {
     private roomService: RoomService,
     private sr: StockRequestService,
     private alert: AlertService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit(): void {
@@ -71,6 +72,12 @@ export class StockRequestCreateComponent implements OnInit, OnDestroy {
       const foundRoom = this.rooms.find(r => r.roomId == id);
       let sType = foundRoom ? (foundRoom.stockroomType || '').toLowerCase() : null;
 
+      // [USER REQUIREMENT] If we HAVE a forced roomType from query params, DON'T let the room's default type overwrite it.
+      // This ensures that even for new items, the form matches the intended category.
+      if (this.route.snapshot.queryParams['prefill'] && this.route.snapshot.queryParams['roomType']) {
+        sType = this.route.snapshot.queryParams['roomType'];
+      }
+
       // [ENHANCED] Differentiate IT from Maintenance if both share "general" stockroomType
       if (sType === 'general' && foundRoom?.roomName?.toUpperCase().includes('IT')) {
         sType = 'it';
@@ -84,6 +91,41 @@ export class StockRequestCreateComponent implements OnInit, OnDestroy {
       if (!id) return;
       this.loadItemsForRoom(Number(id));
 
+    });
+
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
+      if (params['prefill']) {
+        const p = params;
+
+        if (p['roomType']) {
+          this.selectedRoomType = p['roomType'];
+        }
+
+        this.form.patchValue({
+          itemId: p['itemId'] || null,
+          otherItemName: p['otherItemName'] || '',
+          quantity: p['quantity'] ? Number(p['quantity']) : 1,
+          note: p['note'] || '',
+          apparelLevel: p['apparelLevel'] || 'teachers',
+          apparelType: p['apparelType'] || 'uniform',
+          apparelFor: p['apparelFor'] || 'boys',
+          apparelSize: p['apparelSize'] || 'm',
+          supplyMeasure: p['supplyMeasure'] || 'pc',
+          genItemType: p['genItemType'] || 'unknownType',
+          genItemSize: p['genItemSize'] || '',
+          itSerialNumber: p['itSerialNumber'] || '',
+          itModel: p['itModel'] || '',
+          itBrand: p['itBrand'] || '',
+          itSize: p['itSize'] || ''
+        });
+
+        if (p['requesterRoomId']) {
+          this.form.get('requesterRoomId')!.setValue(Number(p['requesterRoomId']));
+        }
+
+        // Trigger validation update immediately for the forced type
+        this.updateDynamicValidators();
+      }
     });
   }
 

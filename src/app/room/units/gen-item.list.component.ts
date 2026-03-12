@@ -165,11 +165,18 @@ export class GenItemUnitListComponent implements OnInit {
 
   // Selection Logic
   selection = new Set<string>();
+
+  private getUnitKey(u: any): string {
+    const type = u.unitType || 'genitem';
+    const id = u.genItemId || u.apparelId || u.adminSupplyId || u.id;
+    return `${type}:${id}`;
+  }
+
   isSelected(u: any): boolean {
-    return this.selection.has(`${u.unitType}:${u.id}`);
+    return this.selection.has(this.getUnitKey(u));
   }
   toggleSelection(u: any) {
-    const key = `${u.unitType}:${u.id}`;
+    const key = this.getUnitKey(u);
     if (this.selection.has(key)) {
       this.selection.delete(key);
     } else {
@@ -183,7 +190,7 @@ export class GenItemUnitListComponent implements OnInit {
     if (this.allSelected) {
       this.selection.clear();
     } else {
-      this.units.forEach(u => this.selection.add(`${u.unitType}:${u.id}`));
+      this.units.forEach(u => this.selection.add(this.getUnitKey(u)));
     }
   }
 

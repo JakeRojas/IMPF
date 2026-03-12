@@ -29,6 +29,8 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
   claimedBy = '';
   releasedBy = '';
   rooms: any[] = [];
+  allStockRooms: any[] = [];
+  transferToRooms: any[] = [];
 
   // stock-request UI state
   showStockRequestForm = false;
@@ -62,7 +64,22 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
     private stockRequestService: StockRequestService,
     private transferService: TransferService
   ) {
-    this.roomService.getRooms().pipe(first()).subscribe(rooms => this.rooms = rooms);
+    this.roomService.getRooms().pipe(first()).subscribe(rooms => {
+      this.rooms = rooms;
+      const svcAny = this.roomService as any;
+      const getAll = typeof svcAny.getAllRooms === 'function' ? svcAny.getAllRooms() : this.roomService.listRooms();
+
+      if ((getAll as any).pipe) {
+        (getAll as any).pipe(first()).subscribe({
+          next: (res: any[]) => {
+            this.allStockRooms = (res || []).filter(r => {
+              const rt = String(r?.roomType || r?.room_type || '').toLowerCase();
+              return rt === 'stockroom' || rt === 'substockroom';
+            });
+          }
+        });
+      }
+    });
     const user = this.accountService.accountValue;
     if (user) {
       this.releasedBy = `${user.firstName} ${user.lastName}`;
@@ -245,8 +262,26 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
     }
     this.errorMsg = null;
 
+    const fromRoomId = payload.roomId || '';
+
+    // Attempt to lookup the exact stockroomType of the fromRoom (e.g., 'maintenance', 'general')
+    const fromRoom = this.allStockRooms.find(r => Number(r.roomId) === Number(fromRoomId));
+    let sType = '';
+
+    if (fromRoom && fromRoom.stockroomType) {
+      sType = String(fromRoom.stockroomType).toLowerCase();
+    } else {
+      const itemType = this.extractItemType();
+      sType = String(payload.stockroomType || itemType || '').toLowerCase();
+    }
+
+    this.transferToRooms = this.allStockRooms.filter(r =>
+      String(r.stockroomType || '').toLowerCase() === sType &&
+      Number(r.roomId) !== Number(fromRoomId)
+    );
+
     this.transferData = {
-      fromRoomId: payload.roomId || '',
+      fromRoomId: fromRoomId,
       toRoomId: '',
       quantity: 1,
       note: ''
@@ -348,6 +383,20 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
           releasedBy: releaseData.releasedBy
         };
         this.roomService.releaseAdminSupply(Number(roomId), body).pipe(first()).subscribe({
+          next: () => { this.alert.success('Released successfully'); this.resetAfterAction(); setTimeout(() => this.startScanner(), 300); },
+          error: (err) => { const msg = (err?.error?.message || err?.message || String(err)); this.alert.error(`Failed to release: ${msg}`); }
+        });
+        return;
+      }
+
+      if (stockroomType === 'it') {
+        const body = {
+          itInventoryId: Number(inventoryId),
+          releaseItemQuantity: releaseData.quantity,
+          claimedBy: releaseData.claimedBy,
+          releasedBy: releaseData.releasedBy
+        };
+        this.roomService.releaseIt(Number(roomId), body).pipe(first()).subscribe({
           next: () => { this.alert.success('Released successfully'); this.resetAfterAction(); setTimeout(() => this.startScanner(), 300); },
           error: (err) => { const msg = (err?.error?.message || err?.message || String(err)); this.alert.error(`Failed to release: ${msg}`); }
         });
@@ -540,10 +589,11 @@ export class ScanComponent implements AfterViewInit, OnDestroy {
 
   private _detectedItemTypeFromPayload(p: any): string | null {
     if (!p) return null;
-    if (p.unitId || p.inventoryId) {
+    if (p.unitId || p.inventoryId || p.id) {
       if (p.apparelId || p.apparelInventoryId || p.apparelName) return 'apparel';
       if (p.adminSupplyId || p.adminSupplyInventoryId || p.supplyName) return 'supply';
       if (p.genItemId || p.genItemInventoryId || p.genItemName) return 'genitem';
+      if (p.itId || p.itInventoryId || p.itName) return 'it';
     }
     return null;
   }

@@ -33,7 +33,7 @@
               </div>
             </th>
             <th class="py-3">Type</th>
-            <th class="py-3">Unit ID</th>
+            <th class="py-3">Unit Info / ID</th>
             <th class="py-3">Status</th>
             <th class="py-3">Description</th>
             <th class="py-3">QR Status</th>
@@ -55,9 +55,15 @@
               </span>
             </td>
             <td>
-              <span class="fw-bold text-primary">#{{ u.apparelId || u.adminSupplyId || u.genItemId }}</span>
-              <div class="extra-small text-muted">Ref: {{ u.receiveApparelId || u.receiveAdminSupplyId ||
-                u.receiveGenItemId }}</div>
+              <div class="d-flex align-items-center gap-2">
+                <span class="fw-bold text-primary">#{{ u.apparelId || u.adminSupplyId || u.genItemId }}</span>
+                <div class="fw-semibold text-dark">{{u.GenItemInventory?.genItemName || u.ApparelInventory?.apparelName
+                  || u.AdminSupplyInventory?.supplyName || 'Unknown Item'}}</div>
+              </div>
+              <div class="extra-small text-muted mt-1">
+                Ref: {{ u.receiveApparelId || u.receiveAdminSupplyId || u.receiveGenItemId || u.genItemInventoryId }} •
+                {{u.unitType || u.GenItemInventory?.genItemType}}
+              </div>
             </td>
             <td>
               <div *ngIf="!u.editing">

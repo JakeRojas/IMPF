@@ -122,18 +122,22 @@ export class ItemRequestListComponent implements OnInit {
     const id = Number(r?.itemRequestId ?? r?.id);
     if (!Number.isFinite(id)) return this.alert.error('Invalid id');
 
-    this.ir.get(id).pipe(first()).subscribe({
-      next: (fresh) => {
-        if (!fresh) return this.alert.error('Request not found on server');
-        if (fresh.status !== 'accepted') {
-          return this.alert.error(`Cannot release — request status is '${fresh.status}'. Only 'accepted' requests can be released.`);
-        }
+    const issues = this.getInventoryIssues(r);
+    if (issues.missing.length > 0) {
+      alert(`The following item(s) are not yet existed in this stockroom: ${issues.missing.map(m => this.getItemName(m)).join(', ')}.\n\nRelease cannot be done.`);
+      return;
+    }
+    if (issues.insufficient.length > 0) {
+      const details = issues.insufficient.map(i => `- ${this.getItemName(i)}: Stock available ${i.requestedItem?.inventory?.totalQuantity || 0}, requested ${i.quantity}`).join('\n');
+      alert(`Insufficient stock in this stockroom for the following items:\n${details}\n\nRelease cannot be done.`);
+      return;
+    }
 
-        if (!confirm('Release this accepted item request?')) return;
-        this.ir.release(id).pipe(first()).subscribe({
-          next: () => { this.alert.success('Released'); this.load(); },
-          error: e => this.alert.error(this._errToString(e))
-        });
+    if (!confirm('Confirm physically releasing these items from the stockroom? This will deduct from your total inventory.')) return;
+    this.ir.release(id).pipe(first()).subscribe({
+      next: () => {
+        this.alert.success('Released');
+        this.load();
       },
       error: e => this.alert.error(this._errToString(e))
     });
@@ -165,7 +169,9 @@ export class ItemRequestListComponent implements OnInit {
   canRelease(r: any) {
     if (!r) return false;
     if (r.status !== 'accepted') return false;
-    if (this.isSuperAdmin() || this.account?.role === 'admin') return true;
+    // Check if items exist and are in sufficient quantity
+    if (this.hasInventoryIssues(r)) return false;
+    if (this.isSuperAdmin()) return true;
     const ric = r.requestToRoom?.roomInCharge || r.requestToRoom?.room_in_charge;
     return Number(this.account?.accountId) === Number(ric);
   }
@@ -176,5 +182,43 @@ export class ItemRequestListComponent implements OnInit {
     if (this.isSuperAdmin() || this.account?.role === 'admin') return true;
     const requesterId = r.accountId || r.Account?.accountId;
     return Number(this.account?.accountId) === Number(requesterId);
+  }
+
+  hasInventoryIssues(r: ItemRequest): boolean {
+    const issues = this.getInventoryIssues(r);
+    return issues.missing.length > 0 || issues.insufficient.length > 0;
+  }
+
+  getInventoryIssues(r: ItemRequest) {
+    const itemsToCheck: any[] = (r.items && r.items.length > 0) ? r.items : [r];
+    const acceptedItems = itemsToCheck.filter((i: any) => {
+      if (r.status === 'accepted') return i.status !== 'declined';
+      return i.status === 'accepted';
+    });
+
+    const missing = acceptedItems.filter((i: any) => !i.itemId || !i.requestedItem || !i.requestedItem.inventory);
+    const insufficient = acceptedItems.filter((i: any) => {
+      if (!i.itemId || !i.requestedItem || !i.requestedItem.inventory) return false;
+      const stock = Number(i.requestedItem.inventory.totalQuantity || 0);
+      const req = Number(i.quantity || 0);
+      return stock < req;
+    });
+
+    return { missing, insufficient };
+  }
+
+  getItemName(item: any): string {
+    if (item.otherItemName) return item.otherItemName;
+    const ri = item.requestedItem;
+    if (!ri || !ri.inventory) return `Item ID: ${item.itemId || '?'}`;
+    const inv = ri.inventory;
+    if (ri.type === 'apparel') {
+      return `${inv.apparelName} (${inv.apparelType}, ${inv.apparelSize}, ${inv.apparelFor})`;
+    } else if (ri.type === 'supply') {
+      return `${inv.supplyName} (${inv.supplyMeasure})`;
+    } else if (ri.type === 'genitem' || ri.type === 'it') {
+      return `${inv.genItemName} ${inv.genItemSize ? '(' + inv.genItemSize + ')' : ''}`;
+    }
+    return `Item ID: ${item.itemId}`;
   }
 }

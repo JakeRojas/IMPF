@@ -124,11 +124,20 @@
                       </div>
 
                       <ng-template #statusBadge>
-                        <span class="badge rounded-pill" [ngClass]="{
+                        <span class="badge rounded-pill me-2" [ngClass]="{
                           'bg-warning-subtle text-warning': item.status === 'pending',
                           'bg-success-subtle text-success': item.status === 'accepted' || item.status === 'fulfilled',
                           'bg-info-subtle text-info': item.status === 'released'
                         }">{{ item.status }}</span>
+
+                        <!-- [USER REQUIREMENT] Stock Request Button -->
+                        <button
+                          *ngIf="isStockroom() && (item.status === 'accepted' || request.status === 'accepted') && isItemOutOfStock(item)"
+                          class="btn btn-sm btn-warning shadow-sm py-0 extra-small"
+                          (click)="navigateToStockRequest(item)"
+                          title="This item is out of stock. Click to create a stock request for this item.">
+                          <i class="bi bi-cart-plus me-1"></i> Request Stock
+                        </button>
                       </ng-template>
                     </td>
                     <td class="px-4 small text-muted italic">
@@ -156,7 +165,15 @@
                       </ng-template>
                     </td>
                     <td class="text-center">
-                      <span class="badge rounded-pill bg-light text-dark border">{{ request.status }}</span>
+                      <span class="badge rounded-pill bg-light text-dark border me-2">{{ request.status }}</span>
+
+                      <!-- [USER REQUIREMENT] Legacy/Fallback Stock Request Button -->
+                      <button *ngIf="isStockroom() && request.status === 'accepted' && isItemOutOfStock(request)"
+                        class="btn btn-sm btn-warning shadow-sm py-0 extra-small"
+                        (click)="navigateToStockRequest(request)"
+                        title="This item is out of stock. Click to create a stock request.">
+                        <i class="bi bi-cart-plus me-1"></i> Request Stock
+                      </button>
                     </td>
                     <td class="px-4 small text-muted italic">—</td>
                   </tr>
@@ -177,6 +194,13 @@
               </button>
               <button *ngIf="hasDecisions" class="btn btn-outline-secondary px-4 shadow-sm" (click)="decisions = {}">
                 Clear Selection
+              </button>
+            </ng-container>
+
+            <ng-container *ngIf="isStockroom() && request.status === 'accepted'">
+              <button class="btn btn-info text-white px-4 shadow-sm" (click)="release()" [disabled]="!canRelease()"
+                [title]="canRelease() ? 'Release items from stockroom' : 'Items not yet available in stockroom'">
+                <i class="bi bi-box-arrow-right me-1"></i> Confirm Physical Release
               </button>
             </ng-container>
 

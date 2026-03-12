@@ -117,7 +117,11 @@
               <button *ngIf="canDecline(r)" class="btn btn-sm btn-warning" (click)="decline(r)" title="Decline">
                 <i class="bi bi-x-lg"></i>
               </button>
-              <button *ngIf="canRelease(r)" class="btn btn-sm btn-secondary" (click)="release(r)" title="Release Items">
+              <button *ngIf="canRelease(r)" class="btn btn-sm"
+                [ngClass]="hasInventoryIssues(r) ? 'btn-outline-secondary opacity-50' : 'btn-secondary'"
+                (click)="release(r)"
+                [disabled]="hasInventoryIssues(r)"
+                [title]="hasInventoryIssues(r) ? 'Cannot release: Items missing or insufficient stock' : 'Release Items'">
                 <i class="bi bi-box-arrow-right"></i>
               </button>
 
@@ -183,7 +187,12 @@
             <button class="btn btn-sm btn-warning flex-grow-1" (click)="decline(r)">Decline</button>
           </div>
 
-          <button *ngIf="canRelease(r)" class="btn btn-sm btn-secondary" (click)="release(r)">Release Items</button>
+          <button *ngIf="canRelease(r)" class="btn btn-sm"
+            [ngClass]="hasInventoryIssues(r) ? 'btn-outline-secondary opacity-50' : 'btn-secondary'"
+            (click)="release(r)"
+            [disabled]="hasInventoryIssues(r)">
+            {{ hasInventoryIssues(r) ? 'Release Blocked (Check Stock)' : 'Release Items' }}
+          </button>
 
           <button *ngIf="canFulfill(r)" class="btn btn-sm btn-danger" (click)="fulfill(r)">Fulfill Request</button>
         </div>
